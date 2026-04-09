@@ -227,6 +227,7 @@ function MeetingPage({
   const normalizedCode = shareCode.toUpperCase()
   const normalizedRole = role === 'organizer' || role === 'join' ? role : null
   const snapshot = store[normalizedCode]
+  const latestSnapshotRef = useRef(snapshot)
 
   const [ocrState, setOcrState] = useState<OcrState>({
     status: 'idle',
@@ -261,6 +262,10 @@ function MeetingPage({
     setIsMoreSheetOpen(false)
     setShareTarget(null)
   }, [normalizedCode, normalizedRole])
+
+  useEffect(() => {
+    latestSnapshotRef.current = snapshot
+  }, [snapshot])
 
   useEffect(() => {
     window.localStorage.setItem(
@@ -512,11 +517,14 @@ function MeetingPage({
           .join('\n')
 
   function patchSnapshot(recipe: (currentSnapshot: Snapshot) => Snapshot) {
-    if (!snapshot) {
+    const baseSnapshot = latestSnapshotRef.current
+
+    if (!baseSnapshot) {
       return
     }
 
-    const nextSnapshot = normalizeSnapshot(recipe(snapshot))
+    const nextSnapshot = normalizeSnapshot(recipe(baseSnapshot))
+    latestSnapshotRef.current = nextSnapshot
 
     setStore((currentStore) => upsertMeeting(currentStore, nextSnapshot))
 
