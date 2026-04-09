@@ -1,5 +1,11 @@
 import { useMemo, useState, type FormEvent } from 'react'
-import { formatCountdown, type Attendee, type Snapshot } from '../lib/meeting'
+import {
+  formatCountdown,
+  getMenuDisplayPrice,
+  isCoffeeMenuName,
+  type Attendee,
+  type Snapshot,
+} from '../lib/meeting'
 import { formatVisiblePrice } from '../lib/menu'
 import { TemperatureSelector } from './TemperatureSelector'
 
@@ -12,7 +18,7 @@ type QuickOrderPanelProps = {
   onUpdateAttendee: (
     attendeeId: string,
     field: keyof Attendee,
-    value: string | number,
+    value: string | number | boolean,
   ) => void
   onSkipAttendee: (attendeeId: string, skipped: boolean) => void
 }
@@ -67,6 +73,7 @@ export function QuickOrderPanel({
   const selectedMenu = menuItems.find(
     (item) => item.id === selectedAttendee?.menuItemId,
   )
+  const canUseDecaf = Boolean(selectedMenu && isCoffeeMenuName(selectedMenu.name))
 
   const completionStats = useMemo(() => {
     const completed = attendees.filter(
@@ -131,12 +138,17 @@ export function QuickOrderPanel({
       : '이름만 입력하고 바로 메뉴를 고르세요'
   const description =
     variant === 'organizer'
-      ? '같은 이름을 다시 입력하면 기존 주문을 불러와 수정할 수 있습니다.'
+      ? '같은 이름을 다시 입력하면 기존 주문을 불러와 바로 수정할 수 있습니다.'
       : '이미 주문한 이름을 다시 입력하면 기존 주문을 이어서 수정할 수 있습니다.'
   const countdownLabel = meetingClosed ? '주문 마감' : formatCountdown(meeting.deadline)
   const primaryButtonLabel = matchedAttendee
     ? '기존 주문 수정하기'
     : '이 이름으로 주문 시작'
+  const previewPrice =
+    selectedMenu && selectedAttendee
+      ? getMenuDisplayPrice(selectedMenu, selectedAttendee.decaf) *
+        selectedAttendee.quantity
+      : 0
 
   return (
     <section className="panel panel-wide participant-entry-panel quick-order-panel">
@@ -318,20 +330,32 @@ export function QuickOrderPanel({
                 )}
               </div>
 
-              <label className="field">
-                <span>사이즈</span>
-                <select
-                  value={selectedAttendee.size}
-                  disabled={orderFieldsDisabled}
-                  onChange={(event) =>
-                    onUpdateAttendee(selectedAttendee.id, 'size', event.target.value)
-                  }
-                >
-                  <option value="">기본</option>
-                  <option value="Regular">기본</option>
-                  <option value="Large">라지</option>
-                </select>
-              </label>
+              {canUseDecaf ? (
+                <div className="field field-full">
+                  <span>원두 옵션</span>
+                  <div className="checkbox-group">
+                    <label
+                      className={`checkbox-chip ${
+                        selectedAttendee.decaf ? 'active' : ''
+                      }`}
+                    >
+                      <input
+                        checked={selectedAttendee.decaf}
+                        disabled={orderFieldsDisabled}
+                        type="checkbox"
+                        onChange={(event) =>
+                          onUpdateAttendee(
+                            selectedAttendee.id,
+                            'decaf',
+                            event.target.checked,
+                          )
+                        }
+                      />
+                      <span>디카페인 변경 +700원</span>
+                    </label>
+                  </div>
+                </div>
+              ) : null}
 
               <label className="field field-full">
                 <span>추가 요청</span>
@@ -367,17 +391,16 @@ export function QuickOrderPanel({
               </div>
             ) : selectedMenu ? (
               <div className="personal-summary">
-                <strong>{selectedMenu.name}</strong>
+                <strong>
+                  {selectedMenu.name}
+                  {selectedAttendee.decaf && canUseDecaf ? ' · 디카페인' : ''}
+                </strong>
                 <p>
                   {selectedAttendee.quantity}잔 ·{' '}
-                  {formatVisiblePrice(
-                    selectedMenu.price * selectedAttendee.quantity,
-                    showPrices,
-                  )}
+                  {formatVisiblePrice(previewPrice, showPrices)}
                 </p>
                 <span>
                   {selectedAttendee.temperature || '온도 미선택'} /{' '}
-                  {selectedAttendee.size || '기본 사이즈'} /{' '}
                   {selectedAttendee.note || '추가 요청 없음'}
                 </span>
               </div>

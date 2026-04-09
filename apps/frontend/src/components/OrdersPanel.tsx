@@ -1,4 +1,9 @@
-import { type Attendee, type MenuItem } from '../lib/meeting'
+import {
+  getMenuDisplayPrice,
+  isCoffeeMenuName,
+  type Attendee,
+  type MenuItem,
+} from '../lib/meeting'
 import { formatVisiblePrice } from '../lib/menu'
 import { TemperatureSelector } from './TemperatureSelector'
 
@@ -10,7 +15,7 @@ type OrdersPanelProps = {
   onUpdateAttendee: (
     attendeeId: string,
     field: keyof Attendee,
-    value: string | number,
+    value: string | number | boolean,
   ) => void
   onSkipAttendee: (attendeeId: string, skipped: boolean) => void
 }
@@ -73,12 +78,11 @@ export function OrdersPanel({
         <div className="attendance-board">
           {sortedAttendees.map((attendee) => {
             const selectedMenu = menuItems.find((item) => item.id === attendee.menuItemId)
+            const canUseDecaf = Boolean(
+              selectedMenu && isCoffeeMenuName(selectedMenu.name),
+            )
             const fieldsDisabled = meetingClosed || attendee.skipped
-            const temperatureLabel = attendee.temperature
-              ? attendee.temperature
-              : selectedMenu?.availableTemperatures.length === 1
-                ? selectedMenu.availableTemperatures[0]
-                : '온도 선택'
+            const temperatureLabel = attendee.temperature || '온도 미선택'
             const statusTone = attendee.skipped
               ? 'skip'
               : attendee.menuItemId
@@ -93,8 +97,13 @@ export function OrdersPanel({
               ? '이번 주문은 안마심으로 처리되었습니다.'
               : selectedMenu
                 ? `${selectedMenu.name}${
+                    attendee.decaf && canUseDecaf ? ' · 디카페인' : ''
+                  }${
                     showPrices
-                      ? ` · ${formatVisiblePrice(selectedMenu.price, showPrices)}`
+                      ? ` · ${formatVisiblePrice(
+                          getMenuDisplayPrice(selectedMenu, attendee.decaf),
+                          showPrices,
+                        )}`
                       : ''
                   }`
                 : '아직 메뉴를 선택하지 않았습니다.'
@@ -116,15 +125,18 @@ export function OrdersPanel({
                       {selectedMenu && !attendee.skipped ? (
                         <span
                           className={`temperature-pill ${
-                            temperatureLabel === 'HOT'
+                            attendee.temperature === 'HOT'
                               ? 'hot'
-                              : temperatureLabel === 'ICE'
+                              : attendee.temperature === 'ICE'
                                 ? 'ice'
                                 : 'neutral'
                           }`}
                         >
                           {temperatureLabel}
                         </span>
+                      ) : null}
+                      {attendee.decaf && canUseDecaf ? (
+                        <span className="status-pill soft">디카페인</span>
                       ) : null}
                       {attendee.note ? (
                         <span className="status-pill neutral">{attendee.note}</span>
@@ -195,20 +207,30 @@ export function OrdersPanel({
                       )}
                     </div>
 
-                    <label className="field">
-                      <span>사이즈</span>
-                      <select
-                        value={attendee.size}
-                        disabled={fieldsDisabled}
-                        onChange={(event) =>
-                          onUpdateAttendee(attendee.id, 'size', event.target.value)
-                        }
-                      >
-                        <option value="">기본</option>
-                        <option value="Regular">기본</option>
-                        <option value="Large">라지</option>
-                      </select>
-                    </label>
+                    {canUseDecaf ? (
+                      <div className="field field-full">
+                        <span>원두 옵션</span>
+                        <div className="checkbox-group">
+                          <label
+                            className={`checkbox-chip ${attendee.decaf ? 'active' : ''}`}
+                          >
+                            <input
+                              checked={attendee.decaf}
+                              disabled={fieldsDisabled}
+                              type="checkbox"
+                              onChange={(event) =>
+                                onUpdateAttendee(
+                                  attendee.id,
+                                  'decaf',
+                                  event.target.checked,
+                                )
+                              }
+                            />
+                            <span>디카페인 변경 +700원</span>
+                          </label>
+                        </div>
+                      </div>
+                    ) : null}
 
                     <label className="field field-full">
                       <span>추가 요청</span>

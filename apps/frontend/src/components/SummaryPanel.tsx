@@ -37,9 +37,10 @@ export function SummaryPanel({
           요약 복사
         </button>
       </div>
+
       {groupedOrders.length === 0 ? (
         <div className="empty-state compact">
-          주문을 입력하면 메뉴별 수량과 금액이 자동으로 집계됩니다.
+          주문이 입력되면 메뉴별 수량과 금액이 자동으로 집계됩니다.
         </div>
       ) : (
         <>
@@ -51,12 +52,13 @@ export function SummaryPanel({
                   <p>{group.people}</p>
                 </div>
                 <div className="summary-metrics">
-                  <span>x{group.count}</span>
+                  <span>{group.count}잔</span>
                   <strong>{showPrices ? group.amount : '금액 숨김'}</strong>
                 </div>
               </article>
             ))}
           </div>
+
           <div className="summary-totals">
             <div>
               <span>총 수량</span>
@@ -69,20 +71,23 @@ export function SummaryPanel({
           </div>
         </>
       )}
+
       <div className="pending-box">
         <h3>미선택 참석자</h3>
         <p>{pendingNames || '모든 참석자가 응답했습니다.'}</p>
       </div>
+
       {skippedNames ? (
         <div className="pending-box">
           <h3>스킵 참석자</h3>
           <p>{skippedNames}</p>
         </div>
       ) : null}
+
       <div className="summary-copy-box">
         <div className="subhead">
           <h3>주문 전달용 텍스트</h3>
-          <span>{summaryText ? '복사해서 바로 주문 가능' : '주문 입력 후 생성'}</span>
+          <span>{summaryText ? '복사해서 바로 주문할 수 있습니다.' : '주문 입력 후 생성됩니다.'}</span>
         </div>
         <textarea readOnly rows={12} value={summaryText} />
       </div>

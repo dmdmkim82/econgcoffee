@@ -37,7 +37,9 @@ import {
   createId,
   formatCountdown,
   formatDeadlineLabel,
+  getMenuDisplayPrice,
   inferTemperaturesFromMenuName,
+  isCoffeeMenuName,
   mergeMenuItems,
   normalizeSnapshot,
   resolveTemperatureSelection,
@@ -384,16 +386,17 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
         return groups
       }
 
+      const unitPrice = getMenuDisplayPrice(menuItem, attendee.decaf)
       const options = [
         attendee.temperature || null,
-        attendee.size || null,
+        attendee.decaf ? '디카페인' : null,
         attendee.note.trim() || null,
       ].filter(Boolean)
       const label =
         options.length > 0
           ? `${menuItem.name} / ${options.join(' / ')}`
           : menuItem.name
-      const key = `${label}::${menuItem.price}`
+      const key = `${label}::${unitPrice}`
 
       if (!groups[key]) {
         groups[key] = {
@@ -405,7 +408,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
       }
 
       groups[key].count += attendee.quantity
-      groups[key].amount += menuItem.price * attendee.quantity
+      groups[key].amount += unitPrice * attendee.quantity
       groups[key].people.push(
         attendee.quantity > 1
           ? `${attendee.name} x${attendee.quantity}`
@@ -442,9 +445,9 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
           '',
           ...groupedOrders.map(
             (group, index) =>
-              `${index + 1}. ${group.label} x${group.count} (${
+              `${index + 1}. ${group.label} · ${group.count}잔 · ${
                 showPrices ? formatPrice(group.amount) : '금액 숨김'
-              }) - ${group.people.join(', ')}`,
+              } - ${group.people.join(', ')}`,
           ),
           '',
           `총 ${totalCups}잔 / ${
@@ -502,7 +505,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
   function updateAttendeeField(
     attendeeId: string,
     field: keyof Attendee,
-    value: string | number,
+    value: string | number | boolean,
   ) {
     patchSnapshot((currentSnapshot) => {
       const menuLookup = new Map(
@@ -524,6 +527,8 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
               ...attendee,
               menuItemId: nextMenuItemId,
               skipped: nextMenuItemId ? false : attendee.skipped,
+              decaf:
+                attendee.decaf && Boolean(selectedMenu && isCoffeeMenuName(selectedMenu.name)),
               temperature: resolveTemperatureSelection(
                 attendee.temperature,
                 selectedMenu,
@@ -542,6 +547,17 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
                 nextTemperature,
                 selectedMenu,
               ),
+            }
+          }
+
+          if (field === 'decaf') {
+            const selectedMenu = menuLookup.get(attendee.menuItemId)
+
+            return {
+              ...attendee,
+              decaf:
+                Boolean(value) &&
+                Boolean(selectedMenu && isCoffeeMenuName(selectedMenu.name)),
             }
           }
 
@@ -565,6 +581,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
               menuItemId: skipped ? '' : attendee.menuItemId,
               quantity: skipped ? 1 : attendee.quantity,
               temperature: skipped ? '' : attendee.temperature,
+              decaf: skipped ? false : attendee.decaf,
               size: skipped ? '' : attendee.size,
               note: skipped ? '' : attendee.note,
             }
@@ -635,6 +652,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
           skipped: false,
           quantity: 1,
           temperature: '',
+          decaf: false,
           size: '',
           note: '',
         },

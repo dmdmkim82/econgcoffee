@@ -48,11 +48,7 @@ export function OrderSummarySheet({
   }
 
   return (
-    <div
-      className="summary-sheet-overlay"
-      role="presentation"
-      onClick={onClose}
-    >
+    <div className="summary-sheet-overlay" role="presentation" onClick={onClose}>
       <section
         aria-label="주문 요약 목록"
         aria-modal="true"
@@ -71,9 +67,7 @@ export function OrderSummarySheet({
         </div>
 
         {groupedOrders.length === 0 ? (
-          <div className="empty-state compact">
-            아직 취합된 주문이 없습니다.
-          </div>
+          <div className="empty-state compact">아직 취합된 주문이 없습니다.</div>
         ) : (
           <div className="summary-sheet-list">
             {groupedOrders.map((group) => (
@@ -83,7 +77,7 @@ export function OrderSummarySheet({
                   <p>{group.people}</p>
                 </div>
                 <div className="summary-metrics">
-                  <span>x{group.count}</span>
+                  <span>{group.count}잔</span>
                   <strong>{showPrices ? group.amount : '금액 숨김'}</strong>
                 </div>
               </article>
@@ -106,6 +100,7 @@ export function OrderSummarySheet({
           <h3>미선택 참석자</h3>
           <p>{pendingNames || '모든 참석자가 응답했습니다.'}</p>
         </div>
+
         {skippedNames ? (
           <div className="pending-box">
             <h3>스킵 참석자</h3>

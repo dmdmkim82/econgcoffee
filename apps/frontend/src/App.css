@@ -980,7 +980,20 @@
 }
 
 .summary-metrics {
+  display: grid;
+  gap: 4px;
+  min-width: 88px;
   text-align: left;
+}
+
+.summary-metrics span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.2;
+}
+
+.summary-metrics strong {
+  line-height: 1.1;
 }
 
 .summary-totals {

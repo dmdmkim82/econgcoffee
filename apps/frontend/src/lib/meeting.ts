@@ -20,6 +20,34 @@ export const LATELIER_CAFE_NAME = "L'atelier"
 const TEMPERATURE_ORDER: TemperatureOption[] = ['HOT', 'ICE']
 const HOT_AND_ICE: TemperatureOption[] = ['HOT', 'ICE']
 const ICE_ONLY: TemperatureOption[] = HOT_AND_ICE
+export const DECAF_SURCHARGE = 700
+
+const COFFEE_KEYWORDS = [
+  '아메리카노',
+  '에스프레소',
+  '카페',
+  '콜드브루',
+  '마끼아또',
+  '플랫화이트',
+  '아인슈페너',
+  '라떼',
+]
+
+const NON_COFFEE_KEYWORDS = [
+  '초코',
+  '말차',
+  '밀크티',
+  '고구마',
+  '미숫가루',
+  '곡물',
+  '우유',
+  '두유',
+  '티',
+  '주스',
+  '스무디',
+  '에이드',
+  '버블',
+]
 
 type PresetMenuItem = Omit<MenuItem, 'id' | 'source'>
 
@@ -142,6 +170,22 @@ export function inferTemperaturesFromMenuName(name: string): TemperatureOption[]
   return [...HOT_AND_ICE]
 }
 
+export function isCoffeeMenuName(name: string) {
+  const normalized = name.normalize('NFKC').replace(/\s+/g, '').toLowerCase()
+  const hasCoffeeKeyword = COFFEE_KEYWORDS.some((keyword) =>
+    normalized.includes(keyword.toLowerCase()),
+  )
+  const hasNonCoffeeKeyword = NON_COFFEE_KEYWORDS.some((keyword) =>
+    normalized.includes(keyword.toLowerCase()),
+  )
+
+  return hasCoffeeKeyword && !hasNonCoffeeKeyword
+}
+
+export function getMenuDisplayPrice(menuItem: MenuItem, decaf: boolean) {
+  return menuItem.price + (decaf && isCoffeeMenuName(menuItem.name) ? DECAF_SURCHARGE : 0)
+}
+
 export function resolveTemperatureSelection(
   currentValue: '' | TemperatureOption,
   menuItem?: MenuItem,
@@ -198,10 +242,8 @@ function normalizeAttendee(
     skipped: Boolean(attendee.skipped),
     quantity: Math.max(1, pickNumber(attendee.quantity, 1)),
     temperature: resolveTemperatureSelection(rawTemperature, menuItem),
-    size:
-      attendee.size === 'Regular' || attendee.size === 'Large'
-        ? attendee.size
-        : '',
+    decaf: Boolean(attendee.decaf) && Boolean(menuItem && isCoffeeMenuName(menuItem.name)),
+    size: '',
     note: pickText(attendee.note),
   }
 }

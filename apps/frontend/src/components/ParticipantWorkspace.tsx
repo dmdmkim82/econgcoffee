@@ -9,7 +9,7 @@ type ParticipantWorkspaceProps = {
   onUpdateAttendee: (
     attendeeId: string,
     field: keyof Attendee,
-    value: string | number,
+    value: string | number | boolean,
   ) => void
   onSkipAttendee: (attendeeId: string, skipped: boolean) => void
 }

@@ -27,6 +27,7 @@ export type Attendee = {
   skipped: boolean
   quantity: number
   temperature: '' | TemperatureOption
+  decaf: boolean
   size: '' | 'Regular' | 'Large'
   note: string
 }
