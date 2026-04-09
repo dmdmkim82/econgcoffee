@@ -134,7 +134,7 @@ function AppRoutes() {
   }
 
   function handleDeleteMeeting(shareCode: string) {
-    if (!window.confirm('??紐⑥엫?????紐⑸줉?먯꽌 ??젣?좉퉴??')) {
+    if (!window.confirm('이 모임을 최근 목록에서 삭제할까요?')) {
       return
     }
 
@@ -183,7 +183,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
     status: 'idle',
     progress: 0,
     confidence: null,
-    message: '硫붾돱???대?吏瑜??щ━硫?OCR???먮룞?쇰줈 ?ㅽ뻾?⑸땲??',
+    message: '메뉴 이미지를 올리면 OCR이 자동으로 실행됩니다.',
   })
   const [feedback, setFeedback] = useState('')
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -857,30 +857,6 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
       {feedback ? <div className="feedback-banner">{feedback}</div> : null}
       {normalizedRole === 'organizer' ? (
         <main className="workspace-grid">
-          <OrganizerPanel
-            meeting={meeting}
-            meetingClosed={meetingClosed}
-            deadlinePassed={deadlinePassed}
-            deadlineLabel={formatDeadlineLabel(meeting.deadline)}
-            onChange={updateMeetingField}
-            onToggleManualClose={() =>
-              updateMeetingField('manuallyClosed', !meeting.manuallyClosed)
-            }
-            onReset={handleResetWorkspace}
-          />
-          <OcrPanel
-            ocrState={ocrState}
-            imagePreview={imagePreview}
-            rawOcrText={rawOcrText}
-            onUpload={handleImageUpload}
-            onRawTextChange={(value) =>
-              patchSnapshot((currentSnapshot) => ({
-                ...currentSnapshot,
-                rawOcrText: value,
-              }))
-            }
-            onApplyRawText={applyRawTextToMenu}
-          />
           <MenuPanel
             menuItems={menuItems}
             showPrices={showPrices}
@@ -920,6 +896,50 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
             showPrices={showPrices}
             onCopy={handleCopySummary}
           />
+          <details className="admin-details">
+            <summary>참석자 수동 관리</summary>
+            <div className="admin-details-body">
+              <AttendeesPanel
+                attendees={attendees}
+                onAddAttendee={handleAddAttendee}
+                onRemoveAttendee={handleRemoveAttendee}
+              />
+            </div>
+          </details>
+          <details className="admin-details">
+            <summary>취합 설정</summary>
+            <div className="admin-details-body">
+              <OrganizerPanel
+                meeting={meeting}
+                meetingClosed={meetingClosed}
+                deadlinePassed={deadlinePassed}
+                deadlineLabel={formatDeadlineLabel(meeting.deadline)}
+                onChange={updateMeetingField}
+                onToggleManualClose={() =>
+                  updateMeetingField('manuallyClosed', !meeting.manuallyClosed)
+                }
+                onReset={handleResetWorkspace}
+              />
+            </div>
+          </details>
+          <details className="admin-details">
+            <summary>OCR로 메뉴 추가</summary>
+            <div className="admin-details-body">
+              <OcrPanel
+                ocrState={ocrState}
+                imagePreview={imagePreview}
+                rawOcrText={rawOcrText}
+                onUpload={handleImageUpload}
+                onRawTextChange={(value) =>
+                  patchSnapshot((currentSnapshot) => ({
+                    ...currentSnapshot,
+                    rawOcrText: value,
+                  }))
+                }
+                onApplyRawText={applyRawTextToMenu}
+              />
+            </div>
+          </details>
         </main>
       ) : (
         <ParticipantWorkspace

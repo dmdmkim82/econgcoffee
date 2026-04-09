@@ -78,15 +78,15 @@ export function MenuPanel({
     <section className="panel panel-wide">
       <div className="panel-head">
         <div>
-          <span className="panel-kicker">메뉴 관리</span>
-          <h2>음료 메뉴 직접 편집</h2>
+          <span className="panel-kicker">현재 메뉴</span>
+          <h2>참석자가 바로 고를 수 있는 메뉴</h2>
         </div>
         <span className="status-pill neutral">{menuItems.length}개 메뉴</span>
       </div>
 
       <div className="button-row compact-toolbar">
         <button className="button secondary small" type="button" onClick={onLoadPresetMenu}>
-          이미지 메뉴 추가
+          이미지 메뉴 다시 불러오기
         </button>
         <button
           className="button ghost small"
@@ -97,131 +97,148 @@ export function MenuPanel({
         </button>
       </div>
 
-      <form className="inline-form stacked" onSubmit={handleSubmit}>
-        <input
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder="수동 메뉴명"
-        />
-        <input
-          value={price}
-          onChange={(event) => setPrice(event.target.value)}
-          placeholder="가격"
-          inputMode="numeric"
-        />
-        <div className="checkbox-group">
-          {TEMPERATURE_ORDER.map((temperature) => (
-            <label
-              className={`checkbox-chip ${
-                availableTemperatures.includes(temperature) ? 'active' : ''
-              }`}
-              key={temperature}
-            >
-              <input
-                checked={availableTemperatures.includes(temperature)}
-                type="checkbox"
-                onChange={() =>
-                  setAvailableTemperatures((currentValue) =>
-                    toggleTemperatureSelection(currentValue, temperature),
-                  )
-                }
-              />
-              <span>{temperature}</span>
-            </label>
-          ))}
-        </div>
-        <button className="button" type="submit">
-          메뉴 추가
-        </button>
-      </form>
-
       {menuItems.length === 0 ? (
         <div className="empty-state">
-          아직 등록된 메뉴가 없습니다. 이미지 메뉴 추가 버튼을 누르거나 직접
-          메뉴를 입력해주세요.
+          아직 등록된 메뉴가 없습니다. 아래 관리 섹션에서 이미지 메뉴를 올리거나
+          수동으로 추가해주세요.
         </div>
       ) : (
-        <div className="menu-list">
+        <div className="catalog-list menu-catalog-board">
           {menuItems.map((item) => (
-            <article className="menu-row" key={item.id}>
-              <label className="field">
-                <span>메뉴명</span>
-                <input
-                  value={item.name}
-                  onChange={(event) =>
-                    onUpdateMenu(item.id, 'name', event.target.value)
-                  }
-                />
-              </label>
-
-              <label className="field">
-                <span>가격</span>
-                <input
-                  value={String(item.price)}
-                  inputMode="numeric"
-                  onChange={(event) =>
-                    onUpdateMenu(
-                      item.id,
-                      'price',
-                      Math.max(0, Number(event.target.value.replace(/[^\d]/g, ''))),
-                    )
-                  }
-                />
-                <small>{formatVisiblePrice(item.price, showPrices)}</small>
-              </label>
-
-              <div className="field field-full">
-                <span>가능 온도</span>
-                <div className="checkbox-group">
-                  {TEMPERATURE_ORDER.map((temperature) => (
-                    <label
-                      className={`checkbox-chip ${
-                        item.availableTemperatures.includes(temperature)
-                          ? 'active'
-                          : ''
-                      }`}
-                      key={`${item.id}-${temperature}`}
-                    >
-                      <input
-                        checked={item.availableTemperatures.includes(temperature)}
-                        type="checkbox"
-                        onChange={() =>
-                          onUpdateMenu(
-                            item.id,
-                            'availableTemperatures',
-                            toggleTemperatureSelection(
-                              item.availableTemperatures,
-                              temperature,
-                            ),
-                          )
-                        }
-                      />
-                      <span>{temperature}</span>
-                    </label>
-                  ))}
-                </div>
+            <article className="catalog-row menu-catalog-row" key={item.id}>
+              <div>
+                <strong>{item.name}</strong>
+                <p>{item.availableTemperatures.join(' / ')}</p>
               </div>
-
-              <div className="menu-meta">
-                <span
-                  className={`status-pill ${
-                    item.source === 'ocr' ? 'soft' : 'neutral'
-                  }`}
-                >
-                  {item.source === 'ocr' ? 'OCR' : '수동'}
-                </span>
-                <button
-                  className="button ghost small"
-                  type="button"
-                  onClick={() => onRemoveMenu(item.id)}
-                >
-                  삭제
-                </button>
-              </div>
+              <strong>{formatVisiblePrice(item.price, showPrices)}</strong>
             </article>
           ))}
         </div>
       )}
+
+      <details className="admin-details">
+        <summary>메뉴 직접 수정</summary>
+        <div className="admin-details-body">
+          <form className="inline-form stacked" onSubmit={handleSubmit}>
+            <input
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="수동 메뉴명"
+            />
+            <input
+              value={price}
+              onChange={(event) => setPrice(event.target.value)}
+              placeholder="가격"
+              inputMode="numeric"
+            />
+            <div className="checkbox-group">
+              {TEMPERATURE_ORDER.map((temperature) => (
+                <label
+                  className={`checkbox-chip ${
+                    availableTemperatures.includes(temperature) ? 'active' : ''
+                  }`}
+                  key={temperature}
+                >
+                  <input
+                    checked={availableTemperatures.includes(temperature)}
+                    type="checkbox"
+                    onChange={() =>
+                      setAvailableTemperatures((currentValue) =>
+                        toggleTemperatureSelection(currentValue, temperature),
+                      )
+                    }
+                  />
+                  <span>{temperature}</span>
+                </label>
+              ))}
+            </div>
+            <button className="button" type="submit">
+              메뉴 추가
+            </button>
+          </form>
+
+          <div className="menu-list">
+            {menuItems.map((item) => (
+              <article className="menu-row" key={item.id}>
+                <label className="field">
+                  <span>메뉴명</span>
+                  <input
+                    value={item.name}
+                    onChange={(event) =>
+                      onUpdateMenu(item.id, 'name', event.target.value)
+                    }
+                  />
+                </label>
+
+                <label className="field">
+                  <span>가격</span>
+                  <input
+                    value={String(item.price)}
+                    inputMode="numeric"
+                    onChange={(event) =>
+                      onUpdateMenu(
+                        item.id,
+                        'price',
+                        Math.max(0, Number(event.target.value.replace(/[^\d]/g, ''))),
+                      )
+                    }
+                  />
+                  <small>{formatVisiblePrice(item.price, showPrices)}</small>
+                </label>
+
+                <div className="field field-full">
+                  <span>가능 온도</span>
+                  <div className="checkbox-group">
+                    {TEMPERATURE_ORDER.map((temperature) => (
+                      <label
+                        className={`checkbox-chip ${
+                          item.availableTemperatures.includes(temperature)
+                            ? 'active'
+                            : ''
+                        }`}
+                        key={`${item.id}-${temperature}`}
+                      >
+                        <input
+                          checked={item.availableTemperatures.includes(temperature)}
+                          type="checkbox"
+                          onChange={() =>
+                            onUpdateMenu(
+                              item.id,
+                              'availableTemperatures',
+                              toggleTemperatureSelection(
+                                item.availableTemperatures,
+                                temperature,
+                              ),
+                            )
+                          }
+                        />
+                        <span>{temperature}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="menu-meta">
+                  <span
+                    className={`status-pill ${
+                      item.source === 'ocr' ? 'soft' : 'neutral'
+                    }`}
+                  >
+                    {item.source === 'ocr' ? 'OCR' : '수동'}
+                  </span>
+                  <button
+                    className="button ghost small"
+                    type="button"
+                    onClick={() => onRemoveMenu(item.id)}
+                  >
+                    삭제
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </details>
     </section>
   )
 }

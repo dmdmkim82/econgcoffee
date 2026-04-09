@@ -31,8 +31,8 @@ export function AttendeesPanel({
     <section className="panel">
       <div className="panel-head">
         <div>
-          <span className="panel-kicker">참석자 관리</span>
-          <h2>참석자 목록</h2>
+          <span className="panel-kicker">참석자 수동 관리</span>
+          <h2>이름을 미리 넣어두고 싶을 때만 사용</h2>
         </div>
         <span className="status-pill neutral">{attendees.length}명</span>
       </div>
@@ -53,7 +53,7 @@ export function AttendeesPanel({
       </form>
       {attendees.length === 0 ? (
         <div className="empty-state compact">
-          참석자를 추가하면 여기에서 주문 진행 상태를 바로 확인할 수 있습니다.
+          참석 링크로 직접 주문받을 예정이면 이 섹션은 비워둬도 됩니다.
         </div>
       ) : (
         <div className="person-list">
@@ -82,7 +82,7 @@ export function AttendeesPanel({
                     type="button"
                     onClick={() => onRemoveAttendee(attendee.id)}
                   >
-                    제거
+                    삭제
                   </button>
                 </div>
               </article>

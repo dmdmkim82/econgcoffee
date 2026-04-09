@@ -45,149 +45,192 @@ export function OrdersPanel({
     return left.name.localeCompare(right.name, 'ko-KR')
   })
 
+  const completedCount = attendees.filter(
+    (attendee) => attendee.skipped || attendee.menuItemId,
+  ).length
+
   return (
     <section className="panel panel-wide">
       <div className="panel-head">
         <div>
-          <span className="panel-kicker">주문 입력</span>
-          <h2>참석자별 메뉴 선택</h2>
+          <span className="panel-kicker">참여자 현황</span>
+          <h2>누가 무엇을 골랐는지 한눈에 보기</h2>
         </div>
-        <span className={`status-pill ${meetingClosed ? 'danger' : 'soft'}`}>
-          {meetingClosed ? '입력 종료' : '입력 가능'}
+        <span className="status-pill neutral">
+          {completedCount}/{attendees.length || 0}명 응답
         </span>
       </div>
       <p className="panel-note">
-        미선택 참석자가 먼저 보이고, 커피를 마시지 않는 사람은 카드에서 바로
-        안마심 처리할 수 있습니다.
+        주문이 들어오면 상단 현황에 바로 반영되고, 필요한 사람만 펼쳐서 수정하면
+        됩니다.
       </p>
       {attendees.length === 0 ? (
         <div className="empty-state">
-          참석자를 추가하면 이 영역에서 메뉴와 수량, 온도, 요청사항을 바로
-          관리할 수 있습니다.
+          아직 참석자가 없습니다. 아래에서 수동으로 추가하거나 참석 링크로 직접
+          입력받아주세요.
         </div>
       ) : (
-        <div className="order-grid">
+        <div className="attendance-board">
           {sortedAttendees.map((attendee) => {
-            const fieldsDisabled = meetingClosed || attendee.skipped
             const selectedMenu = menuItems.find((item) => item.id === attendee.menuItemId)
+            const fieldsDisabled = meetingClosed || attendee.skipped
+            const temperatureLabel = attendee.temperature
+              ? attendee.temperature
+              : selectedMenu?.availableTemperatures.length === 1
+                ? selectedMenu.availableTemperatures[0]
+                : '온도 선택'
             const statusTone = attendee.skipped
               ? 'skip'
               : attendee.menuItemId
                 ? 'live'
                 : 'neutral'
             const statusLabel = attendee.skipped
-              ? '스킵'
+              ? 'SKIP'
               : attendee.menuItemId
-                ? '완료'
-                : '미선택'
+                ? '주문'
+                : '대기'
+            const detailLine = attendee.skipped
+              ? '이번 주문은 안 마심으로 처리됨'
+              : selectedMenu
+                ? `${selectedMenu.name}${
+                    showPrices
+                      ? ` · ${formatVisiblePrice(selectedMenu.price, showPrices)}`
+                      : ''
+                  }`
+                : '아직 메뉴를 선택하지 않았습니다.'
 
             return (
-              <article className="order-card" key={attendee.id}>
-                <div className="order-card-head">
-                  <div>
-                    <h3>{attendee.name}</h3>
-                    <p>{attendee.team || '팀 정보 없음'}</p>
+              <details className="attendance-row" key={attendee.id}>
+                <summary className="attendance-summary">
+                  <div className="attendee-avatar" aria-hidden="true">
+                    {attendee.name.slice(0, 1) || '?'}
                   </div>
-                  <span className={`status-pill ${statusTone}`}>{statusLabel}</span>
-                </div>
-                <div className="order-fields">
-                  <label className="field field-full">
-                    <span>메뉴 선택</span>
-                    <select
-                      value={attendee.menuItemId}
-                      disabled={fieldsDisabled || menuItems.length === 0}
-                      onChange={(event) =>
-                        onUpdateAttendee(attendee.id, 'menuItemId', event.target.value)
-                      }
-                    >
-                      <option value="">
-                        {menuItems.length === 0
-                          ? '등록된 메뉴가 없습니다'
-                          : '메뉴를 선택해주세요'}
-                      </option>
-                      {menuItems.map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.name}
-                          {showPrices ? ` (${formatVisiblePrice(item.price, showPrices)})` : ''}
+                  <div className="attendance-main">
+                    <strong>{attendee.name}</strong>
+                    <span>{attendee.team || '팀 정보 없음'}</span>
+                  </div>
+                  <div className="attendance-order">
+                    <strong>{detailLine}</strong>
+                    <div className="attendance-badges">
+                      <span className={`status-pill ${statusTone}`}>{statusLabel}</span>
+                      {selectedMenu && !attendee.skipped ? (
+                        <span
+                          className={`temperature-pill ${
+                            temperatureLabel === 'HOT'
+                              ? 'hot'
+                              : temperatureLabel === 'ICE'
+                                ? 'ice'
+                                : 'neutral'
+                          }`}
+                        >
+                          {temperatureLabel}
+                        </span>
+                      ) : null}
+                      {attendee.note ? (
+                        <span className="status-pill neutral">{attendee.note}</span>
+                      ) : null}
+                    </div>
+                  </div>
+                  <span className="accordion-trigger">편집</span>
+                </summary>
+
+                <div className="attendance-editor">
+                  <div className="order-fields">
+                    <label className="field field-full">
+                      <span>메뉴 선택</span>
+                      <select
+                        value={attendee.menuItemId}
+                        disabled={fieldsDisabled || menuItems.length === 0}
+                        onChange={(event) =>
+                          onUpdateAttendee(attendee.id, 'menuItemId', event.target.value)
+                        }
+                      >
+                        <option value="">
+                          {menuItems.length === 0
+                            ? '등록된 메뉴가 없습니다'
+                            : '메뉴를 선택해주세요'}
                         </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label className="field">
-                    <span>수량</span>
-                    <input
-                      type="number"
-                      min={1}
-                      max={9}
-                      value={attendee.quantity}
-                      disabled={fieldsDisabled}
-                      onChange={(event) =>
-                        onUpdateAttendee(
-                          attendee.id,
-                          'quantity',
-                          Math.min(9, Math.max(1, Number(event.target.value || 1))),
-                        )
-                      }
-                    />
-                  </label>
-                  <div className="field">
-                    <span>온도</span>
-                    {selectedMenu ? (
-                      <TemperatureSelector
-                        availableTemperatures={selectedMenu.availableTemperatures}
+                        {menuItems.map((item) => (
+                          <option key={item.id} value={item.id}>
+                            {item.name}
+                            {showPrices
+                              ? ` (${formatVisiblePrice(item.price, showPrices)})`
+                              : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="field">
+                      <span>수량</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={9}
+                        value={attendee.quantity}
                         disabled={fieldsDisabled}
-                        value={attendee.temperature}
-                        onChange={(value) =>
-                          onUpdateAttendee(attendee.id, 'temperature', value)
+                        onChange={(event) =>
+                          onUpdateAttendee(
+                            attendee.id,
+                            'quantity',
+                            Math.min(9, Math.max(1, Number(event.target.value || 1))),
+                          )
                         }
                       />
-                    ) : (
-                      <div className="selection-hint">메뉴를 먼저 선택해주세요.</div>
-                    )}
+                    </label>
+                    <div className="field">
+                      <span>온도</span>
+                      {selectedMenu ? (
+                        <TemperatureSelector
+                          availableTemperatures={selectedMenu.availableTemperatures}
+                          disabled={fieldsDisabled}
+                          value={attendee.temperature}
+                          onChange={(value) =>
+                            onUpdateAttendee(attendee.id, 'temperature', value)
+                          }
+                        />
+                      ) : (
+                        <div className="selection-hint">메뉴를 먼저 선택해주세요.</div>
+                      )}
+                    </div>
+                    <label className="field">
+                      <span>사이즈</span>
+                      <select
+                        value={attendee.size}
+                        disabled={fieldsDisabled}
+                        onChange={(event) =>
+                          onUpdateAttendee(attendee.id, 'size', event.target.value)
+                        }
+                      >
+                        <option value="">기본</option>
+                        <option value="Regular">기본</option>
+                        <option value="Large">대</option>
+                      </select>
+                    </label>
+                    <label className="field field-full">
+                      <span>추가 요청</span>
+                      <input
+                        value={attendee.note}
+                        disabled={fieldsDisabled}
+                        onChange={(event) =>
+                          onUpdateAttendee(attendee.id, 'note', event.target.value)
+                        }
+                        placeholder="샷 추가, 얼음 적게, 덜 달게"
+                      />
+                    </label>
                   </div>
-                  <label className="field">
-                    <span>사이즈</span>
-                    <select
-                      value={attendee.size}
-                      disabled={fieldsDisabled}
-                      onChange={(event) =>
-                        onUpdateAttendee(attendee.id, 'size', event.target.value)
-                      }
+                  <div className="button-row order-card-actions">
+                    <button
+                      aria-pressed={attendee.skipped}
+                      className="button ghost small"
+                      type="button"
+                      disabled={meetingClosed}
+                      onClick={() => onSkipAttendee(attendee.id, !attendee.skipped)}
                     >
-                      <option value="">기본</option>
-                      <option value="Regular">기본</option>
-                      <option value="Large">대</option>
-                    </select>
-                  </label>
-                  <label className="field field-full">
-                    <span>추가 요청</span>
-                    <input
-                      value={attendee.note}
-                      disabled={fieldsDisabled}
-                      onChange={(event) =>
-                        onUpdateAttendee(attendee.id, 'note', event.target.value)
-                      }
-                      placeholder="샷 추가, 얼음 적게, 덜 달게"
-                    />
-                  </label>
+                      {attendee.skipped ? '스킵 취소' : '안마심'}
+                    </button>
+                  </div>
                 </div>
-                {attendee.skipped ? (
-                  <p className="field-disabled-note">
-                    이번 모임에서는 커피를 마시지 않는 참석자로 표시됩니다.
-                  </p>
-                ) : null}
-                <div className="button-row order-card-actions">
-                  <button
-                    aria-pressed={attendee.skipped}
-                    className="button ghost small"
-                    type="button"
-                    disabled={meetingClosed}
-                    onClick={() => onSkipAttendee(attendee.id, !attendee.skipped)}
-                  >
-                    {attendee.skipped ? '스킵 취소' : '안마심'}
-                  </button>
-                </div>
-              </article>
+              </details>
             )
           })}
         </div>

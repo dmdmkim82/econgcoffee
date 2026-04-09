@@ -29,7 +29,7 @@ export function OcrPanel({
       <div className="panel-head">
         <div>
           <span className="panel-kicker">OCR</span>
-          <h2>메뉴판 이미지 업로드</h2>
+          <h2>메뉴 이미지 업로드</h2>
         </div>
         {ocrState.confidence !== null ? (
           <span className="status-pill neutral">
@@ -39,8 +39,8 @@ export function OcrPanel({
       </div>
       <label className="upload-box">
         <input type="file" accept="image/*" onChange={onUpload} />
-        <strong>카페 메뉴판 사진 업로드</strong>
-        <span>휴대폰 촬영 이미지, JPG, PNG 파일을 지원합니다.</span>
+        <strong>카페 메뉴 사진 업로드</strong>
+        <span>휴대폰으로 찍은 메뉴판 사진, JPG, PNG 파일 모두 가능합니다.</span>
       </label>
       <div className="progress-shell">
         <div
@@ -56,7 +56,7 @@ export function OcrPanel({
             <img src={imagePreview} alt="업로드한 메뉴판 미리보기" />
           ) : (
             <div className="empty-state compact">
-              메뉴판 이미지를 올리면 이 영역에서 바로 확인할 수 있습니다.
+              메뉴 이미지를 올리면 이 영역에서 바로 확인할 수 있습니다.
             </div>
           )}
         </div>
@@ -69,7 +69,7 @@ export function OcrPanel({
               onClick={onApplyRawText}
               disabled={!rawOcrText.trim()}
             >
-              텍스트로 메뉴 재추출
+              텍스트로 메뉴 반영
             </button>
           </div>
           <textarea
@@ -77,7 +77,7 @@ export function OcrPanel({
             value={rawOcrText}
             onChange={(event) => onRawTextChange(event.target.value)}
             rows={12}
-            placeholder="OCR 결과가 표시됩니다. 인식 오류가 있으면 직접 수정한 뒤 다시 반영할 수 있습니다."
+            placeholder="OCR 결과가 표시됩니다. 인식 오류가 있으면 직접 수정한 뒤 다시 반영해주세요."
           />
         </div>
       </div>
