@@ -19,6 +19,7 @@ import { OrdersPanel } from './components/OrdersPanel'
 import { OrganizerPanel } from './components/OrganizerPanel'
 import { ParticipantWorkspace } from './components/ParticipantWorkspace'
 import { QuickOrderPanel } from './components/QuickOrderPanel'
+import { ShareLinkSheet } from './components/ShareLinkSheet'
 import { SummaryPanel } from './components/SummaryPanel'
 import {
   apiSyncEnabled,
@@ -63,6 +64,13 @@ type OcrState = {
   progress: number
   confidence: number | null
   message: string
+}
+
+type ShareTarget = {
+  role: 'organizer' | 'join'
+  title: string
+  description: string
+  link: string
 }
 
 function App() {
@@ -191,6 +199,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
   const [feedback, setFeedback] = useState('')
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isSummarySheetOpen, setIsSummarySheetOpen] = useState(false)
+  const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null)
   const [showPrices, setShowPrices] = useState(() => {
     const storedValue = window.localStorage.getItem(PRICE_VISIBILITY_STORAGE_KEY)
     return storedValue !== 'false'
@@ -210,6 +219,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
 
   useEffect(() => {
     setIsSummarySheetOpen(false)
+    setShareTarget(null)
   }, [normalizedCode, normalizedRole])
 
   useEffect(() => {
@@ -793,23 +803,68 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
     }
   }
 
+  function buildMeetingLink(nextRole: 'organizer' | 'join') {
+    return `${window.location.origin}/meeting/${normalizedCode}/${nextRole}`
+  }
+
+  function openShareSheet(nextRole: 'organizer' | 'join') {
+    const isOrganizer = nextRole === 'organizer'
+
+    setShareTarget({
+      role: nextRole,
+      title: isOrganizer ? '취합 링크 공유' : '참석 링크 공유',
+      description: isOrganizer
+        ? '취합자용 링크입니다. 관리와 최종 주문 취합에 사용합니다.'
+        : '참석자용 링크입니다. 이름 입력 후 메뉴 선택에 사용합니다.',
+      link: buildMeetingLink(nextRole),
+    })
+  }
+
   async function handleCopyPath(nextRole: 'organizer' | 'join') {
-    const link = `${window.location.origin}/meeting/${normalizedCode}/${nextRole}`
+    const link = buildMeetingLink(nextRole)
 
     try {
       await navigator.clipboard.writeText(link)
       setFeedback(
         nextRole === 'organizer'
-          ? '痍⑦빀??留곹겕瑜?蹂듭궗?덉뒿?덈떎.'
-          : '李몄꽍??留곹겕瑜?蹂듭궗?덉뒿?덈떎.',
+          ? '취합 링크를 복사했습니다.'
+          : '참석 링크를 복사했습니다.',
       )
     } catch {
-      setFeedback('留곹겕 蹂듭궗 沅뚰븳???놁뼱 吏곸젒 二쇱냼李?URL??蹂듭궗?댁＜?몄슂.')
+      setFeedback('브라우저 복사 권한이 없어 직접 링크를 복사해주세요.')
     }
   }
 
+  async function handleShareToKakao(nextRole: 'organizer' | 'join') {
+    const link = buildMeetingLink(nextRole)
+    const title = meeting.title || '에콩커피'
+    const text =
+      nextRole === 'organizer'
+        ? `${title} 취합 링크입니다.`
+        : `${title} 참석 링크입니다.`
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title,
+          text,
+          url: link,
+        })
+        setFeedback('공유 창을 열었습니다. 카카오톡을 선택해 공유해 주세요.')
+        return
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return
+        }
+      }
+    }
+
+    await handleCopyPath(nextRole)
+    setFeedback('이 브라우저에서는 공유 창을 지원하지 않아 링크를 복사했습니다.')
+  }
+
   function handleResetWorkspace() {
-    if (!window.confirm('?꾩옱 痍⑦빀 ?댁슜??珥덇린?뷀븯怨???紐⑥엫 ?곹깭濡??섎룎由닿퉴??')) {
+    if (!window.confirm('현재 취합 내용을 초기화하고 새 모임 상태로 되돌릴까요?')) {
       return
     }
 
@@ -828,9 +883,9 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
       status: 'idle',
       progress: 0,
       confidence: null,
-      message: '硫붾돱???대?吏瑜??щ━硫?OCR???먮룞?쇰줈 ?ㅽ뻾?⑸땲??',
+      message: '메뉴 이미지를 올리면 OCR이 자동으로 실행됩니다.',
     })
-    setFeedback('紐⑥엫 ?곗씠?곕? 珥덇린?뷀뻽?듬땲??')
+    setFeedback('모임 데이터를 초기화했습니다.')
   }
 
   return (
@@ -841,10 +896,19 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
         role={normalizedRole}
         summaryCount={groupedOrders.length}
         showPrices={showPrices}
-        onCopyOrganizerLink={() => handleCopyPath('organizer')}
-        onCopyParticipantLink={() => handleCopyPath('join')}
+        onOpenOrganizerShare={() => openShareSheet('organizer')}
+        onOpenParticipantShare={() => openShareSheet('join')}
         onOpenSummary={() => setIsSummarySheetOpen(true)}
         onTogglePriceVisibility={() => setShowPrices((currentValue) => !currentValue)}
+      />
+      <ShareLinkSheet
+        open={Boolean(shareTarget)}
+        title={shareTarget?.title ?? ''}
+        description={shareTarget?.description ?? ''}
+        link={shareTarget?.link ?? ''}
+        onClose={() => setShareTarget(null)}
+        onCopy={() => handleCopyPath(shareTarget?.role ?? 'join')}
+        onShareToKakao={() => handleShareToKakao(shareTarget?.role ?? 'join')}
       />
       <OrderSummarySheet
         open={isSummarySheetOpen}

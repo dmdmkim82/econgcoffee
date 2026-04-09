@@ -551,6 +551,20 @@
   box-shadow: 0 24px 60px rgba(36, 24, 16, 0.22);
 }
 
+.share-sheet {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 430px);
+  margin: 0 auto;
+  max-height: min(78vh, 680px);
+  overflow: auto;
+  padding: 14px;
+  border: 1px solid rgba(92, 67, 44, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 252, 247, 0.98);
+  box-shadow: 0 24px 60px rgba(36, 24, 16, 0.22);
+}
+
 .summary-sheet-head {
   display: flex;
   justify-content: space-between;
@@ -599,6 +613,51 @@
   margin-bottom: 4px;
   color: var(--muted);
   font-size: 0.74rem;
+}
+
+.share-link-box,
+.share-qr-card {
+  padding: 12px;
+  border: 1px solid rgba(92, 67, 44, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.share-link-box {
+  display: grid;
+  gap: 6px;
+}
+
+.share-link-box a {
+  color: var(--accent-strong);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.share-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.share-qr-card {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.share-qr-card .subhead {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.share-qr-image {
+  width: min(220px, 100%);
+  height: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(92, 67, 44, 0.1);
+  background: #fffaf5;
 }
 
 .upload-box {

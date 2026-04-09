@@ -6,8 +6,8 @@ type MeetingTopbarProps = {
   role: 'organizer' | 'join'
   summaryCount: number
   showPrices: boolean
-  onCopyOrganizerLink: () => Promise<void>
-  onCopyParticipantLink: () => Promise<void>
+  onOpenOrganizerShare: () => void
+  onOpenParticipantShare: () => void
   onOpenSummary: () => void
   onTogglePriceVisibility: () => void
 }
@@ -18,8 +18,8 @@ export function MeetingTopbar({
   role,
   summaryCount,
   showPrices,
-  onCopyOrganizerLink,
-  onCopyParticipantLink,
+  onOpenOrganizerShare,
+  onOpenParticipantShare,
   onOpenSummary,
   onTogglePriceVisibility,
 }: MeetingTopbarProps) {
@@ -63,16 +63,16 @@ export function MeetingTopbar({
           <button
             className="button secondary small"
             type="button"
-            onClick={onCopyOrganizerLink}
+            onClick={onOpenOrganizerShare}
           >
-            취합 링크
+            취합 링크공유
           </button>
           <button
             className="button secondary small"
             type="button"
-            onClick={onCopyParticipantLink}
+            onClick={onOpenParticipantShare}
           >
-            참석 링크
+            참석 링크공유
           </button>
         </div>
       </div>
