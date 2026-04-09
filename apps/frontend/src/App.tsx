@@ -12,6 +12,7 @@ import { AttendeesPanel } from './components/AttendeesPanel'
 import { HeroPanel } from './components/HeroPanel'
 import { HomePage } from './components/HomePage'
 import { MeetingTopbar } from './components/MeetingTopbar'
+import { MeetingUtilityBar } from './components/MeetingUtilityBar'
 import { MenuPanel } from './components/MenuPanel'
 import { MoreSheet } from './components/MoreSheet'
 import { OcrPanel } from './components/OcrPanel'
@@ -934,9 +935,6 @@ function MeetingPage({
         shareCode={normalizedCode}
         title={meeting.title}
         role={normalizedRole}
-        summaryCount={groupedOrders.length}
-        onOpenSummary={() => setIsSummarySheetOpen(true)}
-        onOpenMore={() => setIsMoreSheetOpen(true)}
       />
       <MoreSheet
         open={isMoreSheetOpen}
@@ -985,6 +983,13 @@ function MeetingPage({
             onAddAttendee={handleAddAttendee}
             onUpdateAttendee={updateAttendeeField}
             onSkipAttendee={handleSkipAttendee}
+          />
+          <MeetingUtilityBar
+            summaryCount={groupedOrders.length}
+            shareLabel="취합 링크"
+            onOpenSummary={() => setIsSummarySheetOpen(true)}
+            onOpenShare={() => openShareSheet('organizer')}
+            onOpenMore={() => setIsMoreSheetOpen(true)}
           />
           <main className="workspace-grid">
             <OrdersPanel
@@ -1095,6 +1100,15 @@ function MeetingPage({
             snapshot={snapshot}
             meetingClosed={meetingClosed}
             showPrices={showPrices}
+            utilityBar={
+              <MeetingUtilityBar
+                summaryCount={groupedOrders.length}
+                shareLabel="참석 링크"
+                onOpenSummary={() => setIsSummarySheetOpen(true)}
+                onOpenShare={() => openShareSheet('join')}
+                onOpenMore={() => setIsMoreSheetOpen(true)}
+              />
+            }
             onAddAttendee={handleAddAttendee}
             onUpdateAttendee={updateAttendeeField}
             onSkipAttendee={handleSkipAttendee}

@@ -83,8 +83,8 @@
   position: sticky;
   top: calc(6px + env(safe-area-inset-top, 0));
   z-index: 20;
-  padding: 12px;
-  margin-bottom: 10px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
   backdrop-filter: blur(14px);
 }
 
@@ -102,7 +102,7 @@
 }
 
 .meeting-topbar-copy strong {
-  font-size: 0.94rem;
+  font-size: 0.9rem;
   line-height: 1.25;
 }
 
@@ -132,13 +132,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 38px;
-  padding: 8px 10px;
+  min-height: 34px;
+  padding: 7px 10px;
   border-radius: 999px;
   background: var(--chip-bg);
   color: var(--ink-soft);
   text-decoration: none;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 700;
   text-align: center;
 }
@@ -521,6 +521,13 @@
   min-height: 34px;
   padding: 7px 10px;
   font-size: 0.76rem;
+}
+
+.button.micro {
+  min-height: 30px;
+  padding: 6px 10px;
+  font-size: 0.72rem;
+  box-shadow: none;
 }
 
 .meeting-card-actions {
@@ -989,6 +996,14 @@
 
 .quick-order-panel {
   margin-top: 6px;
+}
+
+.meeting-utility-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin: -2px 0 10px;
 }
 
 .quick-order-meta {

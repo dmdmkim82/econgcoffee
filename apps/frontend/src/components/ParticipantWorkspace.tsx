@@ -5,6 +5,7 @@ type ParticipantWorkspaceProps = {
   snapshot: Snapshot
   meetingClosed: boolean
   showPrices: boolean
+  utilityBar?: React.ReactNode
   onAddAttendee: (name: string, team: string) => string
   onUpdateAttendee: (
     attendeeId: string,
@@ -18,6 +19,7 @@ export function ParticipantWorkspace({
   snapshot,
   meetingClosed,
   showPrices,
+  utilityBar,
   onAddAttendee,
   onUpdateAttendee,
   onSkipAttendee,
@@ -35,6 +37,8 @@ export function ParticipantWorkspace({
         onUpdateAttendee={onUpdateAttendee}
         onSkipAttendee={onSkipAttendee}
       />
+
+      {utilityBar}
 
       {meeting.notes ? (
         <section className="panel">
