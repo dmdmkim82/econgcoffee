@@ -54,20 +54,20 @@ export function OrdersPanel({
       <div className="panel-head">
         <div>
           <span className="panel-kicker">참여자 현황</span>
-          <h2>누가 무엇을 골랐는지 한눈에 보기</h2>
+          <h2>누가 무엇을 골랐는지 한눈에 확인하세요</h2>
         </div>
         <span className="status-pill neutral">
           {completedCount}/{attendees.length || 0}명 응답
         </span>
       </div>
+
       <p className="panel-note">
-        주문이 들어오면 상단 현황에 바로 반영되고, 필요한 사람만 펼쳐서 수정하면
-        됩니다.
+        주문이 들어오면 이 목록에 바로 반영됩니다. 필요할 때만 각 사람별 세부 내용을 펼쳐 수정하세요.
       </p>
+
       {attendees.length === 0 ? (
         <div className="empty-state">
-          아직 참석자가 없습니다. 아래에서 수동으로 추가하거나 참석 링크로 직접
-          입력받아주세요.
+          아직 참석자가 없습니다. 아래 관리 영역에서 직접 추가하거나 참석 링크로 입력을 받아 주세요.
         </div>
       ) : (
         <div className="attendance-board">
@@ -85,12 +85,12 @@ export function OrdersPanel({
                 ? 'live'
                 : 'neutral'
             const statusLabel = attendee.skipped
-              ? 'SKIP'
+              ? '안마심'
               : attendee.menuItemId
                 ? '주문'
                 : '대기'
             const detailLine = attendee.skipped
-              ? '이번 주문은 안 마심으로 처리됨'
+              ? '이번 주문은 안마심으로 처리되었습니다.'
               : selectedMenu
                 ? `${selectedMenu.name}${
                     showPrices
@@ -148,7 +148,7 @@ export function OrdersPanel({
                         <option value="">
                           {menuItems.length === 0
                             ? '등록된 메뉴가 없습니다'
-                            : '메뉴를 선택해주세요'}
+                            : '메뉴를 선택하세요'}
                         </option>
                         {menuItems.map((item) => (
                           <option key={item.id} value={item.id}>
@@ -160,6 +160,7 @@ export function OrdersPanel({
                         ))}
                       </select>
                     </label>
+
                     <label className="field">
                       <span>수량</span>
                       <input
@@ -177,6 +178,7 @@ export function OrdersPanel({
                         }
                       />
                     </label>
+
                     <div className="field">
                       <span>온도</span>
                       {selectedMenu ? (
@@ -189,9 +191,10 @@ export function OrdersPanel({
                           }
                         />
                       ) : (
-                        <div className="selection-hint">메뉴를 먼저 선택해주세요.</div>
+                        <div className="selection-hint">메뉴를 먼저 선택하세요.</div>
                       )}
                     </div>
+
                     <label className="field">
                       <span>사이즈</span>
                       <select
@@ -203,9 +206,10 @@ export function OrdersPanel({
                       >
                         <option value="">기본</option>
                         <option value="Regular">기본</option>
-                        <option value="Large">대</option>
+                        <option value="Large">라지</option>
                       </select>
                     </label>
+
                     <label className="field field-full">
                       <span>추가 요청</span>
                       <input
@@ -214,10 +218,11 @@ export function OrdersPanel({
                         onChange={(event) =>
                           onUpdateAttendee(attendee.id, 'note', event.target.value)
                         }
-                        placeholder="샷 추가, 얼음 적게, 덜 달게"
+                        placeholder="샷 추가, 덜 달게, 얼음 적게"
                       />
                     </label>
                   </div>
+
                   <div className="button-row order-card-actions">
                     <button
                       aria-pressed={attendee.skipped}

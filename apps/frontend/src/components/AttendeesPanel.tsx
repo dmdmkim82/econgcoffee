@@ -32,10 +32,11 @@ export function AttendeesPanel({
       <div className="panel-head">
         <div>
           <span className="panel-kicker">참석자 수동 관리</span>
-          <h2>이름을 미리 넣어두고 싶을 때만 사용</h2>
+          <h2>참석자 이름을 미리 등록하거나 정리할 때 사용합니다</h2>
         </div>
         <span className="status-pill neutral">{attendees.length}명</span>
       </div>
+
       <form className="inline-form stacked" onSubmit={handleSubmit}>
         <input
           value={name}
@@ -51,9 +52,10 @@ export function AttendeesPanel({
           참석자 추가
         </button>
       </form>
+
       {attendees.length === 0 ? (
         <div className="empty-state compact">
-          참석 링크로 직접 주문받을 예정이면 이 섹션은 비워둬도 됩니다.
+          참석 링크로 직접 주문을 받을 예정이면 이 섹션은 비워 두어도 됩니다.
         </div>
       ) : (
         <div className="person-list">
@@ -64,7 +66,7 @@ export function AttendeesPanel({
                 ? 'live'
                 : 'neutral'
             const label = attendee.skipped
-              ? '스킵'
+              ? '안마심'
               : attendee.menuItemId
                 ? '선택 완료'
                 : '대기 중'

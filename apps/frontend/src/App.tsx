@@ -18,6 +18,7 @@ import { OrderSummarySheet } from './components/OrderSummarySheet'
 import { OrdersPanel } from './components/OrdersPanel'
 import { OrganizerPanel } from './components/OrganizerPanel'
 import { ParticipantWorkspace } from './components/ParticipantWorkspace'
+import { QuickOrderPanel } from './components/QuickOrderPanel'
 import { SummaryPanel } from './components/SummaryPanel'
 import {
   apiSyncEnabled,
@@ -827,18 +828,6 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
         onOpenSummary={() => setIsSummarySheetOpen(true)}
         onTogglePriceVisibility={() => setShowPrices((currentValue) => !currentValue)}
       />
-      <HeroPanel
-        meetingClosed={meetingClosed}
-        shareCode={meeting.shareCode}
-        countdown={formatCountdown(meeting.deadline)}
-        menuCount={menuItems.length}
-        attendeeCount={attendees.length}
-        completionRate={completionRate}
-        completedOrders={completedOrders}
-        totalAmount={totalAmount}
-        totalCups={totalCups}
-        showPrices={showPrices}
-      />
       <OrderSummarySheet
         open={isSummarySheetOpen}
         groupedOrders={groupedOrders.map((group) => ({
@@ -856,100 +845,132 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
       />
       {feedback ? <div className="feedback-banner">{feedback}</div> : null}
       {normalizedRole === 'organizer' ? (
-        <main className="workspace-grid">
-          <MenuPanel
-            menuItems={menuItems}
-            showPrices={showPrices}
-            onAddMenu={handleAddMenu}
-            onUpdateMenu={updateMenuField}
-            onRemoveMenu={handleRemoveMenu}
-            onLoadPresetMenu={handleLoadPresetMenu}
-            onTogglePriceVisibility={() =>
-              setShowPrices((currentValue) => !currentValue)
-            }
-          />
-          <AttendeesPanel
-            attendees={attendees}
-            onAddAttendee={handleAddAttendee}
-            onRemoveAttendee={handleRemoveAttendee}
-          />
-          <OrdersPanel
-            attendees={attendees}
-            menuItems={menuItems}
+        <>
+          <QuickOrderPanel
+            snapshot={snapshot}
             meetingClosed={meetingClosed}
             showPrices={showPrices}
+            variant="organizer"
+            onAddAttendee={handleAddAttendee}
             onUpdateAttendee={updateAttendeeField}
             onSkipAttendee={handleSkipAttendee}
           />
-          <SummaryPanel
-            groupedOrders={groupedOrders.map((group) => ({
-              label: group.label,
-              count: group.count,
-              amount: formatPrice(group.amount),
-              people: group.people.join(', '),
-            }))}
+          <HeroPanel
+            meetingClosed={meetingClosed}
+            shareCode={meeting.shareCode}
+            countdown={formatCountdown(meeting.deadline)}
+            menuCount={menuItems.length}
+            attendeeCount={attendees.length}
+            completionRate={completionRate}
+            completedOrders={completedOrders}
+            totalAmount={totalAmount}
             totalCups={totalCups}
-            totalAmount={formatPrice(totalAmount)}
-            pendingNames={pendingNames}
-            skippedNames={skippedNames}
-            summaryText={summaryTextOutput}
             showPrices={showPrices}
-            onCopy={handleCopySummary}
           />
-          <details className="admin-details">
-            <summary>참석자 수동 관리</summary>
-            <div className="admin-details-body">
-              <AttendeesPanel
-                attendees={attendees}
-                onAddAttendee={handleAddAttendee}
-                onRemoveAttendee={handleRemoveAttendee}
-              />
-            </div>
-          </details>
-          <details className="admin-details">
-            <summary>취합 설정</summary>
-            <div className="admin-details-body">
-              <OrganizerPanel
-                meeting={meeting}
-                meetingClosed={meetingClosed}
-                deadlinePassed={deadlinePassed}
-                deadlineLabel={formatDeadlineLabel(meeting.deadline)}
-                onChange={updateMeetingField}
-                onToggleManualClose={() =>
-                  updateMeetingField('manuallyClosed', !meeting.manuallyClosed)
-                }
-                onReset={handleResetWorkspace}
-              />
-            </div>
-          </details>
-          <details className="admin-details">
-            <summary>OCR로 메뉴 추가</summary>
-            <div className="admin-details-body">
-              <OcrPanel
-                ocrState={ocrState}
-                imagePreview={imagePreview}
-                rawOcrText={rawOcrText}
-                onUpload={handleImageUpload}
-                onRawTextChange={(value) =>
-                  patchSnapshot((currentSnapshot) => ({
-                    ...currentSnapshot,
-                    rawOcrText: value,
-                  }))
-                }
-                onApplyRawText={applyRawTextToMenu}
-              />
-            </div>
-          </details>
-        </main>
+          <main className="workspace-grid">
+            <MenuPanel
+              menuItems={menuItems}
+              showPrices={showPrices}
+              onAddMenu={handleAddMenu}
+              onUpdateMenu={updateMenuField}
+              onRemoveMenu={handleRemoveMenu}
+              onLoadPresetMenu={handleLoadPresetMenu}
+              onTogglePriceVisibility={() =>
+                setShowPrices((currentValue) => !currentValue)
+              }
+            />
+            <OrdersPanel
+              attendees={attendees}
+              menuItems={menuItems}
+              meetingClosed={meetingClosed}
+              showPrices={showPrices}
+              onUpdateAttendee={updateAttendeeField}
+              onSkipAttendee={handleSkipAttendee}
+            />
+            <SummaryPanel
+              groupedOrders={groupedOrders.map((group) => ({
+                label: group.label,
+                count: group.count,
+                amount: formatPrice(group.amount),
+                people: group.people.join(', '),
+              }))}
+              totalCups={totalCups}
+              totalAmount={formatPrice(totalAmount)}
+              pendingNames={pendingNames}
+              skippedNames={skippedNames}
+              summaryText={summaryTextOutput}
+              showPrices={showPrices}
+              onCopy={handleCopySummary}
+            />
+            <details className="admin-details">
+              <summary>참석자 수동 관리</summary>
+              <div className="admin-details-body">
+                <AttendeesPanel
+                  attendees={attendees}
+                  onAddAttendee={handleAddAttendee}
+                  onRemoveAttendee={handleRemoveAttendee}
+                />
+              </div>
+            </details>
+            <details className="admin-details">
+              <summary>취합 설정</summary>
+              <div className="admin-details-body">
+                <OrganizerPanel
+                  meeting={meeting}
+                  meetingClosed={meetingClosed}
+                  deadlinePassed={deadlinePassed}
+                  deadlineLabel={formatDeadlineLabel(meeting.deadline)}
+                  onChange={updateMeetingField}
+                  onToggleManualClose={() =>
+                    updateMeetingField('manuallyClosed', !meeting.manuallyClosed)
+                  }
+                  onReset={handleResetWorkspace}
+                />
+              </div>
+            </details>
+            <details className="admin-details">
+              <summary>OCR로 메뉴 추가</summary>
+              <div className="admin-details-body">
+                <OcrPanel
+                  ocrState={ocrState}
+                  imagePreview={imagePreview}
+                  rawOcrText={rawOcrText}
+                  onUpload={handleImageUpload}
+                  onRawTextChange={(value) =>
+                    patchSnapshot((currentSnapshot) => ({
+                      ...currentSnapshot,
+                      rawOcrText: value,
+                    }))
+                  }
+                  onApplyRawText={applyRawTextToMenu}
+                />
+              </div>
+            </details>
+          </main>
+        </>
       ) : (
-        <ParticipantWorkspace
-          snapshot={snapshot}
-          meetingClosed={meetingClosed}
-          showPrices={showPrices}
-          onAddAttendee={handleAddAttendee}
-          onUpdateAttendee={updateAttendeeField}
-          onSkipAttendee={handleSkipAttendee}
-        />
+        <>
+          <ParticipantWorkspace
+            snapshot={snapshot}
+            meetingClosed={meetingClosed}
+            showPrices={showPrices}
+            onAddAttendee={handleAddAttendee}
+            onUpdateAttendee={updateAttendeeField}
+            onSkipAttendee={handleSkipAttendee}
+          />
+          <HeroPanel
+            meetingClosed={meetingClosed}
+            shareCode={meeting.shareCode}
+            countdown={formatCountdown(meeting.deadline)}
+            menuCount={menuItems.length}
+            attendeeCount={attendees.length}
+            completionRate={completionRate}
+            completedOrders={completedOrders}
+            totalAmount={totalAmount}
+            totalCups={totalCups}
+            showPrices={showPrices}
+          />
+        </>
       )}
     </div>
   )

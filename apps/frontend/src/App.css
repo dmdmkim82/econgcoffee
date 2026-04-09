@@ -919,6 +919,28 @@
   gap: 12px;
 }
 
+.quick-order-panel {
+  margin-top: 10px;
+}
+
+.quick-order-meta {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.quick-order-inline-select {
+  gap: 6px;
+}
+
+.quick-order-preview {
+  display: grid;
+  gap: 10px;
+}
+
+.quick-order-menu-list {
+  max-height: 260px;
+  overflow: auto;
+}
+
 .participant-add-form {
   display: grid;
   gap: 8px;

@@ -32,6 +32,7 @@ export function MeetingTopbar({
         <strong>{title || '에콩커피 모임'}</strong>
         <span>모임 코드 {shareCode}</span>
       </div>
+
       <div className="meeting-topbar-actions">
         <div className="role-tabs">
           <Link
@@ -47,6 +48,7 @@ export function MeetingTopbar({
             참석자
           </Link>
         </div>
+
         <div className="button-row">
           <button className="button small" type="button" onClick={onOpenSummary}>
             요약 목록{summaryCount > 0 ? ` ${summaryCount}` : ''}
