@@ -58,8 +58,8 @@ export function OrdersPanel({
     <section className="panel panel-wide">
       <div className="panel-head">
         <div>
-          <span className="panel-kicker">참여자 현황</span>
-          <h2>누가 무엇을 골랐는지 한눈에 확인하세요</h2>
+          <span className="panel-kicker">참석자 현황</span>
+          <h2>이름별 주문 상태와 수정</h2>
         </div>
         <span className="status-pill neutral">
           {completedCount}/{attendees.length || 0}명 응답
@@ -67,12 +67,12 @@ export function OrdersPanel({
       </div>
 
       <p className="panel-note">
-        주문이 들어오면 이 목록에 바로 반영됩니다. 필요할 때만 각 사람별 세부 내용을 펼쳐 수정하세요.
+        위 빠른 주문 입력에서 받은 주문이 바로 반영됩니다. 필요한 경우에만 펼쳐서 수정하세요.
       </p>
 
       {attendees.length === 0 ? (
         <div className="empty-state">
-          아직 참석자가 없습니다. 아래 관리 영역에서 직접 추가하거나 참석 링크로 입력을 받아 주세요.
+          아직 참석자가 없습니다. 상단에서 이름을 입력해 첫 주문을 받아주세요.
         </div>
       ) : (
         <div className="attendance-board">
@@ -82,7 +82,7 @@ export function OrdersPanel({
               selectedMenu && isCoffeeMenuName(selectedMenu.name),
             )
             const fieldsDisabled = meetingClosed || attendee.skipped
-            const temperatureLabel = attendee.temperature || '온도 미선택'
+            const temperatureLabel = attendee.temperature || '온도 선택 전'
             const statusTone = attendee.skipped
               ? 'skip'
               : attendee.menuItemId
@@ -91,10 +91,10 @@ export function OrdersPanel({
             const statusLabel = attendee.skipped
               ? '안마심'
               : attendee.menuItemId
-                ? '주문'
+                ? '주문 완료'
                 : '대기'
             const detailLine = attendee.skipped
-              ? '이번 주문은 안마심으로 처리되었습니다.'
+              ? '이번 주문에서 제외된 참석자입니다.'
               : selectedMenu
                 ? `${selectedMenu.name}${
                     attendee.decaf && canUseDecaf ? ' · 디카페인' : ''
@@ -116,7 +116,6 @@ export function OrdersPanel({
                   </div>
                   <div className="attendance-main">
                     <strong>{attendee.name}</strong>
-                    <span>{attendee.team || '팀 정보 없음'}</span>
                   </div>
                   <div className="attendance-order">
                     <strong>{detailLine}</strong>
@@ -143,7 +142,7 @@ export function OrdersPanel({
                       ) : null}
                     </div>
                   </div>
-                  <span className="accordion-trigger">편집</span>
+                  <span className="accordion-trigger">수정</span>
                 </summary>
 
                 <div className="attendance-editor">
@@ -209,11 +208,9 @@ export function OrdersPanel({
 
                     {canUseDecaf ? (
                       <div className="field field-full">
-                        <span>원두 옵션</span>
+                        <span>커피 옵션</span>
                         <div className="checkbox-group">
-                          <label
-                            className={`checkbox-chip ${attendee.decaf ? 'active' : ''}`}
-                          >
+                          <label className={`checkbox-chip ${attendee.decaf ? 'active' : ''}`}>
                             <input
                               checked={attendee.decaf}
                               disabled={fieldsDisabled}

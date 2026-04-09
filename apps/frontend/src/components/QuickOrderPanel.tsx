@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState } from 'react'
 import {
   formatCountdown,
   getMenuDisplayPrice,
@@ -44,7 +44,7 @@ function getAttendeeStatus(attendee: Attendee) {
 
   return {
     tone: 'neutral',
-    label: '메뉴 미선택',
+    label: '메뉴 선택 전',
   }
 }
 
@@ -61,31 +61,6 @@ export function QuickOrderPanel({
   const [selectedAttendeeId, setSelectedAttendeeId] = useState('')
   const [nameInput, setNameInput] = useState('')
 
-  const activeAttendeeId = attendees.some(
-    (attendee) => attendee.id === selectedAttendeeId,
-  )
-    ? selectedAttendeeId
-    : ''
-
-  const selectedAttendee = attendees.find(
-    (attendee) => attendee.id === activeAttendeeId,
-  )
-  const selectedMenu = menuItems.find(
-    (item) => item.id === selectedAttendee?.menuItemId,
-  )
-  const canUseDecaf = Boolean(selectedMenu && isCoffeeMenuName(selectedMenu.name))
-
-  const completionStats = useMemo(() => {
-    const completed = attendees.filter(
-      (attendee) => attendee.skipped || attendee.menuItemId,
-    ).length
-
-    return {
-      completed,
-      total: attendees.length,
-    }
-  }, [attendees])
-
   const matchedAttendee = useMemo(() => {
     const normalizedInput = normalizeName(nameInput)
 
@@ -100,62 +75,150 @@ export function QuickOrderPanel({
     )
   }, [attendees, nameInput])
 
-  function handleStartOrder(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  const selectedAttendeeById =
+    attendees.find((attendee) => attendee.id === selectedAttendeeId) ?? null
+  const activeAttendee = matchedAttendee ?? selectedAttendeeById ?? null
+  const activeAttendeeId = activeAttendee?.id ?? ''
+  const selectedMenu = menuItems.find((item) => item.id === activeAttendee?.menuItemId)
+  const canUseDecaf = Boolean(selectedMenu && isCoffeeMenuName(selectedMenu.name))
+  const orderReady = Boolean(activeAttendee || nameInput.trim())
+  const fieldsDisabled = meetingClosed || !orderReady || Boolean(activeAttendee?.skipped)
 
-    if (meetingClosed || !nameInput.trim()) {
+  const completionStats = useMemo(() => {
+    const completed = attendees.filter(
+      (attendee) => attendee.skipped || attendee.menuItemId,
+    ).length
+
+    return {
+      completed,
+      total: attendees.length,
+    }
+  }, [attendees])
+
+  const heading =
+    variant === 'organizer'
+      ? '이름 입력 후 바로 주문 받기'
+      : '이름만 입력하고 바로 메뉴 고르기'
+  const description =
+    variant === 'organizer'
+      ? '같은 이름을 다시 입력하면 기존 주문을 바로 불러와 수정합니다.'
+      : '내 이름을 입력하면 기존 주문도 바로 이어서 수정할 수 있습니다.'
+  const countdownLabel = meetingClosed ? '주문 마감' : formatCountdown(meeting.deadline)
+  const previewPrice =
+    selectedMenu && activeAttendee
+      ? getMenuDisplayPrice(selectedMenu, activeAttendee.decaf) * activeAttendee.quantity
+      : 0
+
+  function syncSelectedAttendee(attendeeId: string) {
+    const nextAttendee = attendees.find((attendee) => attendee.id === attendeeId)
+
+    if (!nextAttendee) {
+      setSelectedAttendeeId('')
       return
+    }
+
+    setSelectedAttendeeId(attendeeId)
+    setNameInput(nextAttendee.name)
+  }
+
+  function ensureActiveAttendeeId() {
+    if (activeAttendeeId) {
+      return activeAttendeeId
+    }
+
+    const trimmedName = nameInput.trim()
+
+    if (!trimmedName || meetingClosed) {
+      return ''
     }
 
     if (matchedAttendee) {
       setSelectedAttendeeId(matchedAttendee.id)
       setNameInput(matchedAttendee.name)
+      return matchedAttendee.id
+    }
+
+    const nextAttendeeId = onAddAttendee(trimmedName, '')
+    setSelectedAttendeeId(nextAttendeeId)
+    setNameInput(trimmedName)
+    return nextAttendeeId
+  }
+
+  function handleNameChange(nextValue: string) {
+    setNameInput(nextValue)
+
+    const selectedName = selectedAttendeeById?.name ?? ''
+    if (selectedAttendeeId && normalizeName(selectedName) !== normalizeName(nextValue)) {
+      setSelectedAttendeeId('')
+    }
+  }
+
+  function handleMenuSelect(menuItemId: string) {
+    const attendeeId = ensureActiveAttendeeId()
+
+    if (!attendeeId) {
       return
     }
 
-    const attendeeId = onAddAttendee(nameInput.trim(), '')
-    setSelectedAttendeeId(attendeeId)
-    setNameInput(nameInput.trim())
+    onUpdateAttendee(attendeeId, 'menuItemId', menuItemId)
   }
 
-  function handleSelectAttendee(attendeeId: string) {
-    setSelectedAttendeeId(attendeeId)
+  function handleQuantityChange(nextQuantity: number) {
+    const attendeeId = ensureActiveAttendeeId()
 
-    const attendee = attendees.find((item) => item.id === attendeeId)
-    if (attendee) {
-      setNameInput(attendee.name)
+    if (!attendeeId) {
+      return
     }
+
+    onUpdateAttendee(attendeeId, 'quantity', Math.min(9, Math.max(1, nextQuantity)))
   }
 
-  const orderFieldsDisabled =
-    meetingClosed || !selectedAttendee || selectedAttendee.skipped
-  const selectedStatus = selectedAttendee
-    ? getAttendeeStatus(selectedAttendee)
-    : null
-  const heading =
-    variant === 'organizer'
-      ? '참석자 이름만 넣고 바로 주문을 입력하세요'
-      : '이름만 입력하고 바로 메뉴를 고르세요'
-  const description =
-    variant === 'organizer'
-      ? '같은 이름을 다시 입력하면 기존 주문을 불러와 바로 수정할 수 있습니다.'
-      : '이미 주문한 이름을 다시 입력하면 기존 주문을 이어서 수정할 수 있습니다.'
-  const countdownLabel = meetingClosed ? '주문 마감' : formatCountdown(meeting.deadline)
-  const primaryButtonLabel = matchedAttendee
-    ? '기존 주문 수정하기'
-    : '이 이름으로 주문 시작'
-  const previewPrice =
-    selectedMenu && selectedAttendee
-      ? getMenuDisplayPrice(selectedMenu, selectedAttendee.decaf) *
-        selectedAttendee.quantity
-      : 0
+  function handleTemperatureChange(nextTemperature: string) {
+    const attendeeId = ensureActiveAttendeeId()
+
+    if (!attendeeId) {
+      return
+    }
+
+    onUpdateAttendee(attendeeId, 'temperature', nextTemperature)
+  }
+
+  function handleNoteChange(nextNote: string) {
+    const attendeeId = ensureActiveAttendeeId()
+
+    if (!attendeeId) {
+      return
+    }
+
+    onUpdateAttendee(attendeeId, 'note', nextNote)
+  }
+
+  function handleDecafChange(nextChecked: boolean) {
+    const attendeeId = ensureActiveAttendeeId()
+
+    if (!attendeeId) {
+      return
+    }
+
+    onUpdateAttendee(attendeeId, 'decaf', nextChecked)
+  }
+
+  function handleSkipToggle() {
+    const attendeeId = ensureActiveAttendeeId()
+
+    if (!attendeeId) {
+      return
+    }
+
+    onSkipAttendee(attendeeId, !activeAttendee?.skipped)
+  }
 
   return (
     <section className="panel panel-wide participant-entry-panel quick-order-panel">
       <div className="panel-head">
         <div>
           <span className="panel-kicker">
-            {variant === 'organizer' ? '상단 빠른 주문' : '내 주문 입력'}
+            {variant === 'organizer' ? '빠른 주문 입력' : '내 주문 입력'}
           </span>
           <h2>{heading}</h2>
         </div>
@@ -183,50 +246,24 @@ export function QuickOrderPanel({
         </article>
       </div>
 
-      <form className="participant-add-form" onSubmit={handleStartOrder}>
-        <label className="field">
+      <div className="quick-order-composer">
+        <label className="field field-full">
           <span>참석자 이름</span>
           <input
             value={nameInput}
-            onChange={(event) => setNameInput(event.target.value)}
-            placeholder="이름을 입력하세요"
+            onChange={(event) => handleNameChange(event.target.value)}
+            placeholder="이름만 입력하면 바로 메뉴를 고를 수 있습니다"
           />
         </label>
+
         {matchedAttendee ? (
           <div className="status-callout">
-            같은 이름이 이미 있습니다. 기존 주문을 불러와서 바로 수정합니다.
+            같은 이름의 기존 주문을 찾았습니다. 아래에서 바로 수정하면 됩니다.
           </div>
         ) : null}
-        <div className="button-row">
-          <button className="button" type="submit" disabled={meetingClosed}>
-            {primaryButtonLabel}
-          </button>
-        </div>
-      </form>
 
-      {attendees.length > 0 ? (
-        <>
-          <label className="field quick-order-inline-select">
-            <span>기존 이름에서 바로 수정</span>
-            <select
-              value={activeAttendeeId}
-              onChange={(event) => handleSelectAttendee(event.target.value)}
-            >
-              <option value="">이름을 선택하세요</option>
-              {attendees.map((attendee) => (
-                <option key={attendee.id} value={attendee.id}>
-                  {attendee.name}
-                  {attendee.skipped
-                    ? ' · 안마심'
-                    : attendee.menuItemId
-                      ? ' · 선택 완료'
-                      : ''}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <div className="quick-attendee-list">
+        {attendees.length > 0 ? (
+          <div className="quick-attendee-scroll" role="list" aria-label="기존 참석자">
             {attendees.map((attendee) => {
               const status = getAttendeeStatus(attendee)
 
@@ -237,182 +274,137 @@ export function QuickOrderPanel({
                   }`}
                   key={attendee.id}
                   type="button"
-                  onClick={() => handleSelectAttendee(attendee.id)}
+                  onClick={() => syncSelectedAttendee(attendee.id)}
                 >
-                  {attendee.name} · {status.label}
+                  {attendee.name}
+                  <span>{status.label}</span>
                 </button>
               )
             })}
           </div>
-        </>
-      ) : null}
+        ) : null}
 
-      {!selectedAttendee ? (
-        <div className="empty-state compact">
-          이름을 입력하거나 기존 이름을 선택하면 바로 메뉴를 고를 수 있습니다.
-        </div>
-      ) : (
-        <div className="participant-order-stack">
-          <div className="preview-card quick-order-preview">
-            <div className="panel-head">
-              <div>
-                <span className="panel-kicker">선택한 참석자</span>
-                <h3>{selectedAttendee.name}</h3>
-              </div>
-              {selectedStatus ? (
-                <span className={`status-pill ${selectedStatus.tone}`}>
-                  {selectedStatus.label}
-                </span>
-              ) : null}
-            </div>
+        <div className="quick-order-fields">
+          <label className="field field-full">
+            <span>메뉴 선택</span>
+            <select
+              value={activeAttendee?.menuItemId ?? ''}
+              disabled={meetingClosed || menuItems.length === 0 || !orderReady}
+              onChange={(event) => handleMenuSelect(event.target.value)}
+            >
+              <option value="">
+                {!orderReady
+                  ? '먼저 이름을 입력하세요'
+                  : menuItems.length === 0
+                    ? '등록된 메뉴가 없습니다'
+                    : '메뉴를 선택하세요'}
+              </option>
+              {menuItems.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.name}
+                  {showPrices ? ` (${formatVisiblePrice(item.price, showPrices)})` : ''}
+                </option>
+              ))}
+            </select>
+          </label>
 
-            <div className="order-fields">
-              <label className="field field-full">
-                <span>메뉴 선택</span>
-                <select
-                  value={selectedAttendee.menuItemId}
-                  disabled={orderFieldsDisabled || menuItems.length === 0}
-                  onChange={(event) =>
-                    onUpdateAttendee(
-                      selectedAttendee.id,
-                      'menuItemId',
-                      event.target.value,
-                    )
-                  }
-                >
-                  <option value="">
-                    {menuItems.length === 0
-                      ? '등록된 메뉴가 없습니다'
-                      : '메뉴를 선택하세요'}
-                  </option>
-                  {menuItems.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                      {showPrices
-                        ? ` (${formatVisiblePrice(item.price, showPrices)})`
-                        : ''}
-                    </option>
-                  ))}
-                </select>
-              </label>
+          <label className="field">
+            <span>수량</span>
+            <input
+              type="number"
+              min={1}
+              max={9}
+              value={activeAttendee?.quantity ?? 1}
+              disabled={meetingClosed || !orderReady}
+              onChange={(event) =>
+                handleQuantityChange(Number(event.target.value || 1))
+              }
+            />
+          </label>
 
-              <label className="field">
-                <span>수량</span>
-                <input
-                  type="number"
-                  min={1}
-                  max={9}
-                  value={selectedAttendee.quantity}
-                  disabled={orderFieldsDisabled}
-                  onChange={(event) =>
-                    onUpdateAttendee(
-                      selectedAttendee.id,
-                      'quantity',
-                      Math.min(9, Math.max(1, Number(event.target.value || 1))),
-                    )
-                  }
-                />
-              </label>
-
-              <div className="field">
-                <span>온도</span>
-                {selectedMenu ? (
-                  <TemperatureSelector
-                    availableTemperatures={selectedMenu.availableTemperatures}
-                    disabled={orderFieldsDisabled}
-                    value={selectedAttendee.temperature}
-                    onChange={(value) =>
-                      onUpdateAttendee(selectedAttendee.id, 'temperature', value)
-                    }
-                  />
-                ) : (
-                  <div className="selection-hint">메뉴를 먼저 선택하세요.</div>
-                )}
-              </div>
-
-              {canUseDecaf ? (
-                <div className="field field-full">
-                  <span>원두 옵션</span>
-                  <div className="checkbox-group">
-                    <label
-                      className={`checkbox-chip ${
-                        selectedAttendee.decaf ? 'active' : ''
-                      }`}
-                    >
-                      <input
-                        checked={selectedAttendee.decaf}
-                        disabled={orderFieldsDisabled}
-                        type="checkbox"
-                        onChange={(event) =>
-                          onUpdateAttendee(
-                            selectedAttendee.id,
-                            'decaf',
-                            event.target.checked,
-                          )
-                        }
-                      />
-                      <span>디카페인 변경 +700원</span>
-                    </label>
-                  </div>
-                </div>
-              ) : null}
-
-              <label className="field field-full">
-                <span>추가 요청</span>
-                <input
-                  value={selectedAttendee.note}
-                  disabled={orderFieldsDisabled}
-                  onChange={(event) =>
-                    onUpdateAttendee(selectedAttendee.id, 'note', event.target.value)
-                  }
-                  placeholder="샷 추가, 덜 달게, 얼음 적게"
-                />
-              </label>
-            </div>
-
-            <div className="button-row order-card-actions">
-              <button
-                aria-pressed={selectedAttendee.skipped}
-                className="button ghost small"
-                type="button"
-                disabled={meetingClosed}
-                onClick={() =>
-                  onSkipAttendee(selectedAttendee.id, !selectedAttendee.skipped)
-                }
-              >
-                {selectedAttendee.skipped ? '스킵 취소' : '안마심'}
-              </button>
-            </div>
-
-            {selectedAttendee.skipped ? (
-              <div className="personal-summary">
-                <strong>이번 주문은 안마심으로 처리됩니다.</strong>
-                <p>음료를 마시지 않는 참석자로 집계됩니다.</p>
-              </div>
-            ) : selectedMenu ? (
-              <div className="personal-summary">
-                <strong>
-                  {selectedMenu.name}
-                  {selectedAttendee.decaf && canUseDecaf ? ' · 디카페인' : ''}
-                </strong>
-                <p>
-                  {selectedAttendee.quantity}잔 ·{' '}
-                  {formatVisiblePrice(previewPrice, showPrices)}
-                </p>
-                <span>
-                  {selectedAttendee.temperature || '온도 미선택'} /{' '}
-                  {selectedAttendee.note || '추가 요청 없음'}
-                </span>
-              </div>
+          <div className="field">
+            <span>온도</span>
+            {selectedMenu ? (
+              <TemperatureSelector
+                availableTemperatures={selectedMenu.availableTemperatures}
+                disabled={fieldsDisabled}
+                value={activeAttendee?.temperature ?? ''}
+                onChange={handleTemperatureChange}
+              />
             ) : (
-              <div className="personal-summary">
-                <strong>아직 메뉴를 고르지 않았습니다.</strong>
-                <p>위에서 원하는 메뉴를 선택해 주세요.</p>
-              </div>
+              <div className="selection-hint">메뉴를 선택하면 HOT / ICE를 고를 수 있습니다.</div>
             )}
           </div>
+
+          {canUseDecaf ? (
+            <div className="field field-full">
+              <span>커피 옵션</span>
+              <div className="checkbox-group">
+                <label className={`checkbox-chip ${activeAttendee?.decaf ? 'active' : ''}`}>
+                  <input
+                    checked={Boolean(activeAttendee?.decaf)}
+                    disabled={fieldsDisabled}
+                    type="checkbox"
+                    onChange={(event) => handleDecafChange(event.target.checked)}
+                  />
+                  <span>디카페인 변경 +700원</span>
+                </label>
+              </div>
+            </div>
+          ) : null}
+
+          <label className="field field-full">
+            <span>추가 요청</span>
+            <input
+              value={activeAttendee?.note ?? ''}
+              disabled={meetingClosed || !orderReady}
+              onChange={(event) => handleNoteChange(event.target.value)}
+              placeholder="샷 추가, 덜 달게, 얼음 적게"
+            />
+          </label>
         </div>
-      )}
+
+        <div className="button-row order-card-actions">
+          <button
+            aria-pressed={Boolean(activeAttendee?.skipped)}
+            className="button ghost small"
+            type="button"
+            disabled={meetingClosed || !orderReady}
+            onClick={handleSkipToggle}
+          >
+            {activeAttendee?.skipped ? '스킵 취소' : '안마심'}
+          </button>
+        </div>
+
+        {!orderReady ? (
+          <div className="personal-summary">
+            <strong>이름만 입력하면 바로 메뉴를 고를 수 있습니다.</strong>
+            <span>기존 이름을 누르면 기존 주문을 바로 수정할 수 있습니다.</span>
+          </div>
+        ) : activeAttendee?.skipped ? (
+          <div className="personal-summary">
+            <strong>{activeAttendee.name}님은 이번 주문에서 제외됩니다.</strong>
+            <span>필요하면 스킵 취소를 눌러 다시 메뉴를 선택하세요.</span>
+          </div>
+        ) : selectedMenu && activeAttendee ? (
+          <div className="personal-summary">
+            <strong>
+              {activeAttendee.name} · {selectedMenu.name}
+              {activeAttendee.decaf && canUseDecaf ? ' · 디카페인' : ''}
+            </strong>
+            <span>
+              {activeAttendee.quantity}잔 · {activeAttendee.temperature || '온도 선택 전'} ·{' '}
+              {formatVisiblePrice(previewPrice, showPrices)}
+            </span>
+            <span>{activeAttendee.note || '추가 요청 없음'}</span>
+          </div>
+        ) : (
+          <div className="personal-summary">
+            <strong>{nameInput.trim() || '참석자'}님의 메뉴를 선택해 주세요.</strong>
+            <span>메뉴를 고르는 즉시 주문이 저장됩니다.</span>
+          </div>
+        )}
+      </div>
 
       <details className="admin-details quick-menu-details">
         <summary>메뉴 전체 보기</summary>

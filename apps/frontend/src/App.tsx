@@ -13,6 +13,7 @@ import { HeroPanel } from './components/HeroPanel'
 import { HomePage } from './components/HomePage'
 import { MeetingTopbar } from './components/MeetingTopbar'
 import { MenuPanel } from './components/MenuPanel'
+import { MoreSheet } from './components/MoreSheet'
 import { OcrPanel } from './components/OcrPanel'
 import { OrderSummarySheet } from './components/OrderSummarySheet'
 import { OrdersPanel } from './components/OrdersPanel'
@@ -58,6 +59,9 @@ import {
 import { formatPrice, parseMenuText } from './lib/menu'
 
 const PRICE_VISIBILITY_STORAGE_KEY = 'ekong-coffee-show-prices'
+const THEME_STORAGE_KEY = 'ekong-coffee-theme'
+
+type ThemeMode = 'light' | 'dark'
 
 type OcrState = {
   status: 'idle' | 'processing' | 'success' | 'error'
@@ -83,11 +87,20 @@ function App() {
 
 function AppRoutes() {
   const [store, setStore] = useState<MeetingsStore>(() => loadMeetingsStore())
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
+    return storedTheme === 'dark' ? 'dark' : 'light'
+  })
   const initialStoreRef = useRef(store)
 
   useEffect(() => {
     saveMeetingsStore(store)
   }, [store])
+
+  useEffect(() => {
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme)
+    document.documentElement.dataset.theme = theme
+  }, [theme])
 
   useEffect(() => {
     let ignore = false
@@ -164,14 +177,31 @@ function AppRoutes() {
         element={
           <HomePage
             meetings={listMeetings(store)}
+            theme={theme}
             onCreateMeeting={handleCreateMeeting}
             onDeleteMeeting={handleDeleteMeeting}
+            onToggleTheme={() =>
+              setTheme((currentTheme) =>
+                currentTheme === 'dark' ? 'light' : 'dark',
+              )
+            }
           />
         }
       />
       <Route
         path="/meeting/:shareCode/:role"
-        element={<MeetingPage store={store} setStore={setStore} />}
+        element={
+          <MeetingPage
+            store={store}
+            setStore={setStore}
+            theme={theme}
+            onToggleTheme={() =>
+              setTheme((currentTheme) =>
+                currentTheme === 'dark' ? 'light' : 'dark',
+              )
+            }
+          />
+        }
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
@@ -181,9 +211,16 @@ function AppRoutes() {
 type MeetingPageProps = {
   store: MeetingsStore
   setStore: React.Dispatch<React.SetStateAction<MeetingsStore>>
+  theme: ThemeMode
+  onToggleTheme: () => void
 }
 
-function MeetingPage({ store, setStore }: MeetingPageProps) {
+function MeetingPage({
+  store,
+  setStore,
+  theme,
+  onToggleTheme,
+}: MeetingPageProps) {
   const navigate = useNavigate()
   const { shareCode = '', role = '' } = useParams()
   const normalizedCode = shareCode.toUpperCase()
@@ -199,6 +236,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
   const [feedback, setFeedback] = useState('')
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isSummarySheetOpen, setIsSummarySheetOpen] = useState(false)
+  const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
   const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null)
   const [showPrices, setShowPrices] = useState(() => {
     const storedValue = window.localStorage.getItem(PRICE_VISIBILITY_STORAGE_KEY)
@@ -219,6 +257,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
 
   useEffect(() => {
     setIsSummarySheetOpen(false)
+    setIsMoreSheetOpen(false)
     setShareTarget(null)
   }, [normalizedCode, normalizedRole])
 
@@ -810,6 +849,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
   function openShareSheet(nextRole: 'organizer' | 'join') {
     const isOrganizer = nextRole === 'organizer'
 
+    setIsMoreSheetOpen(false)
     setShareTarget({
       role: nextRole,
       title: isOrganizer ? '취합 링크 공유' : '참석 링크 공유',
@@ -895,11 +935,20 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
         title={meeting.title}
         role={normalizedRole}
         summaryCount={groupedOrders.length}
+        onOpenSummary={() => setIsSummarySheetOpen(true)}
+        onOpenMore={() => setIsMoreSheetOpen(true)}
+      />
+      <MoreSheet
+        open={isMoreSheetOpen}
+        role={normalizedRole}
         showPrices={showPrices}
+        theme={theme}
+        onClose={() => setIsMoreSheetOpen(false)}
+        onOpenSummary={() => setIsSummarySheetOpen(true)}
         onOpenOrganizerShare={() => openShareSheet('organizer')}
         onOpenParticipantShare={() => openShareSheet('join')}
-        onOpenSummary={() => setIsSummarySheetOpen(true)}
         onTogglePriceVisibility={() => setShowPrices((currentValue) => !currentValue)}
+        onToggleTheme={onToggleTheme}
       />
       <ShareLinkSheet
         open={Boolean(shareTarget)}
@@ -937,30 +986,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
             onUpdateAttendee={updateAttendeeField}
             onSkipAttendee={handleSkipAttendee}
           />
-          <HeroPanel
-            meetingClosed={meetingClosed}
-            shareCode={meeting.shareCode}
-            countdown={formatCountdown(meeting.deadline)}
-            menuCount={menuItems.length}
-            attendeeCount={attendees.length}
-            completionRate={completionRate}
-            completedOrders={completedOrders}
-            totalAmount={totalAmount}
-            totalCups={totalCups}
-            showPrices={showPrices}
-          />
           <main className="workspace-grid">
-            <MenuPanel
-              menuItems={menuItems}
-              showPrices={showPrices}
-              onAddMenu={handleAddMenu}
-              onUpdateMenu={updateMenuField}
-              onRemoveMenu={handleRemoveMenu}
-              onLoadPresetMenu={handleLoadPresetMenu}
-              onTogglePriceVisibility={() =>
-                setShowPrices((currentValue) => !currentValue)
-              }
-            />
             <OrdersPanel
               attendees={attendees}
               menuItems={menuItems}
@@ -984,6 +1010,39 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
               showPrices={showPrices}
               onCopy={handleCopySummary}
             />
+            <details className="admin-details">
+              <summary>모임 현황 보기</summary>
+              <div className="admin-details-body">
+                <HeroPanel
+                  meetingClosed={meetingClosed}
+                  shareCode={meeting.shareCode}
+                  countdown={formatCountdown(meeting.deadline)}
+                  menuCount={menuItems.length}
+                  attendeeCount={attendees.length}
+                  completionRate={completionRate}
+                  completedOrders={completedOrders}
+                  totalAmount={totalAmount}
+                  totalCups={totalCups}
+                  showPrices={showPrices}
+                />
+              </div>
+            </details>
+            <details className="admin-details">
+              <summary>메뉴 보기 및 편집</summary>
+              <div className="admin-details-body">
+                <MenuPanel
+                  menuItems={menuItems}
+                  showPrices={showPrices}
+                  onAddMenu={handleAddMenu}
+                  onUpdateMenu={updateMenuField}
+                  onRemoveMenu={handleRemoveMenu}
+                  onLoadPresetMenu={handleLoadPresetMenu}
+                  onTogglePriceVisibility={() =>
+                    setShowPrices((currentValue) => !currentValue)
+                  }
+                />
+              </div>
+            </details>
             <details className="admin-details">
               <summary>참석자 수동 관리</summary>
               <div className="admin-details-body">
@@ -1039,18 +1098,6 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
             onAddAttendee={handleAddAttendee}
             onUpdateAttendee={updateAttendeeField}
             onSkipAttendee={handleSkipAttendee}
-          />
-          <HeroPanel
-            meetingClosed={meetingClosed}
-            shareCode={meeting.shareCode}
-            countdown={formatCountdown(meeting.deadline)}
-            menuCount={menuItems.length}
-            attendeeCount={attendees.length}
-            completionRate={completionRate}
-            completedOrders={completedOrders}
-            totalAmount={totalAmount}
-            totalCups={totalCups}
-            showPrices={showPrices}
           />
         </>
       )}

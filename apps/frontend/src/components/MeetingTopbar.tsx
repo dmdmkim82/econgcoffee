@@ -5,11 +5,8 @@ type MeetingTopbarProps = {
   title: string
   role: 'organizer' | 'join'
   summaryCount: number
-  showPrices: boolean
-  onOpenOrganizerShare: () => void
-  onOpenParticipantShare: () => void
   onOpenSummary: () => void
-  onTogglePriceVisibility: () => void
+  onOpenMore: () => void
 }
 
 export function MeetingTopbar({
@@ -17,64 +14,43 @@ export function MeetingTopbar({
   title,
   role,
   summaryCount,
-  showPrices,
-  onOpenOrganizerShare,
-  onOpenParticipantShare,
   onOpenSummary,
-  onTogglePriceVisibility,
+  onOpenMore,
 }: MeetingTopbarProps) {
   return (
     <section className="meeting-topbar">
-      <div className="meeting-topbar-copy">
-        <Link className="back-link" to="/">
-          홈으로
-        </Link>
-        <strong>{title || '에콩커피 모임'}</strong>
-        <span>모임 코드 {shareCode}</span>
+      <div className="meeting-topbar-header">
+        <div className="meeting-topbar-copy">
+          <Link className="back-link" to="/">
+            홈으로
+          </Link>
+          <strong>{title || '에콩커피 모임'}</strong>
+          <span>모임 코드 {shareCode}</span>
+        </div>
+
+        <div className="meeting-topbar-utility">
+          <button className="button secondary small" type="button" onClick={onOpenSummary}>
+            요약 {summaryCount > 0 ? summaryCount : ''}
+          </button>
+          <button className="button secondary small" type="button" onClick={onOpenMore}>
+            더보기
+          </button>
+        </div>
       </div>
 
-      <div className="meeting-topbar-actions">
-        <div className="role-tabs">
-          <Link
-            className={`role-tab ${role === 'organizer' ? 'active' : ''}`}
-            to={`/meeting/${shareCode}/organizer`}
-          >
-            취합자
-          </Link>
-          <Link
-            className={`role-tab ${role === 'join' ? 'active' : ''}`}
-            to={`/meeting/${shareCode}/join`}
-          >
-            참석자
-          </Link>
-        </div>
-
-        <div className="button-row">
-          <button className="button small" type="button" onClick={onOpenSummary}>
-            요약 목록{summaryCount > 0 ? ` ${summaryCount}` : ''}
-          </button>
-          <button
-            className="button secondary small"
-            type="button"
-            onClick={onTogglePriceVisibility}
-          >
-            {showPrices ? '금액 숨기기' : '금액 보기'}
-          </button>
-          <button
-            className="button secondary small"
-            type="button"
-            onClick={onOpenOrganizerShare}
-          >
-            취합 링크공유
-          </button>
-          <button
-            className="button secondary small"
-            type="button"
-            onClick={onOpenParticipantShare}
-          >
-            참석 링크공유
-          </button>
-        </div>
+      <div className="role-tabs">
+        <Link
+          className={`role-tab ${role === 'organizer' ? 'active' : ''}`}
+          to={`/meeting/${shareCode}/organizer`}
+        >
+          취합자
+        </Link>
+        <Link
+          className={`role-tab ${role === 'join' ? 'active' : ''}`}
+          to={`/meeting/${shareCode}/join`}
+        >
+          참석자
+        </Link>
       </div>
     </section>
   )

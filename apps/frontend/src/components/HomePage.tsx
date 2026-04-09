@@ -4,8 +4,10 @@ import { type Snapshot } from '../lib/meeting'
 
 type HomePageProps = {
   meetings: Snapshot[]
+  theme: 'light' | 'dark'
   onCreateMeeting: () => string
   onDeleteMeeting: (shareCode: string) => void
+  onToggleTheme: () => void
 }
 
 function isClosed(snapshot: Snapshot) {
@@ -24,8 +26,10 @@ function countCompleted(snapshot: Snapshot) {
 
 export function HomePage({
   meetings,
+  theme,
   onCreateMeeting,
   onDeleteMeeting,
+  onToggleTheme,
 }: HomePageProps) {
   const navigate = useNavigate()
   const [code, setCode] = useState('')
@@ -69,6 +73,11 @@ export function HomePage({
   return (
     <div className="shell">
       <div className="compact-home">
+        <div className="home-utility-row">
+          <button className="button secondary small" type="button" onClick={onToggleTheme}>
+            {theme === 'dark' ? '라이트 모드' : '다크 모드'}
+          </button>
+        </div>
         <section className="compact-home-hero">
           <article className="panel compact-home-copy">
             <span className="eyebrow">SK에코플랜트 미팅 커피 취합</span>
