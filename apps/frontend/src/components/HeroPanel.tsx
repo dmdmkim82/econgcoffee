@@ -26,22 +26,22 @@ export function HeroPanel({
   return (
     <header className="hero-panel">
       <div className="hero-copy">
-        <span className="eyebrow">SK에코플랜트 미팅용 커피 취합</span>
+        <span className="eyebrow">SK에코플랜트 미팅 커피 취합</span>
         <h1>에콩커피</h1>
         <p className="hero-description">
-          카페 메뉴판 사진을 올리면 OCR로 메뉴를 자동 등록하고, 참석자별 주문을
-          정리해 취합자가 바로 주문할 수 있는 요약본까지 만들어줍니다.
+          메뉴판 사진 OCR, 참석자 주문 입력, 최종 주문 요약까지 한 흐름으로
+          정리하는 세로형 커피 취합 보드입니다.
         </p>
         <div className="hero-steps">
           <span className="hero-step">1. 모임 생성</span>
           <span className="hero-step">2. 메뉴 OCR</span>
-          <span className="hero-step">3. 참석자 주문 취합</span>
+          <span className="hero-step">3. 주문 취합</span>
         </div>
         <div className="hero-badges">
           <span className={`status-pill ${meetingClosed ? 'danger' : 'live'}`}>
             {meetingClosed ? '주문 마감' : '취합 진행 중'}
           </span>
-          <span className="status-pill neutral">회의 코드 {shareCode}</span>
+          <span className="status-pill neutral">코드 {shareCode}</span>
           <span className="status-pill neutral">{countdown}</span>
         </div>
       </div>
@@ -49,17 +49,17 @@ export function HeroPanel({
         <article className="stat-card">
           <span className="stat-label">메뉴 수</span>
           <strong>{menuCount}</strong>
-          <p>OCR + 수동 등록</p>
+          <p>OCR과 수동 입력 메뉴</p>
         </article>
         <article className="stat-card">
           <span className="stat-label">참석자 수</span>
           <strong>{attendeeCount}</strong>
-          <p>취합자가 직접 관리</p>
+          <p>현재 주문 대상 인원</p>
         </article>
         <article className="stat-card">
-          <span className="stat-label">입력 완료율</span>
+          <span className="stat-label">응답률</span>
           <strong>{completionRate}%</strong>
-          <p>{completedOrders}명 주문 입력</p>
+          <p>{completedOrders}명 응답 완료</p>
         </article>
         <article className="stat-card accent">
           <span className="stat-label">예상 주문 금액</span>

@@ -23,28 +23,28 @@ export function OrganizerPanel({
     <section className="panel">
       <div className="panel-head">
         <div>
-          <span className="panel-kicker">취합자 설정</span>
+          <span className="panel-kicker">취합 설정</span>
           <h2>모임 기본 정보</h2>
         </div>
         <span className={`status-pill ${meetingClosed ? 'danger' : 'soft'}`}>
-          {meetingClosed ? '닫힘' : '열림'}
+          {meetingClosed ? '마감됨' : '열림'}
         </span>
       </div>
       <div className="field-grid">
         <label className="field">
-          <span>모임명</span>
+          <span>모임 이름</span>
           <input
             value={meeting.title}
             onChange={(event) => onChange('title', event.target.value)}
-            placeholder="예: 주간 공정회의 커피"
+            placeholder="예: 주간 공정 회의 커피"
           />
         </label>
         <label className="field">
-          <span>카페명</span>
+          <span>카페 이름</span>
           <input
             value={meeting.cafeName}
             onChange={(event) => onChange('cafeName', event.target.value)}
-            placeholder="예: 메가커피 서린점"
+            placeholder="예: 메가커피 본사점"
           />
         </label>
         <label className="field">
@@ -60,11 +60,11 @@ export function OrganizerPanel({
           <input
             value={meeting.place}
             onChange={(event) => onChange('place', event.target.value)}
-            placeholder="회의실 또는 층수"
+            placeholder="회의실 이름 또는 층수"
           />
         </label>
         <label className="field field-full">
-          <span>취합 마감시간</span>
+          <span>취합 마감 시간</span>
           <input
             type="datetime-local"
             value={meeting.deadline}
@@ -73,12 +73,12 @@ export function OrganizerPanel({
           <small>{deadlineLabel}</small>
         </label>
         <label className="field field-full">
-          <span>운영 메모</span>
+          <span>안내 메모</span>
           <textarea
             value={meeting.notes}
             onChange={(event) => onChange('notes', event.target.value)}
             rows={4}
-            placeholder="수령 장소, 얼음 관련 안내, 주문 공지 등을 적어두세요."
+            placeholder="배달 장소, 얼음 안내, 취합 공지 등을 적어두세요."
           />
         </label>
       </div>
@@ -96,7 +96,7 @@ export function OrganizerPanel({
         </button>
       </div>
       <p className="panel-note">
-        취합자는 모임 정보, 마감시간, 주문 입력 가능 여부를 관리합니다.
+        취합자는 모임 정보, 마감시간, 주문 가능 여부를 여기서 관리합니다.
       </p>
     </section>
   )

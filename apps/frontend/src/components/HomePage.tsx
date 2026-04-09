@@ -17,7 +17,9 @@ function isClosed(snapshot: Snapshot) {
 }
 
 function countCompleted(snapshot: Snapshot) {
-  return snapshot.attendees.filter((attendee) => attendee.menuItemId).length
+  return snapshot.attendees.filter(
+    (attendee) => attendee.skipped || attendee.menuItemId,
+  ).length
 }
 
 export function HomePage({
@@ -69,23 +71,23 @@ export function HomePage({
       <div className="compact-home">
         <section className="compact-home-hero">
           <article className="panel compact-home-copy">
-            <span className="eyebrow">Mobile-first coffee board</span>
-            <h1>Ekong Coffee</h1>
+            <span className="eyebrow">SK에코플랜트 미팅 커피 취합</span>
+            <h1>에콩커피</h1>
             <p className="hero-description">
-              A tighter meeting order board for mobile and desktop. Create a
-              meeting, share the join link, and check the final order at a glance.
+              모임을 만들고 메뉴판을 올리면 OCR로 메뉴를 정리하고, 참석자 주문과
+              최종 요약까지 한 화면에서 빠르게 확인할 수 있습니다.
             </p>
             <div className="compact-metric-grid">
               <article className="mini-stat">
-                <span>Meetings</span>
+                <span>저장 모임</span>
                 <strong>{summary.meetings}</strong>
               </article>
               <article className="mini-stat">
-                <span>Active</span>
+                <span>진행 중</span>
                 <strong>{summary.activeMeetings}</strong>
               </article>
               <article className="mini-stat">
-                <span>Attendees</span>
+                <span>참석자</span>
                 <strong>{summary.attendees}</strong>
               </article>
             </div>
@@ -94,22 +96,22 @@ export function HomePage({
           <aside className="panel quick-action-card">
             <div className="panel-head">
               <div>
-                <span className="panel-kicker">Quick actions</span>
-                <h2>Open fast</h2>
+                <span className="panel-kicker">바로 시작</span>
+                <h2>모임 만들기 또는 참여하기</h2>
               </div>
             </div>
             <div className="quick-action-grid">
               <button className="button" type="button" onClick={handleCreateMeeting}>
-                Create meeting
+                새 모임 만들기
               </button>
               <form className="join-form compact" onSubmit={handleJoin}>
                 <input
                   value={code}
                   onChange={(event) => setCode(event.target.value)}
-                  placeholder="Meeting code"
+                  placeholder="모임 코드 입력"
                 />
                 <button className="button secondary" type="submit">
-                  Join
+                  코드로 참여
                 </button>
               </form>
             </div>
@@ -119,15 +121,15 @@ export function HomePage({
         <section className="panel home-panel">
           <div className="panel-head">
             <div>
-              <span className="panel-kicker">Recent meetings</span>
-              <h2>Compact meeting list</h2>
+              <span className="panel-kicker">최근 모임</span>
+              <h2>내가 만든 모임과 참여한 모임</h2>
             </div>
-            <span className="status-pill neutral">{meetings.length} saved</span>
+            <span className="status-pill neutral">{meetings.length}개 저장됨</span>
           </div>
 
           {meetings.length === 0 ? (
             <div className="empty-state compact">
-              No saved meetings yet. Create the first meeting to begin.
+              아직 저장된 모임이 없습니다. 첫 모임을 만들어 커피 주문을 시작해보세요.
             </div>
           ) : (
             <div className="recent-card-list">
@@ -136,24 +138,27 @@ export function HomePage({
                 const completed = countCompleted(snapshot)
 
                 return (
-                  <article className="meeting-card recent-card" key={snapshot.meeting.shareCode}>
+                  <article
+                    className="meeting-card recent-card"
+                    key={snapshot.meeting.shareCode}
+                  >
                     <div className="meeting-card-copy">
                       <div className="button-row">
                         <span className={`status-pill ${closed ? 'danger' : 'live'}`}>
-                          {closed ? 'Closed' : 'Live'}
+                          {closed ? '마감' : '진행 중'}
                         </span>
                         <span className="status-pill neutral">
-                          {snapshot.meeting.shareCode}
+                          코드 {snapshot.meeting.shareCode}
                         </span>
                       </div>
-                      <strong>{snapshot.meeting.title || 'Ekong Coffee meeting'}</strong>
+                      <strong>{snapshot.meeting.title || '에콩커피 모임'}</strong>
                       <span>
-                        {snapshot.meeting.cafeName || 'Cafe TBD'} /{' '}
-                        {snapshot.meeting.place || 'Location TBD'}
+                        {snapshot.meeting.cafeName || '카페 미정'} /{' '}
+                        {snapshot.meeting.place || '장소 미정'}
                       </span>
                       <span>
-                        Orders {completed}/{snapshot.attendees.length} / Menu{' '}
-                        {snapshot.menuItems.length}
+                        주문 응답 {completed}/{snapshot.attendees.length} · 메뉴{' '}
+                        {snapshot.menuItems.length}개
                       </span>
                     </div>
 
@@ -165,21 +170,21 @@ export function HomePage({
                           openMeeting(snapshot.meeting.shareCode, 'organizer')
                         }
                       >
-                        Organizer
+                        취합자 화면
                       </button>
                       <button
                         className="button secondary small"
                         type="button"
                         onClick={() => openMeeting(snapshot.meeting.shareCode, 'join')}
                       >
-                        Join
+                        참석자 화면
                       </button>
                       <button
                         className="button ghost small"
                         type="button"
                         onClick={() => onDeleteMeeting(snapshot.meeting.shareCode)}
                       >
-                        Delete
+                        삭제
                       </button>
                     </div>
                   </article>

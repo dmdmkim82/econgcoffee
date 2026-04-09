@@ -4,7 +4,11 @@ import { type MenuItem } from '../lib/meeting'
 type MenuPanelProps = {
   menuItems: MenuItem[]
   onAddMenu: (name: string, price: number) => void
-  onUpdateMenu: (menuItemId: string, field: keyof MenuItem, value: string | number) => void
+  onUpdateMenu: (
+    menuItemId: string,
+    field: keyof MenuItem,
+    value: string | number,
+  ) => void
   onRemoveMenu: (menuItemId: string) => void
 }
 
@@ -36,7 +40,7 @@ export function MenuPanel({
       <div className="panel-head">
         <div>
           <span className="panel-kicker">메뉴 관리</span>
-          <h2>메뉴 편집</h2>
+          <h2>메뉴 직접 편집</h2>
         </div>
         <span className="status-pill neutral">{menuItems.length}개 메뉴</span>
       </div>
@@ -58,7 +62,8 @@ export function MenuPanel({
       </form>
       {menuItems.length === 0 ? (
         <div className="empty-state">
-          아직 등록된 메뉴가 없습니다. 메뉴판 사진을 올리거나 직접 메뉴를 추가해주세요.
+          아직 등록된 메뉴가 없습니다. 메뉴판 사진을 올리거나 직접 메뉴를
+          추가해주세요.
         </div>
       ) : (
         <div className="menu-list">
@@ -100,7 +105,7 @@ export function MenuPanel({
                   type="button"
                   onClick={() => onRemoveMenu(item.id)}
                 >
-                  삭제
+                  제거
                 </button>
               </div>
             </article>

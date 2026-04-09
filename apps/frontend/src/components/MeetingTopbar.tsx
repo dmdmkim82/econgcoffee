@@ -26,7 +26,7 @@ export function MeetingTopbar({
           홈으로
         </Link>
         <strong>{title || '에콩커피 모임'}</strong>
-        <span>코드 {shareCode}</span>
+        <span>모임 코드 {shareCode}</span>
       </div>
       <div className="meeting-topbar-actions">
         <div className="role-tabs">

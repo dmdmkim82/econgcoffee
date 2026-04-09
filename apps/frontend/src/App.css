@@ -840,3 +840,62 @@
     grid-column: span 2;
   }
 }
+
+/* Portrait-first override: keep the app in an iPhone-like vertical layout */
+.shell {
+  width: min(calc(100% - 18px), 430px) !important;
+  padding-top: calc(10px + env(safe-area-inset-top, 0));
+  padding-bottom: calc(18px + env(safe-area-inset-bottom, 0));
+}
+
+.compact-home-hero,
+.hero-panel,
+.workspace-grid,
+.preview-grid,
+.participant-order-grid,
+.field-grid,
+.inline-form,
+.inline-form.stacked,
+.menu-row {
+  grid-template-columns: 1fr !important;
+}
+
+.meeting-topbar {
+  position: sticky;
+  top: calc(6px + env(safe-area-inset-top, 0));
+  grid-template-columns: 1fr !important;
+}
+
+.meeting-topbar-copy,
+.meeting-topbar-actions {
+  display: grid !important;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.meeting-topbar-actions .button-row,
+.meeting-card-actions,
+.recent-card .meeting-card-actions,
+.join-form.compact,
+.hero-steps {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+}
+
+.meeting-card-actions,
+.recent-card .meeting-card-actions {
+  width: 100%;
+}
+
+.panel-head {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.hero-steps {
+  margin-top: 10px;
+}
+
+.panel-wide {
+  grid-column: auto !important;
+}
