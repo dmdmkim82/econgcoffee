@@ -3,11 +3,73 @@ import type {
   MeetingSettings,
   MenuItem,
   Snapshot,
+  TemperatureOption,
 } from '../../../../shared/meeting'
 
-export type { Attendee, MeetingSettings, MenuItem, Snapshot }
+export type {
+  Attendee,
+  MeetingSettings,
+  MenuItem,
+  Snapshot,
+  TemperatureOption,
+}
 
 export const STORAGE_KEY = 'ekong-coffee-state-v1'
+export const LATELIER_CAFE_NAME = "L'atelier"
+
+const TEMPERATURE_ORDER: TemperatureOption[] = ['HOT', 'ICE']
+const HOT_AND_ICE: TemperatureOption[] = ['HOT', 'ICE']
+const ICE_ONLY: TemperatureOption[] = ['ICE']
+
+type PresetMenuItem = Omit<MenuItem, 'id' | 'source'>
+
+const LATELIER_MENU_PRESET: PresetMenuItem[] = [
+  { name: '아메리카노', price: 1800, availableTemperatures: HOT_AND_ICE },
+  { name: '카페라떼', price: 2300, availableTemperatures: HOT_AND_ICE },
+  { name: '카라멜라떼', price: 3000, availableTemperatures: HOT_AND_ICE },
+  { name: '헤이즐넛라떼', price: 3000, availableTemperatures: HOT_AND_ICE },
+  { name: '소이라떼', price: 2300, availableTemperatures: HOT_AND_ICE },
+  { name: '바닐라빈라떼', price: 3000, availableTemperatures: HOT_AND_ICE },
+  { name: '연유카페라떼', price: 3000, availableTemperatures: HOT_AND_ICE },
+  { name: '오트라떼', price: 3000, availableTemperatures: HOT_AND_ICE },
+  { name: '시그니처라떼', price: 3500, availableTemperatures: HOT_AND_ICE },
+  { name: '콜드브루 아메리카노', price: 3600, availableTemperatures: ICE_ONLY },
+  { name: '콜드브루 라떼', price: 3900, availableTemperatures: ICE_ONLY },
+  { name: '콜드브루 연유라떼', price: 4200, availableTemperatures: ICE_ONLY },
+  { name: '타로 버블밀크티', price: 4300, availableTemperatures: ICE_ONLY },
+  { name: '말차 버블밀크티', price: 4300, availableTemperatures: ICE_ONLY },
+  { name: '얼그레이 버블밀크티', price: 4300, availableTemperatures: ICE_ONLY },
+  { name: '초코라떼', price: 3000, availableTemperatures: HOT_AND_ICE },
+  { name: '말차라떼', price: 3200, availableTemperatures: HOT_AND_ICE },
+  { name: '단팥라떼', price: 2800, availableTemperatures: HOT_AND_ICE },
+  { name: '얼그레이밀크티', price: 3200, availableTemperatures: HOT_AND_ICE },
+  { name: '우베라떼', price: 3500, availableTemperatures: HOT_AND_ICE },
+  { name: '우유', price: 1800, availableTemperatures: HOT_AND_ICE },
+  { name: '두유', price: 1800, availableTemperatures: HOT_AND_ICE },
+  { name: '복숭아아이스티', price: 2500, availableTemperatures: ICE_ONLY },
+  { name: '아샷추', price: 3000, availableTemperatures: ICE_ONLY },
+  { name: '레샷추', price: 3500, availableTemperatures: ICE_ONLY },
+  { name: '딸기라떼', price: 4300, availableTemperatures: HOT_AND_ICE },
+  { name: '미숫가루', price: 3000, availableTemperatures: HOT_AND_ICE },
+  { name: '카모마일', price: 2500, availableTemperatures: HOT_AND_ICE },
+  { name: '페퍼민트', price: 2500, availableTemperatures: HOT_AND_ICE },
+  { name: '얼그레이', price: 2500, availableTemperatures: HOT_AND_ICE },
+  { name: '자스민그린티', price: 2500, availableTemperatures: HOT_AND_ICE },
+  { name: '피치카토우롱', price: 2500, availableTemperatures: HOT_AND_ICE },
+  { name: '물랑루즈', price: 2500, availableTemperatures: HOT_AND_ICE },
+  { name: '자몽허니블랙티', price: 3800, availableTemperatures: HOT_AND_ICE },
+  { name: '레몬차', price: 3000, availableTemperatures: HOT_AND_ICE },
+  { name: '유자차', price: 3000, availableTemperatures: HOT_AND_ICE },
+  { name: 'ABC주스', price: 3800, availableTemperatures: ICE_ONLY },
+  { name: '자몽주스', price: 3800, availableTemperatures: ICE_ONLY },
+  { name: '오렌지주스', price: 3800, availableTemperatures: ICE_ONLY },
+  { name: '오몽주스', price: 3800, availableTemperatures: ICE_ONLY },
+  { name: '자몽에이드', price: 3000, availableTemperatures: ICE_ONLY },
+  { name: '레몬에이드', price: 3000, availableTemperatures: ICE_ONLY },
+  { name: '딸기바나나스무디', price: 4300, availableTemperatures: ICE_ONLY },
+  { name: '블루베리바나나스무디', price: 4300, availableTemperatures: ICE_ONLY },
+  { name: '아보카도바나나스무디', price: 4300, availableTemperatures: ICE_ONLY },
+]
 
 export function createId(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 8)}${Date.now()
@@ -32,6 +94,123 @@ function pickNumber(value: unknown, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback
 }
 
+function sortTemperatures(temperatures: TemperatureOption[]) {
+  return TEMPERATURE_ORDER.filter((temperature) =>
+    temperatures.includes(temperature),
+  )
+}
+
+function normalizeTemperatureList(
+  value: unknown,
+  fallback: TemperatureOption[] = HOT_AND_ICE,
+) {
+  const temperatures = Array.isArray(value)
+    ? sortTemperatures(
+        [...new Set(value)].filter(
+          (item): item is TemperatureOption => item === 'HOT' || item === 'ICE',
+        ),
+      )
+    : []
+
+  return temperatures.length > 0 ? temperatures : [...fallback]
+}
+
+function getMenuDedupeKey(name: string, price: number) {
+  return `${name.trim().toLowerCase()}::${Math.round(price)}`
+}
+
+function createPresetMenuItem(item: PresetMenuItem): MenuItem {
+  return {
+    id: createId('menu'),
+    name: item.name,
+    price: item.price,
+    availableTemperatures: [...item.availableTemperatures],
+    source: 'manual',
+  }
+}
+
+export function createLatelierMenuItems() {
+  return LATELIER_MENU_PRESET.map(createPresetMenuItem)
+}
+
+export function inferTemperaturesFromMenuName(name: string): TemperatureOption[] {
+  const normalized = name.normalize('NFKC').toLowerCase()
+
+  if (
+    /(iced|ice|cold brew|bubble|juice|smoothie|ade|에이드|주스|스무디|콜드브루|버블|아이스|아샷추|레샷추)/i.test(
+      normalized,
+    )
+  ) {
+    return [...ICE_ONLY]
+  }
+
+  return [...HOT_AND_ICE]
+}
+
+export function resolveTemperatureSelection(
+  currentValue: '' | TemperatureOption,
+  menuItem?: MenuItem,
+) {
+  if (!menuItem) {
+    return currentValue === 'HOT' || currentValue === 'ICE' ? currentValue : ''
+  }
+
+  if (currentValue && menuItem.availableTemperatures.includes(currentValue)) {
+    return currentValue
+  }
+
+  if (menuItem.availableTemperatures.length === 1) {
+    return menuItem.availableTemperatures[0]
+  }
+
+  return ''
+}
+
+function normalizeMenuItem(item: Partial<MenuItem>): MenuItem {
+  const name = pickText(item.name)
+  const fallbackTemperatures = name
+    ? inferTemperaturesFromMenuName(name)
+    : HOT_AND_ICE
+
+  return {
+    id: pickText(item.id, createId('menu')),
+    name,
+    price: pickNumber(item.price),
+    availableTemperatures: normalizeTemperatureList(
+      item.availableTemperatures,
+      fallbackTemperatures,
+    ),
+    source: item.source === 'ocr' ? 'ocr' : 'manual',
+  }
+}
+
+function normalizeAttendee(
+  attendee: Partial<Attendee>,
+  menuLookup: Map<string, MenuItem>,
+): Attendee {
+  const menuItemId = pickText(attendee.menuItemId)
+  const menuItem = menuLookup.get(menuItemId)
+  const rawTemperature =
+    attendee.temperature === 'HOT' || attendee.temperature === 'ICE'
+      ? attendee.temperature
+      : ''
+
+  return {
+    id: pickText(attendee.id, createId('attendee')),
+    name: pickText(attendee.name),
+    team: pickText(attendee.team),
+    menuItemId,
+    skipped: Boolean(attendee.skipped),
+    quantity: Math.max(1, pickNumber(attendee.quantity, 1)),
+    temperature: resolveTemperatureSelection(rawTemperature, menuItem),
+    size:
+      attendee.size === 'Regular' || attendee.size === 'Large'
+        ? attendee.size
+        : '',
+    note: pickText(attendee.note),
+  }
+}
+
 export function buildDefaultSnapshot(): Snapshot {
   const deadline = new Date()
   deadline.setHours(deadline.getHours() + 1)
@@ -40,7 +219,7 @@ export function buildDefaultSnapshot(): Snapshot {
   return {
     meeting: {
       title: 'SK에코플랜트 미팅 커피',
-      cafeName: '',
+      cafeName: LATELIER_CAFE_NAME,
       place: '',
       organizer: '',
       deadline: formatDateTimeInput(deadline),
@@ -48,11 +227,41 @@ export function buildDefaultSnapshot(): Snapshot {
       shareCode: `EK-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
       manuallyClosed: false,
     },
-    menuItems: [],
+    menuItems: createLatelierMenuItems(),
     attendees: [],
     rawOcrText: '',
     createdAt: now,
     updatedAt: now,
+  }
+}
+
+export function normalizeSnapshot(snapshot: Partial<Snapshot>): Snapshot {
+  const fallback = buildDefaultSnapshot()
+  const menuItems = Array.isArray(snapshot.menuItems)
+    ? snapshot.menuItems.map((item) => normalizeMenuItem(item))
+    : []
+  const menuLookup = new Map(menuItems.map((item) => [item.id, item]))
+
+  return {
+    meeting: {
+      ...fallback.meeting,
+      ...(snapshot.meeting ?? {}),
+      title: pickText(snapshot.meeting?.title, fallback.meeting.title),
+      cafeName: pickText(snapshot.meeting?.cafeName),
+      place: pickText(snapshot.meeting?.place),
+      organizer: pickText(snapshot.meeting?.organizer),
+      deadline: pickText(snapshot.meeting?.deadline, fallback.meeting.deadline),
+      notes: pickText(snapshot.meeting?.notes),
+      shareCode: pickText(snapshot.meeting?.shareCode, fallback.meeting.shareCode),
+      manuallyClosed: Boolean(snapshot.meeting?.manuallyClosed),
+    },
+    menuItems,
+    attendees: Array.isArray(snapshot.attendees)
+      ? snapshot.attendees.map((attendee) => normalizeAttendee(attendee, menuLookup))
+      : [],
+    rawOcrText: pickText(snapshot.rawOcrText),
+    createdAt: pickText(snapshot.createdAt, fallback.createdAt),
+    updatedAt: pickText(snapshot.updatedAt, fallback.updatedAt),
   }
 }
 
@@ -66,74 +275,48 @@ export function loadSnapshot(): Snapshot {
       return fallback
     }
 
-    const parsed = JSON.parse(raw) as Partial<Snapshot>
-
-    return {
-      meeting: {
-        ...fallback.meeting,
-        ...(parsed.meeting ?? {}),
-        title: pickText(parsed.meeting?.title, fallback.meeting.title),
-        cafeName: pickText(parsed.meeting?.cafeName),
-        place: pickText(parsed.meeting?.place),
-        organizer: pickText(parsed.meeting?.organizer),
-        deadline: pickText(parsed.meeting?.deadline, fallback.meeting.deadline),
-        notes: pickText(parsed.meeting?.notes),
-        shareCode: pickText(parsed.meeting?.shareCode, fallback.meeting.shareCode),
-        manuallyClosed: Boolean(parsed.meeting?.manuallyClosed),
-      },
-      menuItems: Array.isArray(parsed.menuItems)
-        ? parsed.menuItems.map((item): MenuItem => ({
-            id: pickText(item.id, createId('menu')),
-            name: pickText(item.name),
-            price: pickNumber(item.price),
-            source: item.source === 'ocr' ? 'ocr' : 'manual',
-          }))
-        : [],
-      attendees: Array.isArray(parsed.attendees)
-        ? parsed.attendees.map((attendee): Attendee => ({
-            id: pickText(attendee.id, createId('attendee')),
-            name: pickText(attendee.name),
-            team: pickText(attendee.team),
-            menuItemId: pickText(attendee.menuItemId),
-            skipped: Boolean(attendee.skipped),
-            quantity: Math.max(1, pickNumber(attendee.quantity, 1)),
-            temperature:
-              attendee.temperature === 'ICE' || attendee.temperature === 'HOT'
-                ? attendee.temperature
-                : '',
-            size:
-              attendee.size === 'Regular' || attendee.size === 'Large'
-                ? attendee.size
-                : '',
-            note: pickText(attendee.note),
-          }))
-        : [],
-      rawOcrText: pickText(parsed.rawOcrText),
-      createdAt: pickText(parsed.createdAt, fallback.createdAt),
-      updatedAt: pickText(parsed.updatedAt, fallback.updatedAt),
-    }
+    return normalizeSnapshot(JSON.parse(raw) as Partial<Snapshot>)
   } catch {
     return fallback
   }
 }
 
+function mergeTemperatureOptions(
+  currentValue: TemperatureOption[],
+  nextValue: TemperatureOption[],
+) {
+  return sortTemperatures([...new Set([...currentValue, ...nextValue])])
+}
+
 export function mergeMenuItems(currentItems: MenuItem[], nextItems: MenuItem[]) {
-  const seen = new Set(
-    currentItems.map(
-      (item) => `${item.name.trim().toLowerCase()}::${Math.round(item.price)}`,
-    ),
+  const merged = currentItems.map((item) => normalizeMenuItem(item))
+  const indexByKey = new Map(
+    merged.map((item, index) => [getMenuDedupeKey(item.name, item.price), index]),
   )
-  const merged = [...currentItems]
 
-  for (const item of nextItems) {
-    const dedupeKey = `${item.name.trim().toLowerCase()}::${Math.round(item.price)}`
+  for (const nextItem of nextItems) {
+    const normalizedNextItem = normalizeMenuItem(nextItem)
+    const dedupeKey = getMenuDedupeKey(
+      normalizedNextItem.name,
+      normalizedNextItem.price,
+    )
+    const existingIndex = indexByKey.get(dedupeKey)
 
-    if (seen.has(dedupeKey)) {
+    if (typeof existingIndex === 'number') {
+      const existing = merged[existingIndex]
+      merged[existingIndex] = {
+        ...existing,
+        availableTemperatures: mergeTemperatureOptions(
+          existing.availableTemperatures,
+          normalizedNextItem.availableTemperatures,
+        ),
+        source: existing.source === 'manual' ? 'manual' : normalizedNextItem.source,
+      }
       continue
     }
 
-    seen.add(dedupeKey)
-    merged.push(item)
+    indexByKey.set(dedupeKey, merged.length)
+    merged.push(normalizedNextItem)
   }
 
   return merged

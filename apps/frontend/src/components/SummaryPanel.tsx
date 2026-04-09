@@ -12,6 +12,7 @@ type SummaryPanelProps = {
   pendingNames: string
   skippedNames: string
   summaryText: string
+  showPrices: boolean
   onCopy: () => Promise<void>
 }
 
@@ -22,6 +23,7 @@ export function SummaryPanel({
   pendingNames,
   skippedNames,
   summaryText,
+  showPrices,
   onCopy,
 }: SummaryPanelProps) {
   return (
@@ -37,7 +39,7 @@ export function SummaryPanel({
       </div>
       {groupedOrders.length === 0 ? (
         <div className="empty-state compact">
-          주문이 입력되면 메뉴별 수량과 금액이 자동으로 집계됩니다.
+          주문을 입력하면 메뉴별 수량과 금액이 자동으로 집계됩니다.
         </div>
       ) : (
         <>
@@ -50,7 +52,7 @@ export function SummaryPanel({
                 </div>
                 <div className="summary-metrics">
                   <span>x{group.count}</span>
-                  <strong>{group.amount}</strong>
+                  <strong>{showPrices ? group.amount : '금액 숨김'}</strong>
                 </div>
               </article>
             ))}
@@ -62,7 +64,7 @@ export function SummaryPanel({
             </div>
             <div>
               <span>총 금액</span>
-              <strong>{totalAmount}</strong>
+              <strong>{showPrices ? totalAmount : '금액 숨김'}</strong>
             </div>
           </div>
         </>

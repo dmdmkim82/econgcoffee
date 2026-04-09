@@ -14,6 +14,7 @@ type OrderSummarySheetProps = {
   totalAmount: string
   pendingNames: string
   skippedNames: string
+  showPrices: boolean
   onClose: () => void
 }
 
@@ -24,6 +25,7 @@ export function OrderSummarySheet({
   totalAmount,
   pendingNames,
   skippedNames,
+  showPrices,
   onClose,
 }: OrderSummarySheetProps) {
   useEffect(() => {
@@ -82,7 +84,7 @@ export function OrderSummarySheet({
                 </div>
                 <div className="summary-metrics">
                   <span>x{group.count}</span>
-                  <strong>{group.amount}</strong>
+                  <strong>{showPrices ? group.amount : '금액 숨김'}</strong>
                 </div>
               </article>
             ))}
@@ -96,7 +98,7 @@ export function OrderSummarySheet({
           </div>
           <div className="summary-sheet-total">
             <span>총 금액</span>
-            <strong>{totalAmount}</strong>
+            <strong>{showPrices ? totalAmount : '금액 숨김'}</strong>
           </div>
         </div>
 

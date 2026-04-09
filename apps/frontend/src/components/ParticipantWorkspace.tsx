@@ -1,10 +1,12 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { type Attendee, type Snapshot } from '../lib/meeting'
-import { formatPrice } from '../lib/menu'
+import { formatVisiblePrice } from '../lib/menu'
+import { TemperatureSelector } from './TemperatureSelector'
 
 type ParticipantWorkspaceProps = {
   snapshot: Snapshot
   meetingClosed: boolean
+  showPrices: boolean
   onAddAttendee: (name: string, team: string) => string
   onUpdateAttendee: (
     attendeeId: string,
@@ -17,6 +19,7 @@ type ParticipantWorkspaceProps = {
 export function ParticipantWorkspace({
   snapshot,
   meetingClosed,
+  showPrices,
   onAddAttendee,
   onUpdateAttendee,
   onSkipAttendee,
@@ -198,7 +201,8 @@ export function ParticipantWorkspace({
                     </option>
                     {menuItems.map((item) => (
                       <option key={item.id} value={item.id}>
-                        {item.name} ({formatPrice(item.price)})
+                        {item.name}
+                        {showPrices ? ` (${formatVisiblePrice(item.price, showPrices)})` : ''}
                       </option>
                     ))}
                   </select>
@@ -220,24 +224,21 @@ export function ParticipantWorkspace({
                     }
                   />
                 </label>
-                <label className="field">
+                <div className="field">
                   <span>온도</span>
-                  <select
-                    value={selectedAttendee.temperature}
-                    disabled={orderFieldsDisabled}
-                    onChange={(event) =>
-                      onUpdateAttendee(
-                        selectedAttendee.id,
-                        'temperature',
-                        event.target.value,
-                      )
-                    }
-                  >
-                    <option value="">기본</option>
-                    <option value="ICE">ICE</option>
-                    <option value="HOT">HOT</option>
-                  </select>
-                </label>
+                  {selectedMenu ? (
+                    <TemperatureSelector
+                      availableTemperatures={selectedMenu.availableTemperatures}
+                      disabled={orderFieldsDisabled}
+                      value={selectedAttendee.temperature}
+                      onChange={(value) =>
+                        onUpdateAttendee(selectedAttendee.id, 'temperature', value)
+                      }
+                    />
+                  ) : (
+                    <div className="selection-hint">메뉴를 먼저 선택해주세요.</div>
+                  )}
+                </div>
                 <label className="field">
                   <span>사이즈</span>
                   <select
@@ -249,7 +250,7 @@ export function ParticipantWorkspace({
                   >
                     <option value="">기본</option>
                     <option value="Regular">기본</option>
-                    <option value="Large">라지</option>
+                    <option value="Large">대</option>
                   </select>
                 </label>
                 <label className="field field-full">
@@ -260,13 +261,13 @@ export function ParticipantWorkspace({
                     onChange={(event) =>
                       onUpdateAttendee(selectedAttendee.id, 'note', event.target.value)
                     }
-                    placeholder="샷 추가, 얼음 적게, 연하게 등"
+                    placeholder="샷 추가, 얼음 적게, 덜 달게"
                   />
                 </label>
               </div>
               {selectedAttendee.skipped ? (
                 <p className="field-disabled-note">
-                  이번 모임에서 이 참석자는 커피를 주문하지 않는 상태로 기록됩니다.
+                  이번 모임에서 이 참석자는 음료를 주문하지 않는 상태로 기록됩니다.
                 </p>
               ) : null}
               <div className="button-row order-card-actions">
@@ -300,12 +301,13 @@ export function ParticipantWorkspace({
                   <div className="personal-summary">
                     <strong>{selectedMenu.name}</strong>
                     <p>
-                      {selectedAttendee.quantity}잔 · {formatPrice(selectedMenu.price)}
+                      {selectedAttendee.quantity}잔 ·{' '}
+                      {formatVisiblePrice(selectedMenu.price, showPrices)}
                     </p>
                     <span>
-                      {selectedAttendee.temperature || '기본'} /{' '}
-                      {selectedAttendee.size || '기본'} /{' '}
-                      {selectedAttendee.note || '요청 없음'}
+                      {selectedAttendee.temperature || '온도 미선택'} /{' '}
+                      {selectedAttendee.size || '기본 사이즈'} /{' '}
+                      {selectedAttendee.note || '추가 요청 없음'}
                     </span>
                   </div>
                 ) : (
@@ -324,8 +326,11 @@ export function ParticipantWorkspace({
                   <div className="catalog-list">
                     {menuItems.map((item) => (
                       <div className="catalog-row" key={item.id}>
-                        <strong>{item.name}</strong>
-                        <span>{formatPrice(item.price)}</span>
+                        <div>
+                          <strong>{item.name}</strong>
+                          <p>{item.availableTemperatures.join(' / ')}</p>
+                        </div>
+                        <span>{formatVisiblePrice(item.price, showPrices)}</span>
                       </div>
                     ))}
                   </div>

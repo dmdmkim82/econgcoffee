@@ -31,10 +31,15 @@ import {
   type MeetingSettings,
   type MenuItem,
   type Snapshot,
+  type TemperatureOption,
+  createLatelierMenuItems,
   createId,
   formatCountdown,
   formatDeadlineLabel,
+  inferTemperaturesFromMenuName,
   mergeMenuItems,
+  normalizeSnapshot,
+  resolveTemperatureSelection,
 } from './lib/meeting'
 import {
   createMeetingSnapshot,
@@ -47,6 +52,8 @@ import {
   upsertMeeting,
 } from './lib/meetings-store'
 import { formatPrice, parseMenuText } from './lib/menu'
+
+const PRICE_VISIBILITY_STORAGE_KEY = 'ekong-coffee-show-prices'
 
 type OcrState = {
   status: 'idle' | 'processing' | 'success' | 'error'
@@ -181,6 +188,10 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
   const [feedback, setFeedback] = useState('')
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isSummarySheetOpen, setIsSummarySheetOpen] = useState(false)
+  const [showPrices, setShowPrices] = useState(() => {
+    const storedValue = window.localStorage.getItem(PRICE_VISIBILITY_STORAGE_KEY)
+    return storedValue !== 'false'
+  })
   const [hasRemoteLookupFinished, setHasRemoteLookupFinished] = useState(
     Boolean(snapshot),
   )
@@ -197,6 +208,13 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
   useEffect(() => {
     setIsSummarySheetOpen(false)
   }, [normalizedCode, normalizedRole])
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      PRICE_VISIBILITY_STORAGE_KEY,
+      String(showPrices),
+    )
+  }, [showPrices])
 
   useEffect(() => {
     return () => {
@@ -423,12 +441,14 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
           '',
           ...groupedOrders.map(
             (group, index) =>
-              `${index + 1}. ${group.label} x${group.count} (${formatPrice(
-                group.amount,
-              )}) - ${group.people.join(', ')}`,
+              `${index + 1}. ${group.label} x${group.count} (${
+                showPrices ? formatPrice(group.amount) : '금액 숨김'
+              }) - ${group.people.join(', ')}`,
           ),
           '',
-          `총 ${totalCups}잔 / ${formatPrice(totalAmount)}`,
+          `총 ${totalCups}잔 / ${
+            showPrices ? formatPrice(totalAmount) : '금액 숨김'
+          }`,
           skippedNames ? `스킵: ${skippedNames}` : '',
           pendingNames
             ? `미선택: ${pendingNames}`
@@ -442,7 +462,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
       return
     }
 
-    const nextSnapshot = recipe(snapshot)
+    const nextSnapshot = normalizeSnapshot(recipe(snapshot))
 
     setStore((currentStore) => upsertMeeting(currentStore, nextSnapshot))
 
@@ -468,7 +488,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
   function updateMenuField(
     menuItemId: string,
     field: keyof MenuItem,
-    value: string | number,
+    value: string | number | TemperatureOption[],
   ) {
     patchSnapshot((currentSnapshot) => ({
       ...currentSnapshot,
@@ -483,21 +503,54 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
     field: keyof Attendee,
     value: string | number,
   ) {
-    patchSnapshot((currentSnapshot) => ({
-      ...currentSnapshot,
-      attendees: currentSnapshot.attendees.map((attendee) =>
-        attendee.id === attendeeId
-          ? {
+    patchSnapshot((currentSnapshot) => {
+      const menuLookup = new Map(
+        currentSnapshot.menuItems.map((item) => [item.id, item]),
+      )
+
+      return {
+        ...currentSnapshot,
+        attendees: currentSnapshot.attendees.map((attendee) => {
+          if (attendee.id !== attendeeId) {
+            return attendee
+          }
+
+          if (field === 'menuItemId') {
+            const nextMenuItemId = typeof value === 'string' ? value : ''
+            const selectedMenu = menuLookup.get(nextMenuItemId)
+
+            return {
               ...attendee,
-              [field]: value,
-              skipped:
-                field === 'menuItemId' && typeof value === 'string' && value
-                  ? false
-                  : attendee.skipped,
+              menuItemId: nextMenuItemId,
+              skipped: nextMenuItemId ? false : attendee.skipped,
+              temperature: resolveTemperatureSelection(
+                attendee.temperature,
+                selectedMenu,
+              ),
             }
-          : attendee,
-      ),
-    }))
+          }
+
+          if (field === 'temperature') {
+            const selectedMenu = menuLookup.get(attendee.menuItemId)
+            const nextTemperature =
+              value === 'HOT' || value === 'ICE' ? value : ''
+
+            return {
+              ...attendee,
+              temperature: resolveTemperatureSelection(
+                nextTemperature,
+                selectedMenu,
+              ),
+            }
+          }
+
+          return {
+            ...attendee,
+            [field]: value,
+          }
+        }),
+      }
+    })
   }
 
   function handleSkipAttendee(attendeeId: string, skipped: boolean) {
@@ -519,7 +572,11 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
     }))
   }
 
-  function handleAddMenu(name: string, price: number) {
+  function handleAddMenu(
+    name: string,
+    price: number,
+    availableTemperatures: TemperatureOption[],
+  ) {
     patchSnapshot((currentSnapshot) => ({
       ...currentSnapshot,
       menuItems: mergeMenuItems(currentSnapshot.menuItems, [
@@ -527,11 +584,27 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
           id: createId('menu'),
           name,
           price,
+          availableTemperatures,
           source: 'manual',
         },
       ]),
     }))
-    setFeedback('?섎룞 硫붾돱瑜?異붽??덉뒿?덈떎.')
+    setFeedback('수동 메뉴를 추가했습니다.')
+  }
+
+  function handleLoadPresetMenu() {
+    patchSnapshot((currentSnapshot) => ({
+      ...currentSnapshot,
+      menuItems: mergeMenuItems(
+        currentSnapshot.menuItems,
+        createLatelierMenuItems(),
+      ),
+      meeting: {
+        ...currentSnapshot.meeting,
+        cafeName: currentSnapshot.meeting.cafeName || "L'atelier",
+      },
+    }))
+    setFeedback('이미지 메뉴를 현재 모임에 추가했습니다.')
   }
 
   function handleRemoveMenu(menuItemId: string) {
@@ -584,11 +657,12 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
       id: createId('menu'),
       name: candidate.name,
       price: candidate.price,
+      availableTemperatures: inferTemperaturesFromMenuName(candidate.name),
       source: 'ocr' as const,
     }))
 
     if (parsedItems.length === 0) {
-      setFeedback('媛寃⑹씠 ?ы븿??硫붾돱 以꾩쓣 李얠? 紐삵뻽?듬땲??')
+      setFeedback('가격이 포함된 메뉴 줄을 찾지 못했습니다.')
       return
     }
 
@@ -596,7 +670,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
       ...currentSnapshot,
       menuItems: mergeMenuItems(currentSnapshot.menuItems, parsedItems),
     }))
-    setFeedback(`${parsedItems.length}媛?硫붾돱瑜?OCR 寃곌낵?먯꽌 諛섏쁺?덉뒿?덈떎.`)
+    setFeedback(`${parsedItems.length}개 메뉴를 OCR 결과에서 반영했습니다.`)
   }
 
   async function handleImageUpload(event: ChangeEvent<HTMLInputElement>) {
@@ -646,6 +720,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
         id: createId('menu'),
         name: candidate.name,
         price: candidate.price,
+        availableTemperatures: inferTemperaturesFromMenuName(candidate.name),
         source: 'ocr' as const,
       }))
 
@@ -746,9 +821,11 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
         title={meeting.title}
         role={normalizedRole}
         summaryCount={groupedOrders.length}
+        showPrices={showPrices}
         onCopyOrganizerLink={() => handleCopyPath('organizer')}
         onCopyParticipantLink={() => handleCopyPath('join')}
         onOpenSummary={() => setIsSummarySheetOpen(true)}
+        onTogglePriceVisibility={() => setShowPrices((currentValue) => !currentValue)}
       />
       <HeroPanel
         meetingClosed={meetingClosed}
@@ -760,6 +837,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
         completedOrders={completedOrders}
         totalAmount={totalAmount}
         totalCups={totalCups}
+        showPrices={showPrices}
       />
       <OrderSummarySheet
         open={isSummarySheetOpen}
@@ -773,6 +851,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
         totalAmount={formatPrice(totalAmount)}
         pendingNames={pendingNames}
         skippedNames={skippedNames}
+        showPrices={showPrices}
         onClose={() => setIsSummarySheetOpen(false)}
       />
       {feedback ? <div className="feedback-banner">{feedback}</div> : null}
@@ -804,9 +883,14 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
           />
           <MenuPanel
             menuItems={menuItems}
+            showPrices={showPrices}
             onAddMenu={handleAddMenu}
             onUpdateMenu={updateMenuField}
             onRemoveMenu={handleRemoveMenu}
+            onLoadPresetMenu={handleLoadPresetMenu}
+            onTogglePriceVisibility={() =>
+              setShowPrices((currentValue) => !currentValue)
+            }
           />
           <AttendeesPanel
             attendees={attendees}
@@ -817,6 +901,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
             attendees={attendees}
             menuItems={menuItems}
             meetingClosed={meetingClosed}
+            showPrices={showPrices}
             onUpdateAttendee={updateAttendeeField}
             onSkipAttendee={handleSkipAttendee}
           />
@@ -832,6 +917,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
             pendingNames={pendingNames}
             skippedNames={skippedNames}
             summaryText={summaryTextOutput}
+            showPrices={showPrices}
             onCopy={handleCopySummary}
           />
         </main>
@@ -839,6 +925,7 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
         <ParticipantWorkspace
           snapshot={snapshot}
           meetingClosed={meetingClosed}
+          showPrices={showPrices}
           onAddAttendee={handleAddAttendee}
           onUpdateAttendee={updateAttendeeField}
           onSkipAttendee={handleSkipAttendee}

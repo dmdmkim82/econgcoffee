@@ -1,10 +1,12 @@
 import { type Attendee, type MenuItem } from '../lib/meeting'
-import { formatPrice } from '../lib/menu'
+import { formatVisiblePrice } from '../lib/menu'
+import { TemperatureSelector } from './TemperatureSelector'
 
 type OrdersPanelProps = {
   attendees: Attendee[]
   menuItems: MenuItem[]
   meetingClosed: boolean
+  showPrices: boolean
   onUpdateAttendee: (
     attendeeId: string,
     field: keyof Attendee,
@@ -29,6 +31,7 @@ export function OrdersPanel({
   attendees,
   menuItems,
   meetingClosed,
+  showPrices,
   onUpdateAttendee,
   onSkipAttendee,
 }: OrdersPanelProps) {
@@ -47,25 +50,26 @@ export function OrdersPanel({
       <div className="panel-head">
         <div>
           <span className="panel-kicker">주문 입력</span>
-          <h2>참석자별 주문 선택</h2>
+          <h2>참석자별 메뉴 선택</h2>
         </div>
         <span className={`status-pill ${meetingClosed ? 'danger' : 'soft'}`}>
           {meetingClosed ? '입력 종료' : '입력 가능'}
         </span>
       </div>
       <p className="panel-note">
-        미선택 참석자가 먼저 보이고, 주문을 안 하는 분은 카드에서 바로 스킵 처리할
-        수 있습니다.
+        미선택 참석자가 먼저 보이고, 커피를 마시지 않는 사람은 카드에서 바로
+        안마심 처리할 수 있습니다.
       </p>
       {attendees.length === 0 ? (
         <div className="empty-state">
-          참석자를 추가하면 이 영역에서 사람별 주문과 스킵 여부를 바로 관리할 수
-          있습니다.
+          참석자를 추가하면 이 영역에서 메뉴와 수량, 온도, 요청사항을 바로
+          관리할 수 있습니다.
         </div>
       ) : (
         <div className="order-grid">
           {sortedAttendees.map((attendee) => {
             const fieldsDisabled = meetingClosed || attendee.skipped
+            const selectedMenu = menuItems.find((item) => item.id === attendee.menuItemId)
             const statusTone = attendee.skipped
               ? 'skip'
               : attendee.menuItemId
@@ -103,7 +107,8 @@ export function OrdersPanel({
                       </option>
                       {menuItems.map((item) => (
                         <option key={item.id} value={item.id}>
-                          {item.name} ({formatPrice(item.price)})
+                          {item.name}
+                          {showPrices ? ` (${formatVisiblePrice(item.price, showPrices)})` : ''}
                         </option>
                       ))}
                     </select>
@@ -125,20 +130,21 @@ export function OrdersPanel({
                       }
                     />
                   </label>
-                  <label className="field">
+                  <div className="field">
                     <span>온도</span>
-                    <select
-                      value={attendee.temperature}
-                      disabled={fieldsDisabled}
-                      onChange={(event) =>
-                        onUpdateAttendee(attendee.id, 'temperature', event.target.value)
-                      }
-                    >
-                      <option value="">기본</option>
-                      <option value="ICE">ICE</option>
-                      <option value="HOT">HOT</option>
-                    </select>
-                  </label>
+                    {selectedMenu ? (
+                      <TemperatureSelector
+                        availableTemperatures={selectedMenu.availableTemperatures}
+                        disabled={fieldsDisabled}
+                        value={attendee.temperature}
+                        onChange={(value) =>
+                          onUpdateAttendee(attendee.id, 'temperature', value)
+                        }
+                      />
+                    ) : (
+                      <div className="selection-hint">메뉴를 먼저 선택해주세요.</div>
+                    )}
+                  </div>
                   <label className="field">
                     <span>사이즈</span>
                     <select
@@ -150,7 +156,7 @@ export function OrdersPanel({
                     >
                       <option value="">기본</option>
                       <option value="Regular">기본</option>
-                      <option value="Large">라지</option>
+                      <option value="Large">대</option>
                     </select>
                   </label>
                   <label className="field field-full">
@@ -161,7 +167,7 @@ export function OrdersPanel({
                       onChange={(event) =>
                         onUpdateAttendee(attendee.id, 'note', event.target.value)
                       }
-                      placeholder="샷 추가, 얼음 적게, 연하게 등"
+                      placeholder="샷 추가, 얼음 적게, 덜 달게"
                     />
                   </label>
                 </div>

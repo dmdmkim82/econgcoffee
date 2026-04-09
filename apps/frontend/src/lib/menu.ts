@@ -138,3 +138,7 @@ export function parseMenuText(rawText: string) {
 export function formatPrice(price: number) {
   return `${priceFormatter.format(price)}원`
 }
+
+export function formatVisiblePrice(price: number, showPrices: boolean) {
+  return showPrices ? formatPrice(price) : '금액 숨김'
+}

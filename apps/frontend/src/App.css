@@ -135,7 +135,7 @@
 
 .meeting-topbar-actions .button-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
 }
 
@@ -198,6 +198,54 @@
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
+}
+
+.compact-toolbar {
+  justify-content: space-between;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.checkbox-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid rgba(92, 67, 44, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+.checkbox-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.checkbox-chip.active {
+  border-color: rgba(196, 124, 51, 0.24);
+  background: rgba(196, 124, 51, 0.14);
+  color: var(--accent-strong);
+}
+
+.checkbox-chip:has(input:disabled) {
+  opacity: 0.58;
+  cursor: not-allowed;
 }
 
 .hero-badges {
@@ -679,6 +727,30 @@
   line-height: 1.45;
 }
 
+.selection-hint {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 10px 11px;
+  border: 1px dashed rgba(92, 67, 44, 0.16);
+  border-radius: 12px;
+  background: rgba(252, 247, 238, 0.72);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.catalog-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.catalog-row p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
 .summary-metrics {
   text-align: left;
 }
@@ -873,13 +945,17 @@
   align-items: stretch;
 }
 
-.meeting-topbar-actions .button-row,
 .meeting-card-actions,
 .recent-card .meeting-card-actions,
 .join-form.compact,
 .hero-steps {
   display: grid !important;
   grid-template-columns: 1fr !important;
+}
+
+.meeting-topbar-actions .button-row {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
 
 .meeting-card-actions,
@@ -948,10 +1024,6 @@
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
-  .meeting-topbar-actions .button-row > :first-child {
-    grid-column: 1 / -1;
-  }
-
   .button {
     min-height: 36px;
     padding: 8px 10px;
@@ -1014,10 +1086,6 @@
 @media (min-width: 390px) and (max-width: 430px) {
   .meeting-topbar-actions .button-row {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
-  .meeting-topbar-actions .button-row > :first-child {
-    grid-column: 1 / -1;
   }
 
   .panel,

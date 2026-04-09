@@ -1,3 +1,5 @@
+export type TemperatureOption = 'HOT' | 'ICE'
+
 export type MeetingSettings = {
   title: string
   cafeName: string
@@ -13,6 +15,7 @@ export type MenuItem = {
   id: string
   name: string
   price: number
+  availableTemperatures: TemperatureOption[]
   source: 'ocr' | 'manual'
 }
 
@@ -23,7 +26,7 @@ export type Attendee = {
   menuItemId: string
   skipped: boolean
   quantity: number
-  temperature: '' | 'ICE' | 'HOT'
+  temperature: '' | TemperatureOption
   size: '' | 'Regular' | 'Large'
   note: string
 }

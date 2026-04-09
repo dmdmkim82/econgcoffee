@@ -3,21 +3,12 @@ import {
   type Snapshot,
   buildDefaultSnapshot,
   loadSnapshot,
+  normalizeSnapshot,
 } from './meeting'
 
 export const MEETINGS_STORAGE_KEY = 'ekong-coffee-meetings-v1'
 
 export type MeetingsStore = Record<string, Snapshot>
-
-function normalizeSnapshot(snapshot: Snapshot): Snapshot {
-  const now = new Date().toISOString()
-
-  return {
-    ...snapshot,
-    createdAt: snapshot.createdAt || now,
-    updatedAt: snapshot.updatedAt || now,
-  }
-}
 
 function hasLegacyContent(snapshot: Snapshot) {
   return Boolean(

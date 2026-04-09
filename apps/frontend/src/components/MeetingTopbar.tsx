@@ -5,9 +5,11 @@ type MeetingTopbarProps = {
   title: string
   role: 'organizer' | 'join'
   summaryCount: number
+  showPrices: boolean
   onCopyOrganizerLink: () => Promise<void>
   onCopyParticipantLink: () => Promise<void>
   onOpenSummary: () => void
+  onTogglePriceVisibility: () => void
 }
 
 export function MeetingTopbar({
@@ -15,9 +17,11 @@ export function MeetingTopbar({
   title,
   role,
   summaryCount,
+  showPrices,
   onCopyOrganizerLink,
   onCopyParticipantLink,
   onOpenSummary,
+  onTogglePriceVisibility,
 }: MeetingTopbarProps) {
   return (
     <section className="meeting-topbar">
@@ -46,6 +50,13 @@ export function MeetingTopbar({
         <div className="button-row">
           <button className="button small" type="button" onClick={onOpenSummary}>
             요약 목록{summaryCount > 0 ? ` ${summaryCount}` : ''}
+          </button>
+          <button
+            className="button secondary small"
+            type="button"
+            onClick={onTogglePriceVisibility}
+          >
+            {showPrices ? '금액 숨기기' : '금액 보기'}
           </button>
           <button
             className="button secondary small"
