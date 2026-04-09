@@ -74,8 +74,7 @@ export function HomePage({
             <span className="eyebrow">SK에코플랜트 미팅 커피 취합</span>
             <h1>에콩커피</h1>
             <p className="hero-description">
-              모임을 만들고 메뉴판을 올리면 OCR로 메뉴를 정리하고, 참석자 주문과
-              최종 요약까지 한 화면에서 빠르게 확인할 수 있습니다.
+              모임 생성, 메뉴 OCR, 주문 취합을 세로 화면 한 번에 빠르게 처리합니다.
             </p>
             <div className="compact-metric-grid">
               <article className="mini-stat">
@@ -97,7 +96,7 @@ export function HomePage({
             <div className="panel-head">
               <div>
                 <span className="panel-kicker">바로 시작</span>
-                <h2>모임 만들기 또는 참여하기</h2>
+                <h2>새 모임 또는 코드 참여</h2>
               </div>
             </div>
             <div className="quick-action-grid">
@@ -122,7 +121,7 @@ export function HomePage({
           <div className="panel-head">
             <div>
               <span className="panel-kicker">최근 모임</span>
-              <h2>내가 만든 모임과 참여한 모임</h2>
+              <h2>저장된 모임</h2>
             </div>
             <span className="status-pill neutral">{meetings.length}개 저장됨</span>
           </div>

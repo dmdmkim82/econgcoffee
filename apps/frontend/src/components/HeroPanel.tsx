@@ -29,8 +29,7 @@ export function HeroPanel({
         <span className="eyebrow">SK에코플랜트 미팅 커피 취합</span>
         <h1>에콩커피</h1>
         <p className="hero-description">
-          메뉴판 사진 OCR, 참석자 주문 입력, 최종 주문 요약까지 한 흐름으로
-          정리하는 세로형 커피 취합 보드입니다.
+          메뉴 OCR부터 참석자 주문과 최종 요약까지 세로 화면에 맞춰 정리합니다.
         </p>
         <div className="hero-steps">
           <span className="hero-step">1. 모임 생성</span>

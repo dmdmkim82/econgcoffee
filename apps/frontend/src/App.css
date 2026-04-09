@@ -899,3 +899,139 @@
 .panel-wide {
   grid-column: auto !important;
 }
+
+/* 360-390 css px portrait class: Galaxy S26-like compact phones */
+@media (max-width: 389px) {
+  .shell {
+    width: min(calc(100% - 12px), 390px) !important;
+  }
+
+  .compact-home,
+  .compact-home-hero,
+  .participant-layout,
+  .participant-side-column,
+  .recent-card-list,
+  .menu-list,
+  .person-list,
+  .summary-list,
+  .quick-action-grid,
+  .compact-metric-grid,
+  .hero-stats,
+  .participant-meta-grid,
+  .preview-grid,
+  .workspace-grid {
+    gap: 6px;
+  }
+
+  .panel,
+  .meeting-topbar,
+  .hero-panel,
+  .meeting-card,
+  .notice-box,
+  .home-side-card,
+  .summary-sheet {
+    padding: 11px;
+    border-radius: 14px;
+  }
+
+  .compact-home-copy h1,
+  .hero-panel h1 {
+    font-size: clamp(1.56rem, 7vw, 2rem);
+  }
+
+  .hero-description {
+    font-size: 0.82rem;
+    -webkit-line-clamp: 2;
+  }
+
+  .meeting-topbar-actions .button-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .meeting-topbar-actions .button-row > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .button {
+    min-height: 36px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .button.small {
+    min-height: 31px;
+    padding: 6px 8px;
+    font-size: 0.72rem;
+  }
+
+  .field input,
+  .field textarea,
+  .field select,
+  .inline-form input,
+  .summary-copy-box textarea,
+  .ocr-textarea,
+  .join-form input {
+    min-height: 38px;
+    padding: 9px 10px;
+    font-size: 0.86rem;
+  }
+
+  .mini-stat,
+  .stat-card,
+  .menu-row,
+  .order-card,
+  .pending-box,
+  .summary-copy-box,
+  .summary-totals > div,
+  .summary-sheet-row,
+  .summary-sheet-total,
+  .preview-card {
+    padding: 10px;
+  }
+
+  .panel-head h2,
+  .preview-card h3,
+  .order-card h3,
+  .pending-box h3,
+  .summary-copy-box h3 {
+    font-size: 0.92rem;
+  }
+
+  .status-pill {
+    min-height: 24px;
+    padding: 4px 7px;
+    font-size: 0.64rem;
+  }
+
+  .empty-state {
+    min-height: 60px;
+    padding: 12px;
+    font-size: 0.78rem;
+  }
+}
+
+/* 390-430 css px portrait class: iPhone 17-like and larger flagship phones */
+@media (min-width: 390px) and (max-width: 430px) {
+  .meeting-topbar-actions .button-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .meeting-topbar-actions .button-row > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .panel,
+  .meeting-topbar,
+  .hero-panel {
+    padding: 12px;
+  }
+
+  .compact-home-copy h1,
+  .hero-panel h1 {
+    font-size: clamp(1.62rem, 6.2vw, 2.08rem);
+  }
+
+  .hero-description {
+    -webkit-line-clamp: 2;
+  }
+}
