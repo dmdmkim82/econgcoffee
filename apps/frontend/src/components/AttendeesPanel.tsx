@@ -13,7 +13,6 @@ export function AttendeesPanel({
   onRemoveAttendee,
 }: AttendeesPanelProps) {
   const [name, setName] = useState('')
-  const [team, setTeam] = useState('')
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -22,9 +21,8 @@ export function AttendeesPanel({
       return
     }
 
-    onAddAttendee(name.trim(), team.trim())
+    onAddAttendee(name.trim(), '')
     setName('')
-    setTeam('')
   }
 
   return (
@@ -32,7 +30,7 @@ export function AttendeesPanel({
       <div className="panel-head">
         <div>
           <span className="panel-kicker">참석자 수동 관리</span>
-          <h2>참석자 이름을 미리 등록하거나 정리할 때 사용합니다</h2>
+          <h2>참석자 이름만 빠르게 미리 등록할 때 사용합니다</h2>
         </div>
         <span className="status-pill neutral">{attendees.length}명</span>
       </div>
@@ -42,11 +40,6 @@ export function AttendeesPanel({
           value={name}
           onChange={(event) => setName(event.target.value)}
           placeholder="참석자 이름"
-        />
-        <input
-          value={team}
-          onChange={(event) => setTeam(event.target.value)}
-          placeholder="팀 또는 부서"
         />
         <button className="button" type="submit">
           참석자 추가

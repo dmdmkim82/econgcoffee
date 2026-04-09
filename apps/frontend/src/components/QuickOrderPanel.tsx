@@ -17,6 +17,10 @@ type QuickOrderPanelProps = {
   onSkipAttendee: (attendeeId: string, skipped: boolean) => void
 }
 
+function normalizeName(value: string) {
+  return value.trim().replace(/\s+/g, ' ').toLocaleLowerCase('ko-KR')
+}
+
 function getAttendeeStatus(attendee: Attendee) {
   if (attendee.skipped) {
     return {
@@ -49,8 +53,7 @@ export function QuickOrderPanel({
 }: QuickOrderPanelProps) {
   const { meeting, attendees, menuItems } = snapshot
   const [selectedAttendeeId, setSelectedAttendeeId] = useState('')
-  const [newName, setNewName] = useState('')
-  const [newTeam, setNewTeam] = useState('')
+  const [nameInput, setNameInput] = useState('')
 
   const activeAttendeeId = attendees.some(
     (attendee) => attendee.id === selectedAttendeeId,
@@ -76,17 +79,45 @@ export function QuickOrderPanel({
     }
   }, [attendees])
 
-  function handleAddSelf(event: FormEvent<HTMLFormElement>) {
+  const matchedAttendee = useMemo(() => {
+    const normalizedInput = normalizeName(nameInput)
+
+    if (!normalizedInput) {
+      return null
+    }
+
+    return (
+      attendees.find(
+        (attendee) => normalizeName(attendee.name) === normalizedInput,
+      ) ?? null
+    )
+  }, [attendees, nameInput])
+
+  function handleStartOrder(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (meetingClosed || !newName.trim()) {
+    if (meetingClosed || !nameInput.trim()) {
       return
     }
 
-    const attendeeId = onAddAttendee(newName.trim(), newTeam.trim())
+    if (matchedAttendee) {
+      setSelectedAttendeeId(matchedAttendee.id)
+      setNameInput(matchedAttendee.name)
+      return
+    }
+
+    const attendeeId = onAddAttendee(nameInput.trim(), '')
     setSelectedAttendeeId(attendeeId)
-    setNewName('')
-    setNewTeam('')
+    setNameInput(nameInput.trim())
+  }
+
+  function handleSelectAttendee(attendeeId: string) {
+    setSelectedAttendeeId(attendeeId)
+
+    const attendee = attendees.find((item) => item.id === attendeeId)
+    if (attendee) {
+      setNameInput(attendee.name)
+    }
   }
 
   const orderFieldsDisabled =
@@ -96,13 +127,16 @@ export function QuickOrderPanel({
     : null
   const heading =
     variant === 'organizer'
-      ? '참석자 이름과 메뉴를 바로 입력하세요'
-      : '내 이름을 적고 바로 메뉴를 고르세요'
+      ? '참석자 이름만 넣고 바로 주문을 입력하세요'
+      : '이름만 입력하고 바로 메뉴를 고르세요'
   const description =
     variant === 'organizer'
-      ? '취합자가 참석자 주문을 상단에서 바로 입력할 수 있게 구성했습니다.'
-      : '이름을 입력하거나 이미 등록된 이름을 선택한 뒤 바로 주문하면 됩니다.'
+      ? '같은 이름을 다시 입력하면 기존 주문을 불러와 수정할 수 있습니다.'
+      : '이미 주문한 이름을 다시 입력하면 기존 주문을 이어서 수정할 수 있습니다.'
   const countdownLabel = meetingClosed ? '주문 마감' : formatCountdown(meeting.deadline)
+  const primaryButtonLabel = matchedAttendee
+    ? '기존 주문 수정하기'
+    : '이 이름으로 주문 시작'
 
   return (
     <section className="panel panel-wide participant-entry-panel quick-order-panel">
@@ -137,28 +171,23 @@ export function QuickOrderPanel({
         </article>
       </div>
 
-      <form className="participant-add-form" onSubmit={handleAddSelf}>
-        <div className="field-grid">
-          <label className="field">
-            <span>참석자 이름</span>
-            <input
-              value={newName}
-              onChange={(event) => setNewName(event.target.value)}
-              placeholder="이름을 입력하세요"
-            />
-          </label>
-          <label className="field">
-            <span>팀 / 부서</span>
-            <input
-              value={newTeam}
-              onChange={(event) => setNewTeam(event.target.value)}
-              placeholder="선택 입력"
-            />
-          </label>
-        </div>
+      <form className="participant-add-form" onSubmit={handleStartOrder}>
+        <label className="field">
+          <span>참석자 이름</span>
+          <input
+            value={nameInput}
+            onChange={(event) => setNameInput(event.target.value)}
+            placeholder="이름을 입력하세요"
+          />
+        </label>
+        {matchedAttendee ? (
+          <div className="status-callout">
+            같은 이름이 이미 있습니다. 기존 주문을 불러와서 바로 수정합니다.
+          </div>
+        ) : null}
         <div className="button-row">
           <button className="button" type="submit" disabled={meetingClosed}>
-            이 이름으로 주문 시작
+            {primaryButtonLabel}
           </button>
         </div>
       </form>
@@ -166,16 +195,15 @@ export function QuickOrderPanel({
       {attendees.length > 0 ? (
         <>
           <label className="field quick-order-inline-select">
-            <span>이미 등록된 이름 선택</span>
+            <span>기존 이름에서 바로 수정</span>
             <select
               value={activeAttendeeId}
-              onChange={(event) => setSelectedAttendeeId(event.target.value)}
+              onChange={(event) => handleSelectAttendee(event.target.value)}
             >
               <option value="">이름을 선택하세요</option>
               {attendees.map((attendee) => (
                 <option key={attendee.id} value={attendee.id}>
                   {attendee.name}
-                  {attendee.team ? ` · ${attendee.team}` : ''}
                   {attendee.skipped
                     ? ' · 안마심'
                     : attendee.menuItemId
@@ -197,7 +225,7 @@ export function QuickOrderPanel({
                   }`}
                   key={attendee.id}
                   type="button"
-                  onClick={() => setSelectedAttendeeId(attendee.id)}
+                  onClick={() => handleSelectAttendee(attendee.id)}
                 >
                   {attendee.name} · {status.label}
                 </button>
@@ -209,7 +237,7 @@ export function QuickOrderPanel({
 
       {!selectedAttendee ? (
         <div className="empty-state compact">
-          먼저 이름을 입력하거나 이미 등록된 이름을 선택하면 바로 메뉴를 고를 수 있습니다.
+          이름을 입력하거나 기존 이름을 선택하면 바로 메뉴를 고를 수 있습니다.
         </div>
       ) : (
         <div className="participant-order-stack">

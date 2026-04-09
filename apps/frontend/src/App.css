@@ -941,6 +941,16 @@
   overflow: auto;
 }
 
+.status-callout {
+  padding: 10px 12px;
+  border: 1px solid rgba(196, 124, 51, 0.18);
+  border-radius: 12px;
+  background: rgba(255, 246, 234, 0.92);
+  color: var(--accent-strong);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
 .participant-add-form {
   display: grid;
   gap: 8px;
