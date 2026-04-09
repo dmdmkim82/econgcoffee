@@ -19,7 +19,7 @@ export const LATELIER_CAFE_NAME = "L'atelier"
 
 const TEMPERATURE_ORDER: TemperatureOption[] = ['HOT', 'ICE']
 const HOT_AND_ICE: TemperatureOption[] = ['HOT', 'ICE']
-const ICE_ONLY: TemperatureOption[] = ['ICE']
+const ICE_ONLY: TemperatureOption[] = HOT_AND_ICE
 
 type PresetMenuItem = Omit<MenuItem, 'id' | 'source'>
 
@@ -112,7 +112,11 @@ function normalizeTemperatureList(
       )
     : []
 
-  return temperatures.length > 0 ? temperatures : [...fallback]
+  if (temperatures.length === 0) {
+    return [...fallback]
+  }
+
+  return [...HOT_AND_ICE]
 }
 
 function getMenuDedupeKey(name: string, price: number) {
@@ -124,7 +128,7 @@ function createPresetMenuItem(item: PresetMenuItem): MenuItem {
     id: createId('menu'),
     name: item.name,
     price: item.price,
-    availableTemperatures: [...item.availableTemperatures],
+    availableTemperatures: [...HOT_AND_ICE],
     source: 'manual',
   }
 }
@@ -134,16 +138,7 @@ export function createLatelierMenuItems() {
 }
 
 export function inferTemperaturesFromMenuName(name: string): TemperatureOption[] {
-  const normalized = name.normalize('NFKC').toLowerCase()
-
-  if (
-    /(iced|ice|cold brew|bubble|juice|smoothie|ade|에이드|주스|스무디|콜드브루|버블|아이스|아샷추|레샷추)/i.test(
-      normalized,
-    )
-  ) {
-    return [...ICE_ONLY]
-  }
-
+  void name
   return [...HOT_AND_ICE]
 }
 
