@@ -39,3 +39,10 @@ Backend example: [apps/backend/.env.example](apps/backend/.env.example)
 
 - Frontend and backend are separated so they can be developed and deployed independently.
 - Shared order types live in `shared/meeting.ts` so both sides stay in sync.
+
+## Vercel
+
+- Root deployment is configured for the Vite frontend with `vercel.json`.
+- Client-side routes such as `/meeting/:shareCode/:role` are rewritten to `index.html`.
+- If `VITE_API_BASE_URL` is not set in production, the deployed app falls back to browser-local storage mode.
+- For shared multi-device meeting sync in production, connect a separately deployed API and set `VITE_API_BASE_URL`.

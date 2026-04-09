@@ -9,6 +9,7 @@ type MeetingResponse = {
 }
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+export const apiSyncEnabled = import.meta.env.DEV || API_BASE_URL.length > 0
 
 function withApiBase(path: string) {
   return `${API_BASE_URL}${path}`

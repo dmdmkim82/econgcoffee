@@ -20,6 +20,7 @@ import { OrganizerPanel } from './components/OrganizerPanel'
 import { ParticipantWorkspace } from './components/ParticipantWorkspace'
 import { SummaryPanel } from './components/SummaryPanel'
 import {
+  apiSyncEnabled,
   deleteMeetingFromApi,
   fetchMeetingFromApi,
   fetchMeetingsFromApi,
@@ -74,6 +75,10 @@ function AppRoutes() {
     let ignore = false
 
     async function hydrateFromServer() {
+      if (!apiSyncEnabled) {
+        return
+      }
+
       try {
         const meetings = await fetchMeetingsFromApi()
         const remoteStore = createMeetingsStore(meetings)
@@ -112,7 +117,11 @@ function AppRoutes() {
     const snapshot = createMeetingSnapshot()
 
     setStore((currentStore) => upsertMeeting(currentStore, snapshot))
-    void saveMeetingToApi(snapshot)
+    if (apiSyncEnabled) {
+      void saveMeetingToApi(snapshot).catch(() => {
+        // Keep the local meeting when the API is unavailable.
+      })
+    }
 
     return snapshot.meeting.shareCode
   }
@@ -123,7 +132,11 @@ function AppRoutes() {
     }
 
     setStore((currentStore) => removeMeeting(currentStore, shareCode))
-    void deleteMeetingFromApi(shareCode)
+    if (apiSyncEnabled) {
+      void deleteMeetingFromApi(shareCode).catch(() => {
+        // Keep the local deletion even if the API is unavailable.
+      })
+    }
   }
 
   return (
@@ -197,6 +210,14 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
     let ignore = false
 
     async function loadMeetingFromServer() {
+      if (!apiSyncEnabled) {
+        if (!ignore) {
+          setHasRemoteLookupFinished(true)
+        }
+
+        return
+      }
+
       try {
         const remoteSnapshot = await fetchMeetingFromApi(normalizedCode)
 
@@ -225,6 +246,10 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
 
   useEffect(() => {
     if (!snapshot) {
+      return undefined
+    }
+
+    if (!apiSyncEnabled) {
       return undefined
     }
 
@@ -420,8 +445,13 @@ function MeetingPage({ store, setStore }: MeetingPageProps) {
     const nextSnapshot = recipe(snapshot)
 
     setStore((currentStore) => upsertMeeting(currentStore, nextSnapshot))
+
+    if (!apiSyncEnabled) {
+      return
+    }
+
     void saveMeetingToApi(nextSnapshot).catch(() => {
-      setFeedback('?쒕쾭 ??μ씠 ?좎떆 ?ㅽ뙣?덉뒿?덈떎. ?꾩옱 釉뚮씪?곗? ?곹깭???좎??⑸땲??')
+      setFeedback('서버 저장에 실패해 현재 브라우저 상태로만 유지합니다.')
     })
   }
 
