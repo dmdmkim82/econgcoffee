@@ -108,8 +108,8 @@ export function QuickOrderPanel({
       : '이름만 입력하고 바로 메뉴 고르기'
   const description =
     variant === 'organizer'
-      ? '같은 이름을 다시 입력하면 기존 주문을 바로 불러와 수정합니다.'
-      : '내 이름을 입력하면 기존 주문도 바로 이어서 수정할 수 있습니다.'
+      ? '참석자 이름을 입력하면 바로 메뉴를 선택할 수 있습니다.'
+      : '내 이름을 입력하면 바로 메뉴를 고를 수 있습니다.'
   const countdownLabel = meetingClosed ? '주문 마감' : formatCountdown(meeting.deadline)
   const previewPrice =
     selectedMenu && activeAttendee
@@ -272,9 +272,9 @@ export function QuickOrderPanel({
           />
         </label>
 
-        {matchedAttendee ? (
+        {nameInput.trim() ? (
           <div className="status-callout">
-            같은 이름의 기존 주문을 찾았습니다. 아래에서 바로 수정하면 됩니다.
+            이름 입력 완료. 아래에서 메뉴를 선택해주세요.
           </div>
         ) : null}
 
@@ -409,12 +409,12 @@ export function QuickOrderPanel({
         {!orderReady ? (
           <div className="personal-summary">
             <strong>이름만 입력하면 바로 메뉴를 고를 수 있습니다.</strong>
-            <span>기존 이름을 누르면 기존 주문을 바로 수정할 수 있습니다.</span>
+            <span>기존 이름을 누르면 기존 주문도 바로 수정할 수 있습니다.</span>
           </div>
         ) : activeAttendee?.skipped ? (
           <div className="personal-summary">
             <strong>{activeAttendee.name}님은 이번 주문에서 제외됩니다.</strong>
-            <span>필요하면 스킵 취소를 눌러 다시 메뉴를 선택하세요.</span>
+            <span>필요하면 스킵 취소를 눌러 다시 메뉴를 선택해주세요.</span>
           </div>
         ) : selectedMenu && activeAttendee ? (
           <div className="personal-summary">
@@ -431,7 +431,7 @@ export function QuickOrderPanel({
           </div>
         ) : (
           <div className="personal-summary">
-            <strong>{nameInput.trim() || '참석자'}님의 메뉴를 선택해 주세요.</strong>
+            <strong>{nameInput.trim() || '참석자'}님의 메뉴를 선택해주세요.</strong>
             <span>온도까지 고른 뒤 선택 완료를 누르면 주문이 마무리됩니다.</span>
           </div>
         )}
