@@ -3,6 +3,7 @@ import { useEffect, useMemo } from 'react'
 type StarbucksCategorySheetProps = {
   open: boolean
   loading: boolean
+  error?: string
   categories: Array<{
     name: string
     count: number
@@ -28,6 +29,7 @@ type StarbucksCategorySheetProps = {
 export function StarbucksCategorySheet({
   open,
   loading,
+  error = '',
   categories,
   menus,
   selectedCategories,
@@ -108,6 +110,8 @@ export function StarbucksCategorySheet({
         <p className="panel-note">
           필요한 카테고리만 선택해서 메뉴를 줄일 수 있습니다.
         </p>
+
+        {error ? <div className="empty-state compact">{error}</div> : null}
 
         <div className="button-row">
           <button className="button ghost small" type="button" onClick={onSelectAll}>

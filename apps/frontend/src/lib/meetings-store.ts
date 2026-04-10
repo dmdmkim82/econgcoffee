@@ -1,5 +1,6 @@
 import {
   STORAGE_KEY,
+  type CreateMenuSeed,
   type Snapshot,
   buildDefaultSnapshot,
   loadSnapshot,
@@ -13,6 +14,7 @@ export type CreateMeetingSnapshotInput = {
   title?: string
   attendeeNames?: string[]
   cafeName?: string
+  menuSeeds?: CreateMenuSeed[]
 }
 
 function hasLegacyContent(snapshot: Snapshot) {

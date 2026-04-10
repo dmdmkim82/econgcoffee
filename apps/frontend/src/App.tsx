@@ -254,6 +254,7 @@ function MeetingPage({
   const [isSummarySheetOpen, setIsSummarySheetOpen] = useState(false)
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
   const [isMenuPanelOpen, setIsMenuPanelOpen] = useState(false)
+  const [starbucksSheetRequestKey, setStarbucksSheetRequestKey] = useState(0)
   const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null)
   const [showPrices, setShowPrices] = useState(() => {
     const storedValue = window.localStorage.getItem(PRICE_VISIBILITY_STORAGE_KEY)
@@ -285,6 +286,7 @@ function MeetingPage({
     setIsSummarySheetOpen(false)
     setIsMoreSheetOpen(false)
     setIsMenuPanelOpen(false)
+    setStarbucksSheetRequestKey(0)
     setShareTarget(null)
     setCompletionToast('')
   }, [normalizedCode, normalizedRole])
@@ -1073,6 +1075,32 @@ function MeetingPage({
       {feedback ? <div className="feedback-banner">{feedback}</div> : null}
       {normalizedRole === 'organizer' ? (
         <>
+          {meeting.cafeName === STARBUCKS_CAFE_NAME && menuItems.length === 0 ? (
+            <section className="panel panel-wide">
+              <div className="panel-head">
+                <div>
+                  <span className="panel-kicker">스타벅스 메뉴 준비</span>
+                  <h2>주문을 받기 전에 스타벅스 메뉴를 먼저 골라주세요</h2>
+                </div>
+              </div>
+              <p className="panel-note">
+                카테고리와 메뉴를 먼저 불러와야 참석자가 상단 주문 화면에서 바로 선택할 수
+                있습니다.
+              </p>
+              <div className="button-row">
+                <button
+                  className="button"
+                  type="button"
+                  onClick={() => {
+                    setIsMenuPanelOpen(true)
+                    setStarbucksSheetRequestKey((currentValue) => currentValue + 1)
+                  }}
+                >
+                  스타벅스 메뉴 선택
+                </button>
+              </div>
+            </section>
+          ) : null}
           <QuickOrderPanel
             snapshot={snapshot}
             meetingClosed={meetingClosed}
@@ -1145,6 +1173,7 @@ function MeetingPage({
                   }
                   cafeName={meeting.cafeName}
                   menuItems={menuItems}
+                  openStarbucksSheetRequestKey={starbucksSheetRequestKey}
                   showPrices={showPrices}
                   onAddMenu={handleAddMenu}
                   onUpdateMenu={updateMenuField}

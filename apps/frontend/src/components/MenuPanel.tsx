@@ -24,6 +24,7 @@ type MenuPanelProps = {
   cafeName: string
   showPrices: boolean
   autoOpenStarbucksCategorySheet?: boolean
+  openStarbucksSheetRequestKey?: number
   onAddMenu: (
     name: string,
     price: number,
@@ -71,6 +72,7 @@ export function MenuPanel({
   cafeName,
   showPrices,
   autoOpenStarbucksCategorySheet = false,
+  openStarbucksSheetRequestKey = 0,
   onAddMenu,
   onUpdateMenu,
   onRemoveMenu,
@@ -90,6 +92,7 @@ export function MenuPanel({
     TemperatureOption[]
   >(['HOT', 'ICE'])
   const hasAutoOpenedStarbucksSheet = useRef(false)
+  const lastHandledOpenRequestKey = useRef(0)
   const isStarbucksMeeting = cafeName === STARBUCKS_CAFE_NAME
 
   const starbucksCategories = useMemo(() => {
@@ -218,11 +221,24 @@ export function MenuPanel({
     menuItems.length,
   ])
 
+  useEffect(() => {
+    if (
+      openStarbucksSheetRequestKey <= 0 ||
+      openStarbucksSheetRequestKey === lastHandledOpenRequestKey.current
+    ) {
+      return
+    }
+
+    lastHandledOpenRequestKey.current = openStarbucksSheetRequestKey
+    void handleOpenStarbucksSheet()
+  }, [handleOpenStarbucksSheet, openStarbucksSheetRequestKey])
+
   return (
     <>
       <StarbucksCategorySheet
         open={isStarbucksSheetOpen}
         loading={isLoadingStarbucks}
+        error={starbucksError}
         categories={starbucksCategories}
         menus={filteredStarbucksMenus.map((menu) => ({
           key: getStarbucksMenuKey(menu),
@@ -306,9 +322,6 @@ export function MenuPanel({
           현재 카페: {cafeName || '미정'} · 스타벅스 메뉴는 카테고리별로 골라서 불러올 수
           있고, 가격은 공식 사이트에 없어 `가격 미정`으로 들어옵니다.
         </p>
-
-        {starbucksError ? <div className="empty-state compact">{starbucksError}</div> : null}
-
         {menuItems.length === 0 ? (
           <div className="empty-state">
             {isStarbucksMeeting ? (

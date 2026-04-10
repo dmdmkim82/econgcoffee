@@ -10,8 +10,8 @@ import { findNutritionInfo } from './nutrition'
 
 export type {
   Attendee,
-  MeetingSettings,
   MenuItem,
+  MeetingSettings,
   NutritionInfo,
   Snapshot,
   TemperatureOption,
@@ -59,10 +59,16 @@ type PresetMenuItem = Omit<MenuItem, 'id' | 'source' | 'nutritionInfo'> & {
   nutritionInfo?: NutritionInfo | null
 }
 
+export type CreateMenuSeed = Pick<
+  MenuItem,
+  'name' | 'price' | 'availableTemperatures' | 'nutritionInfo'
+>
+
 type BuildDefaultSnapshotOptions = {
   title?: string
   attendeeNames?: string[]
   cafeName?: string
+  menuSeeds?: CreateMenuSeed[]
 }
 
 const LATELIER_MENU_PRESET: PresetMenuItem[] = [
@@ -242,6 +248,17 @@ function createPresetMenuItem(item: PresetMenuItem): MenuItem {
   }
 }
 
+function createMenuItemFromSeed(item: CreateMenuSeed): MenuItem {
+  return {
+    id: createId('menu'),
+    name: item.name,
+    price: item.price,
+    availableTemperatures: normalizeTemperatureList(item.availableTemperatures),
+    nutritionInfo: normalizeNutritionInfo(item.nutritionInfo, item.name),
+    source: 'manual',
+  }
+}
+
 export function createLatelierMenuItems() {
   return LATELIER_MENU_PRESET.map(createPresetMenuItem)
 }
@@ -254,7 +271,14 @@ function resolveCafePresetName(cafeName?: string): CafePresetName {
   return LATELIER_CAFE_NAME
 }
 
-function createInitialMenuItems(cafeName: CafePresetName) {
+function createInitialMenuItems(
+  cafeName: CafePresetName,
+  menuSeeds: CreateMenuSeed[] = [],
+) {
+  if (menuSeeds.length > 0) {
+    return menuSeeds.map(createMenuItemFromSeed)
+  }
+
   if (cafeName === LATELIER_CAFE_NAME) {
     return createLatelierMenuItems()
   }
@@ -355,6 +379,7 @@ export function buildDefaultSnapshot(
   const attendeeNames = normalizeInitialAttendeeNames(options.attendeeNames ?? [])
   const title = options.title?.trim() || 'SK에코플랜트 미팅 커피'
   const cafeName = resolveCafePresetName(options.cafeName)
+  const menuSeeds = options.menuSeeds ?? []
 
   return {
     meeting: {
@@ -367,7 +392,7 @@ export function buildDefaultSnapshot(
       shareCode: `EK-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
       manuallyClosed: false,
     },
-    menuItems: createInitialMenuItems(cafeName),
+    menuItems: createInitialMenuItems(cafeName, menuSeeds),
     attendees: attendeeNames.map(createDraftAttendee),
     rawOcrText: '',
     createdAt: now,
