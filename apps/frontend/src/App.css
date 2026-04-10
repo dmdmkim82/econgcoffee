@@ -2,9 +2,9 @@
   width: min(calc(100% - 14px), 430px);
   margin: 0 auto;
   padding:
-    calc(10px + env(safe-area-inset-top, 0))
+    calc(6px + env(safe-area-inset-top, 0))
     0
-    calc(16px + env(safe-area-inset-bottom, 0));
+    calc(10px + env(safe-area-inset-bottom, 0));
 }
 
 .compact-home,
@@ -58,8 +58,8 @@
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 14px;
+  gap: 8px;
+  padding: 10px;
   border-color: var(--border);
   background: var(--panel);
   box-shadow: var(--shadow-sm);
@@ -83,8 +83,8 @@
   position: sticky;
   top: calc(6px + env(safe-area-inset-top, 0));
   z-index: 20;
-  padding: 10px 12px;
-  margin-bottom: 6px;
+  padding: 7px 10px;
+  margin-bottom: 4px;
   backdrop-filter: blur(14px);
 }
 
@@ -131,15 +131,15 @@
 }
 
 .brand-lockup.default .brand-mark {
-  width: 48px;
-  height: 48px;
-  border-radius: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
 }
 
 .brand-lockup.hero .brand-mark {
-  width: 112px;
-  height: 112px;
-  border-radius: 32px;
+  width: 80px;
+  height: 80px;
+  border-radius: 24px;
 }
 
 .brand-mark svg {
@@ -222,7 +222,7 @@
 .hero-panel h1 {
   margin: 6px 0 4px;
   font-family: var(--display-font);
-  font-size: clamp(1.7rem, 8vw, 2.4rem);
+  font-size: clamp(1.3rem, 6vw, 1.9rem);
   line-height: 0.94;
   letter-spacing: -0.04em;
 }
@@ -251,15 +251,7 @@
 }
 
 .hero-description {
-  max-width: 100%;
-  margin: 0;
-  font-size: 0.86rem;
-  line-height: 1.45;
-  color: var(--muted);
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  display: none;
 }
 
 .eyebrow,
@@ -313,8 +305,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
-  padding: 7px 11px;
+  min-height: 30px;
+  padding: 5px 9px;
   border: 1px solid var(--chip-border);
   border-radius: 999px;
   background: var(--chip-bg);
@@ -368,7 +360,7 @@
 
 .mini-stat,
 .stat-card {
-  padding: 10px;
+  padding: 7px 9px;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--surface);
@@ -514,7 +506,7 @@
 
 .workspace-grid {
   grid-template-columns: 1fr;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .panel-head {
@@ -530,8 +522,8 @@
 .pending-box h3,
 .summary-copy-box h3 {
   margin: 3px 0 0;
-  font-size: 0.96rem;
-  line-height: 1.25;
+  font-size: 0.88rem;
+  line-height: 1.2;
 }
 
 .panel-note,
@@ -547,16 +539,16 @@
 .personal-summary span {
   margin: 0;
   color: var(--muted);
-  font-size: 0.8rem;
-  line-height: 1.4;
+  font-size: 0.75rem;
+  line-height: 1.35;
 }
 
 .status-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 26px;
-  padding: 4px 8px;
+  min-height: 22px;
+  padding: 3px 7px;
   border-radius: 999px;
   font-size: 0.68rem;
   font-weight: 700;
@@ -623,8 +615,8 @@
 .ocr-textarea,
 .join-form input {
   width: 100%;
-  min-height: 40px;
-  padding: 10px 11px;
+  min-height: 36px;
+  padding: 8px 10px;
   border: 1px solid var(--input-border);
   border-radius: 12px;
   background: var(--input-bg);
@@ -660,10 +652,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
+  min-height: 36px;
   border: none;
   border-radius: 999px;
-  padding: 9px 12px;
+  padding: 7px 11px;
   background: linear-gradient(135deg, #b86a39, #d58a4a);
   color: #fffdf7;
   font: inherit;
@@ -703,15 +695,15 @@
 }
 
 .button.small {
-  min-height: 34px;
-  padding: 7px 10px;
-  font-size: 0.76rem;
+  min-height: 28px;
+  padding: 5px 9px;
+  font-size: 0.73rem;
 }
 
 .button.micro {
-  min-height: 30px;
-  padding: 6px 10px;
-  font-size: 0.72rem;
+  min-height: 26px;
+  padding: 4px 8px;
+  font-size: 0.7rem;
   box-shadow: none;
 }
 
@@ -783,7 +775,7 @@
   justify-content: space-between;
   gap: 10px;
   align-items: flex-start;
-  padding: 12px;
+  padding: 9px 10px;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--surface);
@@ -946,7 +938,7 @@
 .pending-box,
 .summary-copy-box,
 .summary-totals > div {
-  padding: 12px;
+  padding: 9px 10px;
 }
 
 .menu-row {
@@ -958,8 +950,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
-  padding: 12px;
+  gap: 6px;
+  padding: 9px 10px;
 }
 
 .order-grid {
@@ -1169,7 +1161,7 @@
 }
 
 .menu-catalog-row {
-  padding: 12px;
+  padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--surface);
@@ -1185,8 +1177,8 @@
 .admin-details summary {
   cursor: pointer;
   list-style: none;
-  padding: 14px;
-  font-size: 0.88rem;
+  padding: 10px 12px;
+  font-size: 0.84rem;
   font-weight: 700;
   color: var(--ink);
 }
@@ -1229,12 +1221,12 @@
 
 .attendance-summary {
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
   grid-template-areas:
     'avatar main trigger'
     '. order order';
   gap: 6px 10px;
-  padding: 12px;
+  padding: 9px 10px;
   cursor: pointer;
   list-style: none;
 }
@@ -1248,8 +1240,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 34px;
+  height: 34px;
   border-radius: 999px;
   background: var(--chip-bg);
   color: var(--accent-strong);
@@ -1264,7 +1256,7 @@
 }
 
 .attendance-main strong {
-  font-size: 0.96rem;
+  font-size: 0.88rem;
 }
 
 .attendance-main span {
@@ -1410,8 +1402,8 @@
   display: grid;
   gap: 2px;
   min-width: max-content;
-  min-height: 38px;
-  padding: 8px 12px;
+  min-height: 32px;
+  padding: 5px 10px;
   border: 1px solid var(--chip-border);
   border-radius: 999px;
   background: var(--chip-bg);
@@ -1497,7 +1489,7 @@
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  padding: 14px;
+  padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--surface);
@@ -1591,8 +1583,8 @@
 .empty-state {
   display: grid;
   place-items: center;
-  min-height: 72px;
-  padding: 14px;
+  min-height: 52px;
+  padding: 10px;
   text-align: center;
   border: 1px dashed var(--selection-border);
   border-radius: 14px;
