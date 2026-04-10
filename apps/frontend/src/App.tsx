@@ -236,6 +236,7 @@ function MeetingPage({
     message: '메뉴 이미지를 올리면 OCR이 자동으로 실행됩니다.',
   })
   const [feedback, setFeedback] = useState('')
+  const [completionToast, setCompletionToast] = useState('')
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isSummarySheetOpen, setIsSummarySheetOpen] = useState(false)
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
@@ -258,9 +259,19 @@ function MeetingPage({
   }, [feedback])
 
   useEffect(() => {
+    if (!completionToast) {
+      return undefined
+    }
+
+    const timer = window.setTimeout(() => setCompletionToast(''), 1650)
+    return () => window.clearTimeout(timer)
+  }, [completionToast])
+
+  useEffect(() => {
     setIsSummarySheetOpen(false)
     setIsMoreSheetOpen(false)
     setShareTarget(null)
+    setCompletionToast('')
   }, [normalizedCode, normalizedRole])
 
   useEffect(() => {
@@ -938,7 +949,7 @@ function MeetingPage({
   }
 
   function handleCompleteOrder(attendeeName: string) {
-    setFeedback(`${attendeeName}님의 주문 선택이 완료되었습니다.`)
+    setCompletionToast(`${attendeeName}님 주문 완료!`)
   }
 
   return (
@@ -984,6 +995,17 @@ function MeetingPage({
         showPrices={showPrices}
         onClose={() => setIsSummarySheetOpen(false)}
       />
+      {completionToast ? (
+        <div className="completion-toast-overlay" aria-live="polite" role="status">
+          <div className="completion-toast">
+            <div className="completion-toast-check" aria-hidden="true">
+              <span />
+            </div>
+            <strong>주문 완료!</strong>
+            <p>{completionToast}</p>
+          </div>
+        </div>
+      ) : null}
       {feedback ? <div className="feedback-banner">{feedback}</div> : null}
       {normalizedRole === 'organizer' ? (
         <>
