@@ -1,5 +1,14 @@
 export type TemperatureOption = 'HOT' | 'ICE'
 
+export type NutritionInfo = {
+  caloriesKcal: number
+  sugarG: number
+  proteinG: number
+  sodiumMg: number
+  saturatedFatG: number
+  caffeineMg: number
+}
+
 export type MeetingSettings = {
   title: string
   cafeName: string
@@ -16,6 +25,7 @@ export type MenuItem = {
   name: string
   price: number
   availableTemperatures: TemperatureOption[]
+  nutritionInfo: NutritionInfo | null
   source: 'ocr' | 'manual'
 }
 

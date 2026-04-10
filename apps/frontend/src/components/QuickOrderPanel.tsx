@@ -4,9 +4,11 @@ import {
   getMenuDisplayPrice,
   isCoffeeMenuName,
   type Attendee,
+  type MenuItem,
   type Snapshot,
 } from '../lib/meeting'
 import { formatVisiblePrice } from '../lib/menu'
+import { MenuNutritionSheet } from './MenuNutritionSheet'
 import { TemperatureSelector } from './TemperatureSelector'
 
 type QuickOrderPanelProps = {
@@ -32,7 +34,7 @@ function getAttendeeStatus(attendee: Attendee) {
   if (attendee.skipped) {
     return {
       tone: 'skip',
-      label: '안마심',
+      label: '미주문',
     }
   }
 
@@ -62,6 +64,7 @@ export function QuickOrderPanel({
   const { meeting, attendees, menuItems } = snapshot
   const [selectedAttendeeId, setSelectedAttendeeId] = useState('')
   const [nameInput, setNameInput] = useState('')
+  const [nutritionMenuId, setNutritionMenuId] = useState('')
 
   const matchedAttendee = useMemo(() => {
     const normalizedInput = normalizeName(nameInput)
@@ -82,6 +85,8 @@ export function QuickOrderPanel({
   const activeAttendee = matchedAttendee ?? selectedAttendeeById ?? null
   const activeAttendeeId = activeAttendee?.id ?? ''
   const selectedMenu = menuItems.find((item) => item.id === activeAttendee?.menuItemId)
+  const nutritionMenu =
+    menuItems.find((item) => item.id === nutritionMenuId) ?? null
   const canUseDecaf = Boolean(selectedMenu && isCoffeeMenuName(selectedMenu.name))
   const orderReady = Boolean(activeAttendee || nameInput.trim())
   const fieldsDisabled = meetingClosed || !orderReady || Boolean(activeAttendee?.skipped)
@@ -108,7 +113,7 @@ export function QuickOrderPanel({
       : '이름만 입력하고 바로 메뉴 고르기'
   const description =
     variant === 'organizer'
-      ? '참석자 이름을 입력하면 바로 메뉴를 선택할 수 있습니다.'
+      ? '참석자 이름을 입력하면 바로 메뉴를 선택해서 주문을 받을 수 있습니다.'
       : '내 이름을 입력하면 바로 메뉴를 고를 수 있습니다.'
   const countdownLabel = meetingClosed ? '주문 마감' : formatCountdown(meeting.deadline)
   const previewPrice =
@@ -229,236 +234,276 @@ export function QuickOrderPanel({
     onCompleteOrder(activeAttendee.name)
   }
 
+  function openNutritionSheet(menuItem: MenuItem) {
+    setNutritionMenuId(menuItem.id)
+  }
+
   return (
-    <section className="panel panel-wide participant-entry-panel quick-order-panel">
-      <div className="panel-head">
-        <div>
-          <span className="panel-kicker">
-            {variant === 'organizer' ? '빠른 주문 입력' : '내 주문 입력'}
+    <>
+      <MenuNutritionSheet
+        menuItem={nutritionMenu}
+        open={Boolean(nutritionMenu)}
+        onClose={() => setNutritionMenuId('')}
+      />
+
+      <section className="panel panel-wide participant-entry-panel quick-order-panel">
+        <div className="panel-head">
+          <div>
+            <span className="panel-kicker">
+              {variant === 'organizer' ? '빠른 주문 입력' : '내 주문 입력'}
+            </span>
+            <h2>{heading}</h2>
+          </div>
+          <span className={`status-pill ${meetingClosed ? 'danger' : 'live'}`}>
+            {meetingClosed ? '주문 마감' : '주문 가능'}
           </span>
-          <h2>{heading}</h2>
         </div>
-        <span className={`status-pill ${meetingClosed ? 'danger' : 'live'}`}>
-          {meetingClosed ? '주문 마감' : '주문 가능'}
-        </span>
-      </div>
 
-      <p className="panel-note">{description}</p>
+        <p className="panel-note">{description}</p>
 
-      <div className="participant-meta-grid quick-order-meta">
-        <article className="mini-stat">
-          <span>카페</span>
-          <strong>{meeting.cafeName || '미정'}</strong>
-        </article>
-        <article className="mini-stat">
-          <span>응답</span>
-          <strong>
-            {completionStats.completed}/{completionStats.total}
-          </strong>
-        </article>
-        <article className="mini-stat">
-          <span>마감</span>
-          <strong>{countdownLabel}</strong>
-        </article>
-      </div>
+        <div className="participant-meta-grid quick-order-meta">
+          <article className="mini-stat">
+            <span>카페</span>
+            <strong>{meeting.cafeName || '미정'}</strong>
+          </article>
+          <article className="mini-stat">
+            <span>응답</span>
+            <strong>
+              {completionStats.completed}/{completionStats.total}
+            </strong>
+          </article>
+          <article className="mini-stat">
+            <span>마감</span>
+            <strong>{countdownLabel}</strong>
+          </article>
+        </div>
 
-      <div className="quick-order-composer">
-        <label className="field field-full">
-          <span>참석자 이름</span>
-          <input
-            value={nameInput}
-            onChange={(event) => handleNameChange(event.target.value)}
-            placeholder="이름만 입력하면 바로 메뉴를 고를 수 있습니다"
-          />
-        </label>
-
-        {nameInput.trim() ? (
-          <div className="status-callout">
-            이름 입력 완료. 아래에서 메뉴를 선택해주세요.
-          </div>
-        ) : null}
-
-        {attendees.length > 0 ? (
-          <div className="quick-attendee-scroll" role="list" aria-label="기존 참석자">
-            {attendees.map((attendee) => {
-              const status = getAttendeeStatus(attendee)
-
-              return (
-                <button
-                  className={`quick-attendee-chip ${
-                    attendee.id === activeAttendeeId ? 'active' : ''
-                  }`}
-                  key={attendee.id}
-                  type="button"
-                  onClick={() => syncSelectedAttendee(attendee.id)}
-                >
-                  {attendee.name}
-                  <span>{status.label}</span>
-                </button>
-              )
-            })}
-          </div>
-        ) : null}
-
-        <div className="quick-order-fields">
+        <div className="quick-order-composer">
           <label className="field field-full">
-            <span>메뉴 선택</span>
-            <select
-              value={activeAttendee?.menuItemId ?? ''}
-              disabled={meetingClosed || menuItems.length === 0 || !orderReady}
-              onChange={(event) => handleMenuSelect(event.target.value)}
-            >
-              <option value="">
-                {!orderReady
-                  ? '먼저 이름을 입력하세요'
-                  : menuItems.length === 0
-                    ? '등록된 메뉴가 없습니다'
-                    : '메뉴를 선택하세요'}
-              </option>
-              {menuItems.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                  {showPrices
-                    ? ` (${formatVisiblePrice(item.price, showPrices)})`
-                    : ''}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="field">
-            <span>수량</span>
+            <span>참석자 이름</span>
             <input
-              type="number"
-              min={1}
-              max={9}
-              value={activeAttendee?.quantity ?? 1}
-              disabled={meetingClosed || !orderReady}
-              onChange={(event) =>
-                handleQuantityChange(Number(event.target.value || 1))
-              }
+              value={nameInput}
+              onChange={(event) => handleNameChange(event.target.value)}
+              placeholder="이름만 입력하면 바로 메뉴를 고를 수 있습니다"
             />
           </label>
 
-          <div className="field">
-            <span>온도</span>
-            {selectedMenu ? (
-              <TemperatureSelector
-                availableTemperatures={selectedMenu.availableTemperatures}
-                disabled={fieldsDisabled}
-                value={activeAttendee?.temperature ?? ''}
-                onChange={handleTemperatureChange}
-              />
-            ) : (
-              <div className="selection-hint">
-                메뉴를 선택하면 HOT / ICE를 고를 수 있습니다.
-              </div>
-            )}
-          </div>
-
-          {canUseDecaf ? (
-            <div className="field field-full">
-              <span>커피 옵션</span>
-              <div className="checkbox-group">
-                <label
-                  className={`checkbox-chip ${activeAttendee?.decaf ? 'active' : ''}`}
-                >
-                  <input
-                    checked={Boolean(activeAttendee?.decaf)}
-                    disabled={fieldsDisabled}
-                    type="checkbox"
-                    onChange={(event) => handleDecafChange(event.target.checked)}
-                  />
-                  <span>디카페인 변경 +700원</span>
-                </label>
-              </div>
+          {nameInput.trim() ? (
+            <div className="status-callout">
+              이름 입력 완료. 아래에서 메뉴를 선택해주세요.
             </div>
           ) : null}
 
-          <label className="field field-full">
-            <span>추가 요청</span>
-            <input
-              value={activeAttendee?.note ?? ''}
-              disabled={meetingClosed || !orderReady}
-              onChange={(event) => handleNoteChange(event.target.value)}
-              placeholder="샷 추가, 덜 달게, 얼음 적게"
-            />
-          </label>
-        </div>
+          {attendees.length > 0 ? (
+            <div className="quick-attendee-scroll" role="list" aria-label="기존 참석자">
+              {attendees.map((attendee) => {
+                const status = getAttendeeStatus(attendee)
 
-        <div className="button-row order-card-actions quick-order-actions">
-          <button
-            className="button small"
-            type="button"
-            disabled={!canCompleteOrder || meetingClosed}
-            onClick={handleCompleteSelection}
-          >
-            선택 완료
-          </button>
-          <button
-            aria-pressed={Boolean(activeAttendee?.skipped)}
-            className="button ghost small"
-            type="button"
-            disabled={meetingClosed || !orderReady}
-            onClick={handleSkipToggle}
-          >
-            {activeAttendee?.skipped ? '스킵 취소' : '안마심'}
-          </button>
-        </div>
+                return (
+                  <button
+                    className={`quick-attendee-chip ${
+                      attendee.id === activeAttendeeId ? 'active' : ''
+                    }`}
+                    key={attendee.id}
+                    type="button"
+                    onClick={() => syncSelectedAttendee(attendee.id)}
+                  >
+                    {attendee.name}
+                    <span>{status.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+          ) : null}
 
-        {!orderReady ? (
-          <div className="personal-summary">
-            <strong>이름만 입력하면 바로 메뉴를 고를 수 있습니다.</strong>
-            <span>기존 이름을 누르면 기존 주문도 바로 수정할 수 있습니다.</span>
-          </div>
-        ) : activeAttendee?.skipped ? (
-          <div className="personal-summary">
-            <strong>{activeAttendee.name}님은 이번 주문에서 제외됩니다.</strong>
-            <span>필요하면 스킵 취소를 눌러 다시 메뉴를 선택해주세요.</span>
-          </div>
-        ) : selectedMenu && activeAttendee ? (
-          <div className="personal-summary">
-            <strong>
-              {activeAttendee.name} · {selectedMenu.name}
-              {activeAttendee.decaf && canUseDecaf ? ' · 디카페인' : ''}
-            </strong>
-            <span>
-              {activeAttendee.quantity}잔 ·{' '}
-              {activeAttendee.temperature || '온도 선택 전'} ·{' '}
-              {formatVisiblePrice(previewPrice, showPrices)}
-            </span>
-            <span>{activeAttendee.note || '추가 요청 없음'}</span>
-          </div>
-        ) : (
-          <div className="personal-summary">
-            <strong>{nameInput.trim() || '참석자'}님의 메뉴를 선택해주세요.</strong>
-            <span>온도까지 고른 뒤 선택 완료를 누르면 주문이 마무리됩니다.</span>
-          </div>
-        )}
-      </div>
-
-      <details className="admin-details quick-menu-details">
-        <summary>메뉴 전체 보기</summary>
-        <div className="admin-details-body">
-          <div className="panel">
-            {menuItems.length === 0 ? (
-              <div className="empty-state compact">등록된 메뉴가 없습니다.</div>
-            ) : (
-              <div className="catalog-list quick-order-menu-list">
+          <div className="quick-order-fields">
+            <label className="field field-full">
+              <span>메뉴 선택</span>
+              <select
+                value={activeAttendee?.menuItemId ?? ''}
+                disabled={meetingClosed || menuItems.length === 0 || !orderReady}
+                onChange={(event) => handleMenuSelect(event.target.value)}
+              >
+                <option value="">
+                  {!orderReady
+                    ? '먼저 이름을 입력해주세요'
+                    : menuItems.length === 0
+                      ? '등록된 메뉴가 없습니다'
+                      : '메뉴를 선택해주세요'}
+                </option>
                 {menuItems.map((item) => (
-                  <article className="catalog-row" key={item.id}>
-                    <div>
-                      <strong>{item.name}</strong>
-                      <p>{item.availableTemperatures.join(' / ')}</p>
-                    </div>
-                    <strong>{formatVisiblePrice(item.price, showPrices)}</strong>
-                  </article>
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                    {showPrices
+                      ? ` (${formatVisiblePrice(item.price, showPrices)})`
+                      : ''}
+                  </option>
                 ))}
+              </select>
+            </label>
+
+            {selectedMenu ? (
+              <div className="field field-full">
+                <div className="menu-info-actions">
+                  <button
+                    className="button secondary small"
+                    type="button"
+                    onClick={() => openNutritionSheet(selectedMenu)}
+                  >
+                    영양정보 보기
+                  </button>
+                  <span className="menu-info-note">
+                    {selectedMenu.nutritionInfo
+                      ? '칼로리, 당류, 카페인 정보를 팝업으로 확인할 수 있습니다.'
+                      : '등록된 영양정보가 없으면 팝업에서 안내 문구가 표시됩니다.'}
+                  </span>
+                </div>
               </div>
-            )}
+            ) : null}
+
+            <label className="field">
+              <span>수량</span>
+              <input
+                type="number"
+                min={1}
+                max={9}
+                value={activeAttendee?.quantity ?? 1}
+                disabled={meetingClosed || !orderReady}
+                onChange={(event) =>
+                  handleQuantityChange(Number(event.target.value || 1))
+                }
+              />
+            </label>
+
+            <div className="field">
+              <span>온도</span>
+              {selectedMenu ? (
+                <TemperatureSelector
+                  availableTemperatures={selectedMenu.availableTemperatures}
+                  disabled={fieldsDisabled}
+                  value={activeAttendee?.temperature ?? ''}
+                  onChange={handleTemperatureChange}
+                />
+              ) : (
+                <div className="selection-hint">
+                  메뉴를 선택하면 HOT / ICE를 고를 수 있습니다.
+                </div>
+              )}
+            </div>
+
+            {canUseDecaf ? (
+              <div className="field field-full">
+                <span>커피 옵션</span>
+                <div className="checkbox-group">
+                  <label
+                    className={`checkbox-chip ${activeAttendee?.decaf ? 'active' : ''}`}
+                  >
+                    <input
+                      checked={Boolean(activeAttendee?.decaf)}
+                      disabled={fieldsDisabled}
+                      type="checkbox"
+                      onChange={(event) => handleDecafChange(event.target.checked)}
+                    />
+                    <span>디카페인 변경 +700원</span>
+                  </label>
+                </div>
+              </div>
+            ) : null}
+
+            <label className="field field-full">
+              <span>추가 요청</span>
+              <input
+                value={activeAttendee?.note ?? ''}
+                disabled={meetingClosed || !orderReady}
+                onChange={(event) => handleNoteChange(event.target.value)}
+                placeholder="샷 추가, 연하게, 얼음 적게"
+              />
+            </label>
           </div>
+
+          <div className="button-row order-card-actions quick-order-actions">
+            <button
+              className="button small"
+              type="button"
+              disabled={!canCompleteOrder || meetingClosed}
+              onClick={handleCompleteSelection}
+            >
+              선택 완료
+            </button>
+            <button
+              aria-pressed={Boolean(activeAttendee?.skipped)}
+              className="button ghost small"
+              type="button"
+              disabled={meetingClosed || !orderReady}
+              onClick={handleSkipToggle}
+            >
+              {activeAttendee?.skipped ? '스킵 취소' : '안마심'}
+            </button>
+          </div>
+
+          {!orderReady ? (
+            <div className="personal-summary">
+              <strong>이름만 입력하면 바로 메뉴를 고를 수 있습니다.</strong>
+              <span>기존 이름을 누르면 기존 주문도 바로 수정할 수 있습니다.</span>
+            </div>
+          ) : activeAttendee?.skipped ? (
+            <div className="personal-summary">
+              <strong>{activeAttendee.name}님은 이번 주문에서 제외됩니다.</strong>
+              <span>필요하면 스킵 취소를 눌러 다시 메뉴를 선택해주세요.</span>
+            </div>
+          ) : selectedMenu && activeAttendee ? (
+            <div className="personal-summary">
+              <strong>
+                {activeAttendee.name} · {selectedMenu.name}
+                {activeAttendee.decaf && canUseDecaf ? ' · 디카페인' : ''}
+              </strong>
+              <span>
+                {activeAttendee.quantity}잔 ·{' '}
+                {activeAttendee.temperature || '온도 선택 전'} ·{' '}
+                {formatVisiblePrice(previewPrice, showPrices)}
+              </span>
+              <span>{activeAttendee.note || '추가 요청 없음'}</span>
+            </div>
+          ) : (
+            <div className="personal-summary">
+              <strong>{nameInput.trim() || '참석자'}님의 메뉴를 선택해주세요.</strong>
+              <span>온도까지 고른 뒤 선택 완료를 누르면 주문이 마무리됩니다.</span>
+            </div>
+          )}
         </div>
-      </details>
-    </section>
+
+        <details className="admin-details quick-menu-details">
+          <summary>메뉴 전체 보기</summary>
+          <div className="admin-details-body">
+            <div className="panel">
+              {menuItems.length === 0 ? (
+                <div className="empty-state compact">등록된 메뉴가 없습니다.</div>
+              ) : (
+                <div className="catalog-list quick-order-menu-list">
+                  {menuItems.map((item) => (
+                    <article className="catalog-row" key={item.id}>
+                      <div>
+                        <strong>{item.name}</strong>
+                        <p>{item.availableTemperatures.join(' / ')}</p>
+                      </div>
+                      <div className="catalog-row-actions">
+                        <strong>{formatVisiblePrice(item.price, showPrices)}</strong>
+                        <button
+                          className="button ghost small"
+                          type="button"
+                          onClick={() => openNutritionSheet(item)}
+                        >
+                          영양정보
+                        </button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </details>
+      </section>
+    </>
   )
 }

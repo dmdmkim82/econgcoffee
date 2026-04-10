@@ -31,11 +31,12 @@ import {
   saveMeetingToApi,
 } from './lib/api'
 import {
-  type Attendee,
-  type MeetingSettings,
-  type MenuItem,
-  type Snapshot,
-  type TemperatureOption,
+    type Attendee,
+    type MeetingSettings,
+    type MenuItem,
+    type NutritionInfo,
+    type Snapshot,
+    type TemperatureOption,
   createLatelierMenuItems,
   createId,
   formatCountdown,
@@ -563,7 +564,7 @@ function MeetingPage({
   function updateMenuField(
     menuItemId: string,
     field: keyof MenuItem,
-    value: string | number | TemperatureOption[],
+    value: string | number | TemperatureOption[] | NutritionInfo | null,
   ) {
     patchSnapshot((currentSnapshot) => ({
       ...currentSnapshot,
@@ -668,15 +669,16 @@ function MeetingPage({
   ) {
     patchSnapshot((currentSnapshot) => ({
       ...currentSnapshot,
-      menuItems: mergeMenuItems(currentSnapshot.menuItems, [
-        {
-          id: createId('menu'),
-          name,
-          price,
-          availableTemperatures,
-          source: 'manual',
-        },
-      ]),
+        menuItems: mergeMenuItems(currentSnapshot.menuItems, [
+          {
+            id: createId('menu'),
+            name,
+            price,
+            availableTemperatures,
+            nutritionInfo: null,
+            source: 'manual',
+          },
+        ]),
     }))
     setFeedback('수동 메뉴를 추가했습니다.')
   }
@@ -748,6 +750,7 @@ function MeetingPage({
       name: candidate.name,
       price: candidate.price,
       availableTemperatures: inferTemperaturesFromMenuName(candidate.name),
+      nutritionInfo: null,
       source: 'ocr' as const,
     }))
 
@@ -811,6 +814,7 @@ function MeetingPage({
         name: candidate.name,
         price: candidate.price,
         availableTemperatures: inferTemperaturesFromMenuName(candidate.name),
+        nutritionInfo: null,
         source: 'ocr' as const,
       }))
 

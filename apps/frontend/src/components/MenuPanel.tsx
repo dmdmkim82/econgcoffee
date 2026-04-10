@@ -1,5 +1,9 @@
 import { useState, type FormEvent } from 'react'
-import { type MenuItem, type TemperatureOption } from '../lib/meeting'
+import {
+  type MenuItem,
+  type NutritionInfo,
+  type TemperatureOption,
+} from '../lib/meeting'
 import { formatVisiblePrice } from '../lib/menu'
 
 type MenuPanelProps = {
@@ -13,7 +17,7 @@ type MenuPanelProps = {
   onUpdateMenu: (
     menuItemId: string,
     field: keyof MenuItem,
-    value: string | number | TemperatureOption[],
+    value: string | number | TemperatureOption[] | NutritionInfo | null,
   ) => void
   onRemoveMenu: (menuItemId: string) => void
   onLoadPresetMenu: () => void

@@ -2,6 +2,7 @@ import type {
   Attendee,
   MeetingSettings,
   MenuItem,
+  NutritionInfo,
   Snapshot,
   TemperatureOption,
 } from '../../../../shared/meeting'
@@ -10,6 +11,7 @@ export type {
   Attendee,
   MeetingSettings,
   MenuItem,
+  NutritionInfo,
   Snapshot,
   TemperatureOption,
 }
@@ -49,7 +51,44 @@ const NON_COFFEE_KEYWORDS = [
   '버블',
 ]
 
-type PresetMenuItem = Omit<MenuItem, 'id' | 'source'>
+type PresetMenuItem = Omit<MenuItem, 'id' | 'source' | 'nutritionInfo'> & {
+  nutritionInfo?: NutritionInfo | null
+}
+
+const MENU_NUTRITION_LOOKUP: Record<string, NutritionInfo> = {
+  [normalizeMenuLookupKey('바삭 피스타치오 바닐라 크림 콜드 브루')]: {
+    caloriesKcal: 210,
+    sugarG: 18,
+    proteinG: 3,
+    sodiumMg: 50,
+    saturatedFatG: 9,
+    caffeineMg: 125,
+  },
+  [normalizeMenuLookupKey('서울 막걸리향 콜드브루')]: {
+    caloriesKcal: 205,
+    sugarG: 38,
+    proteinG: 3,
+    sodiumMg: 55,
+    saturatedFatG: 2.1,
+    caffeineMg: 79,
+  },
+  [normalizeMenuLookupKey('나이트로 바닐라 크림')]: {
+    caloriesKcal: 80,
+    sugarG: 10,
+    proteinG: 1,
+    sodiumMg: 40,
+    saturatedFatG: 2,
+    caffeineMg: 232,
+  },
+  [normalizeMenuLookupKey('나이트로 콜드 브루')]: {
+    caloriesKcal: 5,
+    sugarG: 0,
+    proteinG: 0,
+    sodiumMg: 5,
+    saturatedFatG: 0,
+    caffeineMg: 245,
+  },
+}
 
 const LATELIER_MENU_PRESET: PresetMenuItem[] = [
   { name: '아메리카노', price: 1800, availableTemperatures: HOT_AND_ICE },
@@ -122,6 +161,14 @@ function pickNumber(value: unknown, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback
 }
 
+function normalizeMenuLookupKey(name: string) {
+  return name.normalize('NFKC').replace(/\s+/g, '').toLowerCase()
+}
+
+export function findNutritionInfo(menuName: string) {
+  return MENU_NUTRITION_LOOKUP[normalizeMenuLookupKey(menuName)] ?? null
+}
+
 function sortTemperatures(temperatures: TemperatureOption[]) {
   return TEMPERATURE_ORDER.filter((temperature) =>
     temperatures.includes(temperature),
@@ -151,12 +198,30 @@ function getMenuDedupeKey(name: string, price: number) {
   return `${name.trim().toLowerCase()}::${Math.round(price)}`
 }
 
+function normalizeNutritionInfo(value: unknown, menuName: string) {
+  if (value && typeof value === 'object') {
+    const source = value as Partial<NutritionInfo>
+
+    return {
+      caloriesKcal: pickNumber(source.caloriesKcal),
+      sugarG: pickNumber(source.sugarG),
+      proteinG: pickNumber(source.proteinG),
+      sodiumMg: pickNumber(source.sodiumMg),
+      saturatedFatG: pickNumber(source.saturatedFatG),
+      caffeineMg: pickNumber(source.caffeineMg),
+    }
+  }
+
+  return findNutritionInfo(menuName)
+}
+
 function createPresetMenuItem(item: PresetMenuItem): MenuItem {
   return {
     id: createId('menu'),
     name: item.name,
     price: item.price,
     availableTemperatures: [...HOT_AND_ICE],
+    nutritionInfo: normalizeNutritionInfo(item.nutritionInfo, item.name),
     source: 'manual',
   }
 }
@@ -219,6 +284,7 @@ function normalizeMenuItem(item: Partial<MenuItem>): MenuItem {
       item.availableTemperatures,
       fallbackTemperatures,
     ),
+    nutritionInfo: normalizeNutritionInfo(item.nutritionInfo, name),
     source: item.source === 'ocr' ? 'ocr' : 'manual',
   }
 }
@@ -347,6 +413,8 @@ export function mergeMenuItems(currentItems: MenuItem[], nextItems: MenuItem[]) 
           existing.availableTemperatures,
           normalizedNextItem.availableTemperatures,
         ),
+        nutritionInfo:
+          existing.nutritionInfo ?? normalizedNextItem.nutritionInfo ?? null,
         source: existing.source === 'manual' ? 'manual' : normalizedNextItem.source,
       }
       continue

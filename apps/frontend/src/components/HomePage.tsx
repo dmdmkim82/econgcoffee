@@ -85,8 +85,8 @@ export function HomePage({
             <span className="eyebrow">SK에코플랜트 미팅 커피 취합</span>
             <BrandLogo size="hero" />
             <p className="hero-description">
-              이름만 입력하고 바로 메뉴를 고를 수 있는 모바일 중심 커피 주문 보드입니다.
-              모임 생성부터 메뉴 OCR, 참석자 주문 취합, 최종 요약까지 한 번에 정리합니다.
+              사내 미팅 커피 주문을 빠르게 취합하고, 취합자와 참석자 링크를 나눠
+              모바일 화면에서 바로 주문을 받을 수 있게 구성했습니다.
             </p>
             <div className="compact-metric-grid">
               <article className="mini-stat">
