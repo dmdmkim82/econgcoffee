@@ -64,6 +64,11 @@ const THEME_STORAGE_KEY = 'ekong-coffee-theme'
 
 type ThemeMode = 'light' | 'dark'
 
+function getStoredTheme(): ThemeMode {
+  const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
+  return storedTheme === 'light' ? 'light' : 'dark'
+}
+
 type OcrState = {
   status: 'idle' | 'processing' | 'success' | 'error'
   progress: number
@@ -88,10 +93,7 @@ function App() {
 
 function AppRoutes() {
   const [store, setStore] = useState<MeetingsStore>(() => loadMeetingsStore())
-  const [theme, setTheme] = useState<ThemeMode>(() => {
-    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
-    return storedTheme === 'dark' ? 'dark' : 'light'
-  })
+  const [theme, setTheme] = useState<ThemeMode>(() => getStoredTheme())
   const initialStoreRef = useRef(store)
 
   useEffect(() => {
