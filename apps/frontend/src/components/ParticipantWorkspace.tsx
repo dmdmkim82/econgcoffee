@@ -6,6 +6,7 @@ type ParticipantWorkspaceProps = {
   meetingClosed: boolean
   showPrices: boolean
   utilityBar?: React.ReactNode
+  onCompleteOrder: (attendeeName: string) => void
   onAddAttendee: (name: string, team: string) => string
   onUpdateAttendee: (
     attendeeId: string,
@@ -20,6 +21,7 @@ export function ParticipantWorkspace({
   meetingClosed,
   showPrices,
   utilityBar,
+  onCompleteOrder,
   onAddAttendee,
   onUpdateAttendee,
   onSkipAttendee,
@@ -36,6 +38,7 @@ export function ParticipantWorkspace({
         onAddAttendee={onAddAttendee}
         onUpdateAttendee={onUpdateAttendee}
         onSkipAttendee={onSkipAttendee}
+        onCompleteOrder={onCompleteOrder}
       />
 
       {utilityBar}

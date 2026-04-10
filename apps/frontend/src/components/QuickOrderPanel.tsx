@@ -21,6 +21,7 @@ type QuickOrderPanelProps = {
     value: string | number | boolean,
   ) => void
   onSkipAttendee: (attendeeId: string, skipped: boolean) => void
+  onCompleteOrder: (attendeeName: string) => void
 }
 
 function normalizeName(value: string) {
@@ -56,6 +57,7 @@ export function QuickOrderPanel({
   onAddAttendee,
   onUpdateAttendee,
   onSkipAttendee,
+  onCompleteOrder,
 }: QuickOrderPanelProps) {
   const { meeting, attendees, menuItems } = snapshot
   const [selectedAttendeeId, setSelectedAttendeeId] = useState('')
@@ -83,6 +85,11 @@ export function QuickOrderPanel({
   const canUseDecaf = Boolean(selectedMenu && isCoffeeMenuName(selectedMenu.name))
   const orderReady = Boolean(activeAttendee || nameInput.trim())
   const fieldsDisabled = meetingClosed || !orderReady || Boolean(activeAttendee?.skipped)
+  const canCompleteOrder = Boolean(
+    activeAttendee &&
+      (activeAttendee.skipped ||
+        (selectedMenu && activeAttendee.temperature)),
+  )
 
   const completionStats = useMemo(() => {
     const completed = attendees.filter(
@@ -106,7 +113,8 @@ export function QuickOrderPanel({
   const countdownLabel = meetingClosed ? '주문 마감' : formatCountdown(meeting.deadline)
   const previewPrice =
     selectedMenu && activeAttendee
-      ? getMenuDisplayPrice(selectedMenu, activeAttendee.decaf) * activeAttendee.quantity
+      ? getMenuDisplayPrice(selectedMenu, activeAttendee.decaf) *
+        activeAttendee.quantity
       : 0
 
   function syncSelectedAttendee(attendeeId: string) {
@@ -213,6 +221,14 @@ export function QuickOrderPanel({
     onSkipAttendee(attendeeId, !activeAttendee?.skipped)
   }
 
+  function handleCompleteSelection() {
+    if (!activeAttendee || !canCompleteOrder) {
+      return
+    }
+
+    onCompleteOrder(activeAttendee.name)
+  }
+
   return (
     <section className="panel panel-wide participant-entry-panel quick-order-panel">
       <div className="panel-head">
@@ -302,7 +318,9 @@ export function QuickOrderPanel({
               {menuItems.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.name}
-                  {showPrices ? ` (${formatVisiblePrice(item.price, showPrices)})` : ''}
+                  {showPrices
+                    ? ` (${formatVisiblePrice(item.price, showPrices)})`
+                    : ''}
                 </option>
               ))}
             </select>
@@ -332,7 +350,9 @@ export function QuickOrderPanel({
                 onChange={handleTemperatureChange}
               />
             ) : (
-              <div className="selection-hint">메뉴를 선택하면 HOT / ICE를 고를 수 있습니다.</div>
+              <div className="selection-hint">
+                메뉴를 선택하면 HOT / ICE를 고를 수 있습니다.
+              </div>
             )}
           </div>
 
@@ -340,7 +360,9 @@ export function QuickOrderPanel({
             <div className="field field-full">
               <span>커피 옵션</span>
               <div className="checkbox-group">
-                <label className={`checkbox-chip ${activeAttendee?.decaf ? 'active' : ''}`}>
+                <label
+                  className={`checkbox-chip ${activeAttendee?.decaf ? 'active' : ''}`}
+                >
                   <input
                     checked={Boolean(activeAttendee?.decaf)}
                     disabled={fieldsDisabled}
@@ -364,7 +386,15 @@ export function QuickOrderPanel({
           </label>
         </div>
 
-        <div className="button-row order-card-actions">
+        <div className="button-row order-card-actions quick-order-actions">
+          <button
+            className="button small"
+            type="button"
+            disabled={!canCompleteOrder || meetingClosed}
+            onClick={handleCompleteSelection}
+          >
+            선택 완료
+          </button>
           <button
             aria-pressed={Boolean(activeAttendee?.skipped)}
             className="button ghost small"
@@ -393,7 +423,8 @@ export function QuickOrderPanel({
               {activeAttendee.decaf && canUseDecaf ? ' · 디카페인' : ''}
             </strong>
             <span>
-              {activeAttendee.quantity}잔 · {activeAttendee.temperature || '온도 선택 전'} ·{' '}
+              {activeAttendee.quantity}잔 ·{' '}
+              {activeAttendee.temperature || '온도 선택 전'} ·{' '}
               {formatVisiblePrice(previewPrice, showPrices)}
             </span>
             <span>{activeAttendee.note || '추가 요청 없음'}</span>
@@ -401,7 +432,7 @@ export function QuickOrderPanel({
         ) : (
           <div className="personal-summary">
             <strong>{nameInput.trim() || '참석자'}님의 메뉴를 선택해 주세요.</strong>
-            <span>메뉴를 고르는 즉시 주문이 저장됩니다.</span>
+            <span>온도까지 고른 뒤 선택 완료를 누르면 주문이 마무리됩니다.</span>
           </div>
         )}
       </div>

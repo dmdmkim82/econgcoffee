@@ -937,6 +937,10 @@ function MeetingPage({
     setFeedback('모임 데이터를 초기화했습니다.')
   }
 
+  function handleCompleteOrder(attendeeName: string) {
+    setFeedback(`${attendeeName}님의 주문 선택이 완료되었습니다.`)
+  }
+
   return (
     <div className="shell">
       <MeetingTopbar
@@ -991,6 +995,7 @@ function MeetingPage({
             onAddAttendee={handleAddAttendee}
             onUpdateAttendee={updateAttendeeField}
             onSkipAttendee={handleSkipAttendee}
+            onCompleteOrder={handleCompleteOrder}
           />
           <MeetingUtilityBar
             summaryCount={groupedOrders.length}
@@ -1117,6 +1122,7 @@ function MeetingPage({
                 onOpenMore={() => setIsMoreSheetOpen(true)}
               />
             }
+            onCompleteOrder={handleCompleteOrder}
             onAddAttendee={handleAddAttendee}
             onUpdateAttendee={updateAttendeeField}
             onSkipAttendee={handleSkipAttendee}

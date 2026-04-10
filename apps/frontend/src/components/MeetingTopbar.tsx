@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { BrandLogo } from './BrandLogo'
 
 type MeetingTopbarProps = {
   shareCode: string
@@ -13,12 +14,15 @@ export function MeetingTopbar({
 }: MeetingTopbarProps) {
   return (
     <section className="meeting-topbar">
-      <div className="meeting-topbar-copy">
-        <Link className="back-link" to="/">
-          홈으로
-        </Link>
-        <strong>{title || '에콩커피 모임'}</strong>
-        <span>모임 코드 {shareCode}</span>
+      <div className="meeting-topbar-row">
+        <BrandLogo compact />
+        <div className="meeting-topbar-copy">
+          <Link className="back-link" to="/">
+            홈으로
+          </Link>
+          <strong>{title || '에콩커피 모임'}</strong>
+          <span>모임 코드 {shareCode}</span>
+        </div>
       </div>
 
       <div className="role-tabs">
