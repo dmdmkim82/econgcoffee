@@ -20,7 +20,8 @@ export type {
 export const STORAGE_KEY = 'ekong-coffee-state-v1'
 export const LATELIER_CAFE_NAME = "L'atelier"
 export const STARBUCKS_CAFE_NAME = '스타벅스'
-export const CAFE_PRESETS = [LATELIER_CAFE_NAME, STARBUCKS_CAFE_NAME] as const
+export const PAUL_BASSETT_CAFE_NAME = '폴 바셋'
+export const CAFE_PRESETS = [LATELIER_CAFE_NAME, STARBUCKS_CAFE_NAME, PAUL_BASSETT_CAFE_NAME] as const
 export type CafePresetName = (typeof CAFE_PRESETS)[number]
 
 const TEMPERATURE_ORDER: TemperatureOption[] = ['HOT', 'ICE']
@@ -117,6 +118,53 @@ const LATELIER_MENU_PRESET: PresetMenuItem[] = [
   { name: '딸기바나나스무디', price: 4300, availableTemperatures: ICE_ONLY },
   { name: '블루베리바나나스무디', price: 4300, availableTemperatures: ICE_ONLY },
   { name: '아보카도바나나스무디', price: 4300, availableTemperatures: ICE_ONLY },
+]
+
+const PAUL_BASSETT_MENU_PRESET: PresetMenuItem[] = [
+  // 커피
+  { name: '룽고', price: 5300, availableTemperatures: ICE_ONLY },
+  { name: '카페라떼', price: 5900, availableTemperatures: HOT_AND_ICE },
+  { name: '아이스크림 카페라떼', price: 7500, availableTemperatures: ICE_ONLY },
+  { name: '바닐라빈 카페 라떼', price: 6500, availableTemperatures: HOT_AND_ICE },
+  { name: '스페니쉬 카페 라떼', price: 6500, availableTemperatures: HOT_AND_ICE },
+  { name: '시나몬 카페 라떼', price: 6500, availableTemperatures: HOT_AND_ICE },
+  { name: '제주말차 카페라떼', price: 6900, availableTemperatures: HOT_AND_ICE },
+  { name: '커피큐브 WITH 룽고', price: 6800, availableTemperatures: ICE_ONLY },
+  { name: '커피큐브 WITH 카페라떼', price: 7400, availableTemperatures: ICE_ONLY },
+  // 디카페인
+  { name: '디카페인 아이스크림 카페라떼', price: 8000, availableTemperatures: ICE_ONLY },
+  { name: '디카페인 아메리카노', price: 5200, availableTemperatures: HOT_AND_ICE },
+  { name: '디카페인 카페라떼', price: 6400, availableTemperatures: HOT_AND_ICE },
+  { name: '디카페인 락토프리 카페라떼', price: 6400, availableTemperatures: HOT_AND_ICE },
+  { name: '디카페인 카페오트', price: 6400, availableTemperatures: HOT_AND_ICE },
+  { name: '디카페인 카푸치노', price: 6400, availableTemperatures: HOT_AND_ICE },
+  { name: '디카페인 플랫화이트', price: 6400, availableTemperatures: HOT_AND_ICE },
+  { name: '디카페인 스페니쉬 카페라떼', price: 7000, availableTemperatures: HOT_AND_ICE },
+  { name: '디카페인 바닐라빈 카페라떼', price: 7000, availableTemperatures: HOT_AND_ICE },
+  { name: '디카페인 시나몬 카페라떼', price: 7000, availableTemperatures: HOT_AND_ICE },
+  { name: '디카페인 카라멜 마키아토', price: 7000, availableTemperatures: HOT_AND_ICE },
+  // 음료
+  { name: '멜론 라임 에이드', price: 6900, availableTemperatures: ICE_ONLY },
+  { name: '제주 말차 라떼', price: 6300, availableTemperatures: HOT_AND_ICE },
+  { name: '제주말차 아이스크림 라떼', price: 7900, availableTemperatures: ICE_ONLY },
+  { name: '납작복숭아 에이드', price: 6900, availableTemperatures: ICE_ONLY },
+  { name: '밀크 초콜릿', price: 6300, availableTemperatures: HOT_AND_ICE },
+  { name: '제주 한라봉티', price: 5900, availableTemperatures: HOT_AND_ICE },
+  // 신 메뉴
+  { name: '초콜릿 아이스크림 라떼', price: 7800, availableTemperatures: ICE_ONLY },
+  { name: '코코넛 판단 카페 라떼', price: 7100, availableTemperatures: HOT_AND_ICE },
+  { name: '코코넛 말차 라떼', price: 6800, availableTemperatures: HOT_AND_ICE },
+  { name: '콜드브루 푸룻프룻', price: 6000, availableTemperatures: ICE_ONLY },
+  { name: '콜드브루 라떼 푸룻프룻', price: 7000, availableTemperatures: ICE_ONLY },
+  { name: '체리블라썸 아이스크림 카페라떼', price: 7900, availableTemperatures: ICE_ONLY },
+  { name: '체리블라썸 카페라떼', price: 6900, availableTemperatures: HOT_AND_ICE },
+  { name: '체리블라썸 말차라떼', price: 6800, availableTemperatures: HOT_AND_ICE },
+  { name: '체리블라썸 아이스크림(컵)', price: 4800, availableTemperatures: ICE_ONLY },
+  { name: '체리블라썸 요거트 프라페', price: 7200, availableTemperatures: ICE_ONLY },
+  { name: '딥 초콜릿 라떼', price: 6900, availableTemperatures: ICE_ONLY },
+  { name: '고창 고구마 라떼', price: 6500, availableTemperatures: ICE_ONLY },
+  { name: '고창 땅콩 카페라떼', price: 7200, availableTemperatures: ICE_ONLY },
+  { name: '고창 복분자 에이드', price: 6900, availableTemperatures: ICE_ONLY },
 ]
 
 export function createId(prefix: string) {
@@ -263,9 +311,17 @@ export function createLatelierMenuItems() {
   return LATELIER_MENU_PRESET.map(createPresetMenuItem)
 }
 
+export function createPaulBassettMenuItems() {
+  return PAUL_BASSETT_MENU_PRESET.map(createPresetMenuItem)
+}
+
 function resolveCafePresetName(cafeName?: string): CafePresetName {
   if (cafeName === STARBUCKS_CAFE_NAME) {
     return STARBUCKS_CAFE_NAME
+  }
+
+  if (cafeName === PAUL_BASSETT_CAFE_NAME) {
+    return PAUL_BASSETT_CAFE_NAME
   }
 
   return LATELIER_CAFE_NAME
@@ -281,6 +337,10 @@ function createInitialMenuItems(
 
   if (cafeName === LATELIER_CAFE_NAME) {
     return createLatelierMenuItems()
+  }
+
+  if (cafeName === PAUL_BASSETT_CAFE_NAME) {
+    return createPaulBassettMenuItems()
   }
 
   return []

@@ -41,6 +41,8 @@ import {
   STARBUCKS_CAFE_NAME,
   type TemperatureOption,
   createLatelierMenuItems,
+  createPaulBassettMenuItems,
+  PAUL_BASSETT_CAFE_NAME,
   createId,
   formatCountdown,
   formatDeadlineLabel,
@@ -732,6 +734,21 @@ function MeetingPage({
     setFeedback("L'atelier 기본 메뉴를 현재 미팅에 추가했습니다.")
   }
 
+  function handleLoadPaulBassettMenu() {
+    patchSnapshot((currentSnapshot) => ({
+      ...currentSnapshot,
+      menuItems: mergeMenuItems(
+        currentSnapshot.menuItems,
+        createPaulBassettMenuItems(),
+      ),
+      meeting: {
+        ...currentSnapshot.meeting,
+        cafeName: currentSnapshot.meeting.cafeName || PAUL_BASSETT_CAFE_NAME,
+      },
+    }))
+    setFeedback('폴 바셋 메뉴를 현재 미팅에 추가했습니다.')
+  }
+
   function handleLoadStarbucksMenu(
     menus: StarbucksCatalogMenu[],
     categoryNames: string[],
@@ -1179,6 +1196,7 @@ function MeetingPage({
                   onUpdateMenu={updateMenuField}
                   onRemoveMenu={handleRemoveMenu}
                   onLoadLatelierMenu={handleLoadLatelierMenu}
+                  onLoadPaulBassettMenu={handleLoadPaulBassettMenu}
                   onLoadStarbucksMenu={handleLoadStarbucksMenu}
                   onTogglePriceVisibility={() =>
                     setShowPrices((currentValue) => !currentValue)

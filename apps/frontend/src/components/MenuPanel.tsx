@@ -36,6 +36,7 @@ type MenuPanelProps = {
   ) => void
   onRemoveMenu: (menuItemId: string) => void
   onLoadLatelierMenu: () => void
+  onLoadPaulBassettMenu: () => void
   onLoadStarbucksMenu: (
     menus: StarbucksCatalogMenu[],
     categoryNames: string[],
@@ -76,6 +77,7 @@ export function MenuPanel({
   onUpdateMenu,
   onRemoveMenu,
   onLoadLatelierMenu,
+  onLoadPaulBassettMenu,
   onLoadStarbucksMenu,
   onTogglePriceVisibility,
 }: MenuPanelProps) {
@@ -222,6 +224,13 @@ export function MenuPanel({
           <button
             className="button secondary small"
             type="button"
+            onClick={onLoadPaulBassettMenu}
+          >
+            폴 바셋 메뉴 불러오기
+          </button>
+          <button
+            className="button secondary small"
+            type="button"
             disabled={isLoadingStarbucks}
             onClick={() => {
               void handleOpenStarbucksSheet()
@@ -229,7 +238,7 @@ export function MenuPanel({
           >
             {isLoadingStarbucks
               ? '스타벅스 불러오는 중'
-              : '스타벅스 카테고리 선택'}
+              : '스타벅스 메뉴 선택'}
           </button>
           <button
             className="button ghost small"
@@ -241,8 +250,8 @@ export function MenuPanel({
         </div>
 
         <p className="panel-note">
-          현재 카페: {cafeName || '미정'} · 스타벅스 메뉴는 카테고리별로 골라서 불러올 수
-          있고, 가격은 공식 사이트에 없어 `가격 미정`으로 들어옵니다.
+          현재 카페: {cafeName || '미정'} · 버튼으로 카페별 메뉴를 불러오거나 아래에서
+          직접 추가할 수 있습니다.
         </p>
         {menuItems.length === 0 ? (
           <div className="empty-state">
