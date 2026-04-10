@@ -3,6 +3,7 @@ import {
   type Snapshot,
   type TemperatureOption,
 } from './meeting'
+import { fetchStarbucksCatalogDirect } from './starbucks'
 
 type MeetingsResponse = {
   meetings: Snapshot[]
@@ -82,7 +83,15 @@ export async function deleteMeetingFromApi(shareCode: string) {
 }
 
 export async function fetchStarbucksDrinkCatalog() {
-  return request<StarbucksCatalogResponse>(
-    withApiBase('/api/catalogs/starbucks/drinks'),
-  )
+  if (apiSyncEnabled) {
+    try {
+      return await request<StarbucksCatalogResponse>(
+        withApiBase('/api/catalogs/starbucks/drinks'),
+      )
+    } catch {
+      // Backend unreachable — fall through to direct fetch below.
+    }
+  }
+
+  return fetchStarbucksCatalogDirect()
 }
