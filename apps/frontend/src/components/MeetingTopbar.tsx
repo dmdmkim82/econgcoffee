@@ -15,7 +15,7 @@ export function MeetingTopbar({
   return (
     <section className="meeting-topbar">
       <div className="meeting-topbar-row">
-        <BrandLogo compact />
+        <BrandLogo size="compact" />
         <div className="meeting-topbar-copy">
           <Link className="back-link" to="/">
             홈으로

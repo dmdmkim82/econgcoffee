@@ -1,6 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { type Snapshot } from '../lib/meeting'
+import { BrandLogo } from './BrandLogo'
 
 type HomePageProps = {
   meetings: Snapshot[]
@@ -78,13 +79,14 @@ export function HomePage({
             {theme === 'dark' ? '라이트 모드' : '다크 모드'}
           </button>
         </div>
+
         <section className="compact-home-hero">
-          <article className="panel compact-home-copy">
+          <article className="panel compact-home-copy home-brand-panel">
             <span className="eyebrow">SK에코플랜트 미팅 커피 취합</span>
-            <h1>에콩커피</h1>
+            <BrandLogo size="hero" />
             <p className="hero-description">
-              모임 생성, 메뉴 OCR, 참석자 주문 취합을 세로 화면에서 빠르게
-              처리할 수 있도록 만든 모바일 우선 주문 보드입니다.
+              이름만 입력하고 바로 메뉴를 고를 수 있는 모바일 중심 커피 주문 보드입니다.
+              모임 생성부터 메뉴 OCR, 참석자 주문 취합, 최종 요약까지 한 번에 정리합니다.
             </p>
             <div className="compact-metric-grid">
               <article className="mini-stat">
@@ -106,7 +108,7 @@ export function HomePage({
             <div className="panel-head">
               <div>
                 <span className="panel-kicker">바로 시작</span>
-                <h2>새 모임 만들기 또는 코드로 참석</h2>
+                <h2>새 모임을 만들거나 코드로 바로 입장하세요</h2>
               </div>
             </div>
             <div className="quick-action-grid">
@@ -131,14 +133,14 @@ export function HomePage({
           <div className="panel-head">
             <div>
               <span className="panel-kicker">최근 모임</span>
-              <h2>다시 열어볼 모임</h2>
+              <h2>다시 이어서 보기</h2>
             </div>
             <span className="status-pill neutral">{meetings.length}개 저장됨</span>
           </div>
 
           {meetings.length === 0 ? (
             <div className="empty-state compact">
-              아직 저장된 모임이 없습니다. 첫 모임을 만들고 커피 주문을 시작해보세요.
+              아직 저장된 모임이 없습니다. 첫 모임을 만들어 커피 주문을 시작해보세요.
             </div>
           ) : (
             <div className="recent-card-list">
@@ -166,7 +168,7 @@ export function HomePage({
                         {snapshot.meeting.place || '장소 미정'}
                       </span>
                       <span>
-                        주문 응답 {completed}/{snapshot.attendees.length} · 메뉴{' '}
+                        주문 응답 {completed}/{snapshot.attendees.length}명 · 메뉴{' '}
                         {snapshot.menuItems.length}개
                       </span>
                     </div>
@@ -179,14 +181,14 @@ export function HomePage({
                           openMeeting(snapshot.meeting.shareCode, 'organizer')
                         }
                       >
-                        취합자 화면
+                        취합 화면
                       </button>
                       <button
                         className="button secondary small"
                         type="button"
                         onClick={() => openMeeting(snapshot.meeting.shareCode, 'join')}
                       >
-                        참석자 화면
+                        참석 화면
                       </button>
                       <button
                         className="button ghost small"

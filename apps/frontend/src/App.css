@@ -114,12 +114,32 @@
   display: none;
 }
 
+.brand-lockup.hero {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  text-align: center;
+  gap: 10px;
+  width: 100%;
+}
+
 .brand-mark {
   width: 34px;
   height: 34px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+}
+
+.brand-lockup.default .brand-mark {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+}
+
+.brand-lockup.hero .brand-mark {
+  width: 112px;
+  height: 112px;
+  border-radius: 32px;
 }
 
 .brand-mark svg {
@@ -137,6 +157,18 @@
   color: var(--muted);
   font-size: 0.68rem;
   line-height: 1.1;
+}
+
+.brand-lockup.hero .brand-copy strong {
+  font-size: clamp(2.3rem, 10vw, 3rem);
+  line-height: 0.96;
+  letter-spacing: -0.05em;
+}
+
+.brand-lockup.hero .brand-copy span {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent-strong);
 }
 
 .meeting-topbar-copy strong {
@@ -207,6 +239,15 @@
 .compact-home-copy,
 .hero-copy {
   min-width: 0;
+}
+
+.home-brand-panel {
+  align-items: center;
+  text-align: center;
+}
+
+.home-brand-panel .eyebrow {
+  justify-content: center;
 }
 
 .hero-description {
@@ -1549,6 +1590,20 @@
     font-size: clamp(1.56rem, 7vw, 2rem);
   }
 
+  .brand-lockup.hero .brand-mark {
+    width: 96px;
+    height: 96px;
+    border-radius: 28px;
+  }
+
+  .brand-lockup.hero .brand-copy strong {
+    font-size: clamp(2rem, 9vw, 2.5rem);
+  }
+
+  .brand-lockup.hero .brand-copy span {
+    font-size: 0.92rem;
+  }
+
   .hero-description {
     font-size: 0.82rem;
     -webkit-line-clamp: 2;
@@ -1623,6 +1678,11 @@
   .compact-home-copy h1,
   .hero-panel h1 {
     font-size: clamp(1.62rem, 6.2vw, 2.08rem);
+  }
+
+  .brand-lockup.hero .brand-mark {
+    width: 104px;
+    height: 104px;
   }
 
   .hero-description {
