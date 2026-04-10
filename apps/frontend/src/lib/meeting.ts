@@ -25,7 +25,7 @@ export type CafePresetName = (typeof CAFE_PRESETS)[number]
 
 const TEMPERATURE_ORDER: TemperatureOption[] = ['HOT', 'ICE']
 const HOT_AND_ICE: TemperatureOption[] = ['HOT', 'ICE']
-const ICE_ONLY: TemperatureOption[] = HOT_AND_ICE
+const ICE_ONLY: TemperatureOption[] = ['ICE']
 export const DECAF_SURCHARGE = 700
 
 const COFFEE_KEYWORDS = [

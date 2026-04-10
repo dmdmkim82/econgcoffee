@@ -439,16 +439,16 @@ function MeetingPage({
         <section className="panel not-found-panel">
           <div className="panel-head">
             <div>
-              <span className="panel-kicker">紐⑥엫 ?놁쓬</span>
-              <h2>?대떦 肄붾뱶??紐⑥엫??李얠? 紐삵뻽?듬땲??</h2>
+              <span className="panel-kicker">모임 없음</span>
+              <h2>해당 코드의 모임을 찾을 수 없습니다.</h2>
             </div>
           </div>
           <p className="panel-note">
-            濡쒖뺄 ?꾨줈?좏???湲곗??쇰줈????釉뚮씪?곗?????λ맂 紐⑥엫留??????덉뒿?덈떎.
+            공유 링크를 통해 접근하거나, 올바른 코드를 직접 입력해 주세요.
           </p>
           <div className="button-row">
             <button className="button" type="button" onClick={() => navigate('/')}>
-              ?덉쑝濡??대룞
+              홈으로 이동
             </button>
           </div>
         </section>
