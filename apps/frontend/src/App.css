@@ -28,7 +28,7 @@
 .preview-card,
 .workspace-grid {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .compact-home-hero,
@@ -41,7 +41,7 @@
 .inline-form,
 .inline-form.stacked {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .meeting-topbar,
@@ -76,7 +76,7 @@
 .home-utility-row {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .meeting-topbar {
@@ -202,8 +202,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 34px;
-  padding: 7px 10px;
+  min-height: 30px;
+  padding: 5px 8px;
   border-radius: 999px;
   background: var(--chip-bg);
   color: var(--ink-soft);
@@ -1024,7 +1024,7 @@
 
 .category-menu-groups {
   display: grid;
-  gap: 12px;
+  gap: 8px;
 }
 
 .category-menu-group {
@@ -1043,9 +1043,9 @@
   gap: 10px;
   align-items: center;
   width: 100%;
-  padding: 12px;
+  padding: 8px 10px;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--surface);
   color: inherit;
   text-align: left;
@@ -1062,9 +1062,9 @@
   gap: 10px;
   align-items: center;
   width: 100%;
-  padding: 11px 12px;
+  padding: 8px 10px;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--surface-soft);
   color: inherit;
   text-align: left;
@@ -1333,7 +1333,7 @@
   flex-wrap: wrap;
   gap: 6px;
   align-items: center;
-  margin: -2px 0 10px;
+  margin: -2px 0 6px;
 }
 
 .quick-order-actions {
