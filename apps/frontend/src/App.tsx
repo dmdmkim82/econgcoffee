@@ -28,6 +28,7 @@ import {
   deleteMeetingFromApi,
   fetchMeetingFromApi,
   fetchMeetingsFromApi,
+  fetchStarbucksDrinkCatalog,
   saveMeetingToApi,
   type StarbucksCatalogMenu,
 } from './lib/api'
@@ -720,6 +721,28 @@ function MeetingPage({
     }))
     setFeedback('폴 바셋 메뉴를 현재 미팅에 추가했습니다.')
   }
+
+  useEffect(() => {
+    if (
+      normalizedRole !== 'organizer' ||
+      !snapshot ||
+      snapshot.meeting.cafeName !== STARBUCKS_CAFE_NAME ||
+      snapshot.menuItems.length > 0
+    ) {
+      return
+    }
+
+    let cancelled = false
+
+    void fetchStarbucksDrinkCatalog().then((payload) => {
+      if (cancelled) return
+      const categoryNames = [...new Set(payload.menus.map((m) => m.categoryName))]
+      handleLoadStarbucksMenu(payload.menus, categoryNames)
+    })
+
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [normalizedRole, snapshot?.meeting.cafeName, snapshot?.menuItems.length])
 
   function handleLoadStarbucksMenu(
     menus: StarbucksCatalogMenu[],
