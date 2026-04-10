@@ -33,12 +33,13 @@ import {
   type StarbucksCatalogMenu,
 } from './lib/api'
 import {
-    type Attendee,
-    type MeetingSettings,
-    type MenuItem,
-    type NutritionInfo,
-    type Snapshot,
-    type TemperatureOption,
+  type Attendee,
+  type MeetingSettings,
+  type MenuItem,
+  type NutritionInfo,
+  type Snapshot,
+  STARBUCKS_CAFE_NAME,
+  type TemperatureOption,
   createLatelierMenuItems,
   createId,
   formatCountdown,
@@ -252,6 +253,7 @@ function MeetingPage({
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [isSummarySheetOpen, setIsSummarySheetOpen] = useState(false)
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
+  const [isMenuPanelOpen, setIsMenuPanelOpen] = useState(false)
   const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null)
   const [showPrices, setShowPrices] = useState(() => {
     const storedValue = window.localStorage.getItem(PRICE_VISIBILITY_STORAGE_KEY)
@@ -282,6 +284,7 @@ function MeetingPage({
   useEffect(() => {
     setIsSummarySheetOpen(false)
     setIsMoreSheetOpen(false)
+    setIsMenuPanelOpen(false)
     setShareTarget(null)
     setCompletionToast('')
   }, [normalizedCode, normalizedRole])
@@ -289,6 +292,26 @@ function MeetingPage({
   useEffect(() => {
     latestSnapshotRef.current = snapshot
   }, [snapshot])
+
+  useEffect(() => {
+    if (
+      normalizedRole !== 'organizer' ||
+      !snapshot ||
+      (!routeState?.openStarbucksCategorySheet &&
+        !(
+          snapshot.meeting.cafeName === STARBUCKS_CAFE_NAME &&
+          snapshot.menuItems.length === 0
+        ))
+    ) {
+      return
+    }
+
+    setIsMenuPanelOpen(true)
+  }, [
+    normalizedRole,
+    routeState?.openStarbucksCategorySheet,
+    snapshot,
+  ])
 
   useEffect(() => {
     window.localStorage.setItem(
@@ -1108,7 +1131,11 @@ function MeetingPage({
                 />
               </div>
             </details>
-            <details className="admin-details">
+            <details
+              className="admin-details"
+              open={isMenuPanelOpen}
+              onToggle={(event) => setIsMenuPanelOpen(event.currentTarget.open)}
+            >
               <summary>메뉴 보기 및 편집</summary>
               <div className="admin-details-body">
                 <MenuPanel

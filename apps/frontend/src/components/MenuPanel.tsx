@@ -13,6 +13,7 @@ import {
 import {
   type MenuItem,
   type NutritionInfo,
+  STARBUCKS_CAFE_NAME,
   type TemperatureOption,
 } from '../lib/meeting'
 import { formatVisiblePrice } from '../lib/menu'
@@ -89,6 +90,7 @@ export function MenuPanel({
     TemperatureOption[]
   >(['HOT', 'ICE'])
   const hasAutoOpenedStarbucksSheet = useRef(false)
+  const isStarbucksMeeting = cafeName === STARBUCKS_CAFE_NAME
 
   const starbucksCategories = useMemo(() => {
     const counts = new Map<string, number>()
@@ -132,6 +134,11 @@ export function MenuPanel({
   }
 
   const handleOpenStarbucksSheet = useCallback(async () => {
+    if (starbucksMenus.length > 0) {
+      setIsStarbucksSheetOpen(true)
+      return
+    }
+
     setIsLoadingStarbucks(true)
     setStarbucksError('')
 
@@ -149,7 +156,7 @@ export function MenuPanel({
     } finally {
       setIsLoadingStarbucks(false)
     }
-  }, [])
+  }, [starbucksMenus.length])
 
   function handleToggleCategory(categoryName: string) {
     const categoryMenuKeys = starbucksMenus
@@ -194,13 +201,22 @@ export function MenuPanel({
   }
 
   useEffect(() => {
-    if (!autoOpenStarbucksCategorySheet || hasAutoOpenedStarbucksSheet.current) {
+    if (
+      hasAutoOpenedStarbucksSheet.current ||
+      (!autoOpenStarbucksCategorySheet &&
+        !(isStarbucksMeeting && menuItems.length === 0))
+    ) {
       return
     }
 
     hasAutoOpenedStarbucksSheet.current = true
     void handleOpenStarbucksSheet()
-  }, [autoOpenStarbucksCategorySheet, handleOpenStarbucksSheet])
+  }, [
+    autoOpenStarbucksCategorySheet,
+    handleOpenStarbucksSheet,
+    isStarbucksMeeting,
+    menuItems.length,
+  ])
 
   return (
     <>
@@ -295,8 +311,28 @@ export function MenuPanel({
 
         {menuItems.length === 0 ? (
           <div className="empty-state">
-            아직 등록된 메뉴가 없습니다. 아래 관리 섹션에서 이미지 메뉴를 올리거나
-            수동으로 추가해주세요.
+            {isStarbucksMeeting ? (
+              <>
+                <p>스타벅스 미팅은 먼저 카테고리와 메뉴를 골라야 주문을 받을 수 있습니다.</p>
+                <div className="button-row">
+                  <button
+                    className="button"
+                    type="button"
+                    disabled={isLoadingStarbucks}
+                    onClick={() => {
+                      void handleOpenStarbucksSheet()
+                    }}
+                  >
+                    {isLoadingStarbucks ? '스타벅스 메뉴를 불러오는 중' : '스타벅스 메뉴 선택'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                아직 등록된 메뉴가 없습니다. 아래 관리 섹션에서 이미지 메뉴를 올리거나
+                수동으로 추가해주세요.
+              </>
+            )}
           </div>
         ) : (
           <div className="catalog-list menu-catalog-board">
