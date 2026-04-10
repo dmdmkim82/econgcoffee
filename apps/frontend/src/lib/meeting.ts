@@ -6,6 +6,7 @@ import type {
   Snapshot,
   TemperatureOption,
 } from '../../../../shared/meeting'
+import { findNutritionInfo } from './nutrition'
 
 export type {
   Attendee,
@@ -18,6 +19,9 @@ export type {
 
 export const STORAGE_KEY = 'ekong-coffee-state-v1'
 export const LATELIER_CAFE_NAME = "L'atelier"
+export const STARBUCKS_CAFE_NAME = '스타벅스'
+export const CAFE_PRESETS = [LATELIER_CAFE_NAME, STARBUCKS_CAFE_NAME] as const
+export type CafePresetName = (typeof CAFE_PRESETS)[number]
 
 const TEMPERATURE_ORDER: TemperatureOption[] = ['HOT', 'ICE']
 const HOT_AND_ICE: TemperatureOption[] = ['HOT', 'ICE']
@@ -55,39 +59,10 @@ type PresetMenuItem = Omit<MenuItem, 'id' | 'source' | 'nutritionInfo'> & {
   nutritionInfo?: NutritionInfo | null
 }
 
-const MENU_NUTRITION_LOOKUP: Record<string, NutritionInfo> = {
-  [normalizeMenuLookupKey('바삭 피스타치오 바닐라 크림 콜드 브루')]: {
-    caloriesKcal: 210,
-    sugarG: 18,
-    proteinG: 3,
-    sodiumMg: 50,
-    saturatedFatG: 9,
-    caffeineMg: 125,
-  },
-  [normalizeMenuLookupKey('서울 막걸리향 콜드브루')]: {
-    caloriesKcal: 205,
-    sugarG: 38,
-    proteinG: 3,
-    sodiumMg: 55,
-    saturatedFatG: 2.1,
-    caffeineMg: 79,
-  },
-  [normalizeMenuLookupKey('나이트로 바닐라 크림')]: {
-    caloriesKcal: 80,
-    sugarG: 10,
-    proteinG: 1,
-    sodiumMg: 40,
-    saturatedFatG: 2,
-    caffeineMg: 232,
-  },
-  [normalizeMenuLookupKey('나이트로 콜드 브루')]: {
-    caloriesKcal: 5,
-    sugarG: 0,
-    proteinG: 0,
-    sodiumMg: 5,
-    saturatedFatG: 0,
-    caffeineMg: 245,
-  },
+type BuildDefaultSnapshotOptions = {
+  title?: string
+  attendeeNames?: string[]
+  cafeName?: string
 }
 
 const LATELIER_MENU_PRESET: PresetMenuItem[] = [
@@ -144,6 +119,45 @@ export function createId(prefix: string) {
     .slice(-4)}`
 }
 
+function normalizeInitialAttendeeNames(names: string[]) {
+  const deduped = new Set<string>()
+  const normalizedNames: string[] = []
+
+  for (const rawName of names) {
+    const trimmed = rawName.trim().replace(/\s+/g, ' ')
+
+    if (!trimmed) {
+      continue
+    }
+
+    const dedupeKey = trimmed.normalize('NFKC').toLocaleLowerCase('ko-KR')
+
+    if (deduped.has(dedupeKey)) {
+      continue
+    }
+
+    deduped.add(dedupeKey)
+    normalizedNames.push(trimmed)
+  }
+
+  return normalizedNames
+}
+
+function createDraftAttendee(name: string): Attendee {
+  return {
+    id: createId('attendee'),
+    name,
+    team: '',
+    menuItemId: '',
+    skipped: false,
+    quantity: 1,
+    temperature: '',
+    decaf: false,
+    size: '',
+    note: '',
+  }
+}
+
 function formatDateTimeInput(date: Date) {
   const rounded = new Date(date)
   rounded.setMinutes(Math.ceil(rounded.getMinutes() / 10) * 10, 0, 0)
@@ -159,14 +173,6 @@ function pickText(value: unknown, fallback = '') {
 function pickNumber(value: unknown, fallback = 0) {
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : fallback
-}
-
-function normalizeMenuLookupKey(name: string) {
-  return name.normalize('NFKC').replace(/\s+/g, '').toLowerCase()
-}
-
-export function findNutritionInfo(menuName: string) {
-  return MENU_NUTRITION_LOOKUP[normalizeMenuLookupKey(menuName)] ?? null
 }
 
 function sortTemperatures(temperatures: TemperatureOption[]) {
@@ -191,7 +197,7 @@ function normalizeTemperatureList(
     return [...fallback]
   }
 
-  return [...HOT_AND_ICE]
+  return [...temperatures]
 }
 
 function getMenuDedupeKey(name: string, price: number) {
@@ -201,6 +207,13 @@ function getMenuDedupeKey(name: string, price: number) {
 function normalizeNutritionInfo(value: unknown, menuName: string) {
   if (value && typeof value === 'object') {
     const source = value as Partial<NutritionInfo>
+    const basis =
+      source.basis === 'mapped' ||
+      source.basis === 'estimated' ||
+      source.basis === 'official'
+        ? source.basis
+        : 'official'
+    const referenceName = pickText(source.referenceName).trim()
 
     return {
       caloriesKcal: pickNumber(source.caloriesKcal),
@@ -209,6 +222,9 @@ function normalizeNutritionInfo(value: unknown, menuName: string) {
       sodiumMg: pickNumber(source.sodiumMg),
       saturatedFatG: pickNumber(source.saturatedFatG),
       caffeineMg: pickNumber(source.caffeineMg),
+      basis,
+      sourceLabel: pickText(source.sourceLabel, '등록 영양정보'),
+      referenceName: referenceName || undefined,
     }
   }
 
@@ -220,7 +236,7 @@ function createPresetMenuItem(item: PresetMenuItem): MenuItem {
     id: createId('menu'),
     name: item.name,
     price: item.price,
-    availableTemperatures: [...HOT_AND_ICE],
+    availableTemperatures: [...item.availableTemperatures],
     nutritionInfo: normalizeNutritionInfo(item.nutritionInfo, item.name),
     source: 'manual',
   }
@@ -228,6 +244,22 @@ function createPresetMenuItem(item: PresetMenuItem): MenuItem {
 
 export function createLatelierMenuItems() {
   return LATELIER_MENU_PRESET.map(createPresetMenuItem)
+}
+
+function resolveCafePresetName(cafeName?: string): CafePresetName {
+  if (cafeName === STARBUCKS_CAFE_NAME) {
+    return STARBUCKS_CAFE_NAME
+  }
+
+  return LATELIER_CAFE_NAME
+}
+
+function createInitialMenuItems(cafeName: CafePresetName) {
+  if (cafeName === LATELIER_CAFE_NAME) {
+    return createLatelierMenuItems()
+  }
+
+  return []
 }
 
 export function inferTemperaturesFromMenuName(name: string): TemperatureOption[] {
@@ -314,15 +346,20 @@ function normalizeAttendee(
   }
 }
 
-export function buildDefaultSnapshot(): Snapshot {
+export function buildDefaultSnapshot(
+  options: BuildDefaultSnapshotOptions = {},
+): Snapshot {
   const deadline = new Date()
   deadline.setHours(deadline.getHours() + 1)
   const now = new Date().toISOString()
+  const attendeeNames = normalizeInitialAttendeeNames(options.attendeeNames ?? [])
+  const title = options.title?.trim() || 'SK에코플랜트 미팅 커피'
+  const cafeName = resolveCafePresetName(options.cafeName)
 
   return {
     meeting: {
-      title: 'SK에코플랜트 미팅 커피',
-      cafeName: LATELIER_CAFE_NAME,
+      title,
+      cafeName,
       place: '',
       organizer: '',
       deadline: formatDateTimeInput(deadline),
@@ -330,8 +367,8 @@ export function buildDefaultSnapshot(): Snapshot {
       shareCode: `EK-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
       manuallyClosed: false,
     },
-    menuItems: createLatelierMenuItems(),
-    attendees: [],
+    menuItems: createInitialMenuItems(cafeName),
+    attendees: attendeeNames.map(createDraftAttendee),
     rawOcrText: '',
     createdAt: now,
     updatedAt: now,

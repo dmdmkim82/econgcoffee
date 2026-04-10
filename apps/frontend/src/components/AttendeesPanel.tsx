@@ -30,7 +30,7 @@ export function AttendeesPanel({
       <div className="panel-head">
         <div>
           <span className="panel-kicker">참석자 수동 관리</span>
-          <h2>참석자 이름만 빠르게 미리 등록할 때 사용합니다</h2>
+          <h2>생성 팝업 이후에도 참석자 이름을 계속 추가할 수 있습니다</h2>
         </div>
         <span className="status-pill neutral">{attendees.length}명</span>
       </div>
@@ -48,7 +48,7 @@ export function AttendeesPanel({
 
       {attendees.length === 0 ? (
         <div className="empty-state compact">
-          참석 링크로 직접 주문을 받을 예정이면 이 섹션은 비워 두어도 됩니다.
+          새 미팅 만들기 팝업에서 미리 넣지 않았다면 여기서 참석자를 계속 추가하면 됩니다.
         </div>
       ) : (
         <div className="person-list">

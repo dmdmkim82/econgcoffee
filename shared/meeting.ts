@@ -1,5 +1,7 @@
 export type TemperatureOption = 'HOT' | 'ICE'
 
+export type NutritionBasis = 'official' | 'mapped' | 'estimated'
+
 export type NutritionInfo = {
   caloriesKcal: number
   sugarG: number
@@ -7,6 +9,9 @@ export type NutritionInfo = {
   sodiumMg: number
   saturatedFatG: number
   caffeineMg: number
+  basis?: NutritionBasis
+  sourceLabel?: string
+  referenceName?: string
 }
 
 export type MeetingSettings = {

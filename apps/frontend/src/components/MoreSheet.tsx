@@ -194,14 +194,13 @@ export function MoreSheet({
           <div className="more-sheet-note-head">
             <div>
               <span className="panel-kicker">서비스 소개</span>
-              <h3>더보기 맨 아래 개발 메모</h3>
+              <h3>서비스 소개와 개발 메모</h3>
             </div>
             <span className="status-pill neutral">v1 MVP</span>
           </div>
           <p className="more-sheet-note-copy">
-            이름만 입력하고 바로 메뉴를 고를 수 있는 모바일 중심 커피 주문
-            보드입니다. 모임 생성부터 메뉴 OCR, 참석자 주문 취합, 최종 요약까지
-            한 번에 정리합니다.
+            모임을 열고 메뉴를 불러오면 참석자는 바로 주문하고, 취합자는 한 화면에서
+            현황과 최종 주문 내역을 정리할 수 있습니다.
           </p>
           <div className="more-sheet-note-grid">
             <div className="more-sheet-note-item">

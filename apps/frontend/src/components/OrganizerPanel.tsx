@@ -1,4 +1,4 @@
-import { type MeetingSettings } from '../lib/meeting'
+import { CAFE_PRESETS, type MeetingSettings } from '../lib/meeting'
 
 type OrganizerPanelProps = {
   meeting: MeetingSettings
@@ -46,6 +46,20 @@ export function OrganizerPanel({
             onChange={(event) => onChange('cafeName', event.target.value)}
             placeholder="예: 카페 아뜰리에"
           />
+          <div className="button-row inline-chip-row">
+            {CAFE_PRESETS.map((cafeName) => (
+              <button
+                className={`button ghost small ${
+                  meeting.cafeName === cafeName ? 'active-chip' : ''
+                }`}
+                key={cafeName}
+                type="button"
+                onClick={() => onChange('cafeName', cafeName)}
+              >
+                {cafeName}
+              </button>
+            ))}
+          </div>
         </label>
         <label className="field">
           <span>취합자</span>

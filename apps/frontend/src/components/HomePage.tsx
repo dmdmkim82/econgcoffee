@@ -1,12 +1,28 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { type Snapshot } from '../lib/meeting'
+import {
+  CAFE_PRESETS,
+  STARBUCKS_CAFE_NAME,
+  type CafePresetName,
+  type Snapshot,
+} from '../lib/meeting'
 import { BrandLogo } from './BrandLogo'
+import { CreateMeetingSheet } from './CreateMeetingSheet'
+
+type CreateMeetingPayload = {
+  title: string
+  cafeName: CafePresetName
+  attendeeNames: string[]
+}
+
+type MeetingRouteState = {
+  openStarbucksCategorySheet?: boolean
+}
 
 type HomePageProps = {
   meetings: Snapshot[]
   theme: 'light' | 'dark'
-  onCreateMeeting: () => string
+  onCreateMeeting: (payload: CreateMeetingPayload) => string
   onDeleteMeeting: (shareCode: string) => void
   onToggleTheme: () => void
 }
@@ -34,6 +50,10 @@ export function HomePage({
 }: HomePageProps) {
   const navigate = useNavigate()
   const [code, setCode] = useState('')
+  const [isCreateSheetOpen, setIsCreateSheetOpen] = useState(false)
+  const [draftMeetingTitle, setDraftMeetingTitle] = useState('')
+  const [draftCafeName, setDraftCafeName] = useState<CafePresetName | ''>('')
+  const canCreateMeeting = Boolean(draftMeetingTitle.trim() && draftCafeName)
 
   const summary = useMemo(() => {
     return meetings.reduce(
@@ -50,13 +70,35 @@ export function HomePage({
     )
   }, [meetings])
 
-  function openMeeting(shareCode: string, role: 'organizer' | 'join') {
-    navigate(`/meeting/${shareCode}/${role}`)
+  function openMeeting(
+    shareCode: string,
+    role: 'organizer' | 'join',
+    state?: MeetingRouteState,
+  ) {
+    navigate(`/meeting/${shareCode}/${role}`, state ? { state } : undefined)
   }
 
-  function handleCreateMeeting() {
-    const shareCode = onCreateMeeting()
-    openMeeting(shareCode, 'organizer')
+  function handleCreateMeeting(payload: CreateMeetingPayload) {
+    const shareCode = onCreateMeeting({
+      ...payload,
+      title: draftMeetingTitle.trim(),
+      cafeName: draftCafeName || payload.cafeName,
+    })
+    openMeeting(shareCode, 'organizer', {
+      openStarbucksCategorySheet:
+        (draftCafeName || payload.cafeName) === STARBUCKS_CAFE_NAME,
+    })
+    setDraftMeetingTitle('')
+    setDraftCafeName('')
+    setIsCreateSheetOpen(false)
+  }
+
+  function handleOpenCreateSheet() {
+    if (!canCreateMeeting) {
+      return
+    }
+
+    setIsCreateSheetOpen(true)
   }
 
   function handleJoin(event: FormEvent<HTMLFormElement>) {
@@ -73,6 +115,20 @@ export function HomePage({
 
   return (
     <div className="shell">
+      <CreateMeetingSheet
+        open={isCreateSheetOpen}
+        title={draftMeetingTitle}
+        cafeName={draftCafeName}
+        onClose={() => setIsCreateSheetOpen(false)}
+        onSubmit={(payload) =>
+          handleCreateMeeting({
+            ...payload,
+            title: draftMeetingTitle.trim(),
+            cafeName: draftCafeName || CAFE_PRESETS[0],
+          })
+        }
+      />
+
       <div className="compact-home">
         <div className="home-utility-row">
           <button className="button secondary small" type="button" onClick={onToggleTheme}>
@@ -85,8 +141,8 @@ export function HomePage({
             <span className="eyebrow">SK에코플랜트 미팅 커피 취합</span>
             <BrandLogo size="hero" />
             <p className="hero-description">
-              사내 미팅 커피 주문을 빠르게 취합하고, 취합자와 참석자 링크를 나눠
-              모바일 화면에서 바로 주문을 받을 수 있게 구성했습니다.
+              취합자가 카페를 먼저 정하고, 참석자는 자기 이름을 눌러 바로 메뉴를 고를
+              수 있습니다.
             </p>
             <div className="compact-metric-grid">
               <article className="mini-stat">
@@ -108,12 +164,58 @@ export function HomePage({
             <div className="panel-head">
               <div>
                 <span className="panel-kicker">바로 시작</span>
-                <h2>새 모임을 만들거나 코드로 바로 입장하세요</h2>
+                <h2>미팅 이름과 카페를 먼저 정하고 시작하세요</h2>
               </div>
             </div>
             <div className="quick-action-grid">
-              <button className="button" type="button" onClick={handleCreateMeeting}>
-                새 모임 만들기
+              <label className="field field-full">
+                <span>새 미팅 이름</span>
+                <input
+                  value={draftMeetingTitle}
+                  onChange={(event) => setDraftMeetingTitle(event.target.value)}
+                  placeholder="예: 공정회의 커피 주문"
+                />
+              </label>
+              <div className="field field-full">
+                <span>카페 선택</span>
+                <div className="checkbox-group">
+                  {CAFE_PRESETS.map((presetCafeName) => (
+                    <button
+                      className={`button ghost small ${
+                        draftCafeName === presetCafeName ? 'active-chip' : ''
+                      }`}
+                      key={presetCafeName}
+                      type="button"
+                      onClick={() => setDraftCafeName(presetCafeName)}
+                    >
+                      {presetCafeName}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {draftCafeName ? (
+                <div className="status-callout">
+                  {draftCafeName === STARBUCKS_CAFE_NAME
+                    ? '스타벅스는 미팅 생성 직후 카테고리와 메뉴를 골라서 불러오게 됩니다.'
+                    : "L'atelier는 기본 메뉴가 포함된 상태로 바로 미팅이 열립니다."}
+                </div>
+              ) : (
+                <div className="status-callout">
+                  먼저 카페를 고르면 한 카페 기준으로만 미팅이 만들어집니다.
+                </div>
+              )}
+              {!draftMeetingTitle.trim() ? (
+                <div className="status-callout">
+                  미팅 이름을 먼저 적어야 어떤 회의 주문인지 바로 구분할 수 있습니다.
+                </div>
+              ) : null}
+              <button
+                className="button"
+                type="button"
+                disabled={!canCreateMeeting}
+                onClick={handleOpenCreateSheet}
+              >
+                새 미팅 만들기
               </button>
               <form className="join-form compact" onSubmit={handleJoin}>
                 <input
@@ -140,7 +242,7 @@ export function HomePage({
 
           {meetings.length === 0 ? (
             <div className="empty-state compact">
-              아직 저장된 모임이 없습니다. 첫 모임을 만들어 커피 주문을 시작해보세요.
+              아직 저장된 미팅이 없습니다. 첫 미팅을 만들어 커피 주문을 시작해보세요.
             </div>
           ) : (
             <div className="recent-card-list">

@@ -288,6 +288,16 @@
   align-items: center;
 }
 
+.inline-chip-row {
+  margin-top: 8px;
+}
+
+.button.active-chip {
+  border-color: rgba(175, 104, 43, 0.4);
+  background: rgba(196, 124, 51, 0.12);
+  color: var(--accent-strong);
+}
+
 .compact-toolbar {
   justify-content: space-between;
 }
@@ -1011,6 +1021,116 @@
   gap: 12px;
 }
 
+.category-sheet {
+  gap: 12px;
+}
+
+.category-sheet-list {
+  display: grid;
+  gap: 8px;
+}
+
+.category-menu-groups {
+  display: grid;
+  gap: 12px;
+}
+
+.category-menu-group {
+  display: grid;
+  gap: 8px;
+}
+
+.category-menu-list {
+  display: grid;
+  gap: 8px;
+}
+
+.category-sheet-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: inherit;
+  text-align: left;
+}
+
+.category-sheet-item.active {
+  border-color: rgba(175, 104, 43, 0.4);
+  background: rgba(196, 124, 51, 0.1);
+}
+
+.category-menu-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-soft);
+  color: inherit;
+  text-align: left;
+}
+
+.category-menu-item.active {
+  border-color: rgba(175, 104, 43, 0.38);
+  background: rgba(196, 124, 51, 0.08);
+}
+
+.category-sheet-item strong,
+.category-sheet-item span,
+.category-sheet-item em,
+.category-menu-item strong,
+.category-menu-item span,
+.category-menu-item em {
+  display: block;
+}
+
+.category-sheet-item span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.category-menu-item span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.category-sheet-item em {
+  color: var(--accent-strong);
+  font-size: 0.76rem;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.category-menu-item em {
+  color: var(--accent-strong);
+  font-size: 0.75rem;
+  font-style: normal;
+  white-space: nowrap;
+}
+
+.nutrition-source {
+  display: grid;
+  gap: 8px;
+}
+
+.nutrition-source .status-pill {
+  justify-self: start;
+}
+
+.nutrition-source .panel-note {
+  margin: 0;
+}
+
 .nutrition-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1237,6 +1357,11 @@
 .quick-order-fields {
   display: grid;
   gap: 10px;
+}
+
+.quick-order-name-picker {
+  display: grid;
+  gap: 8px;
 }
 
 .menu-info-actions {

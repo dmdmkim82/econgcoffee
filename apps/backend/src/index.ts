@@ -7,6 +7,7 @@ import {
   upsertMeeting,
   writeStore,
 } from './store'
+import { fetchStarbucksDrinkCatalog } from './starbucks'
 
 const app = express()
 const port = Number(process.env.PORT || 8787)
@@ -41,6 +42,15 @@ app.use((request, response, next) => {
 
 app.get('/api/health', (_request, response) => {
   response.json({ ok: true, date: new Date().toISOString() })
+})
+
+app.get('/api/catalogs/starbucks/drinks', async (_request, response, next) => {
+  try {
+    const catalog = await fetchStarbucksDrinkCatalog()
+    response.json(catalog)
+  } catch (error) {
+    next(error)
+  }
 })
 
 app.get('/api/meetings', async (_request, response, next) => {

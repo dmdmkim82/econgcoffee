@@ -9,6 +9,11 @@ import {
 export const MEETINGS_STORAGE_KEY = 'ekong-coffee-meetings-v1'
 
 export type MeetingsStore = Record<string, Snapshot>
+export type CreateMeetingSnapshotInput = {
+  title?: string
+  attendeeNames?: string[]
+  cafeName?: string
+}
 
 function hasLegacyContent(snapshot: Snapshot) {
   return Boolean(
@@ -67,8 +72,10 @@ export function saveMeetingsStore(store: MeetingsStore) {
   window.localStorage.setItem(MEETINGS_STORAGE_KEY, JSON.stringify(store))
 }
 
-export function createMeetingSnapshot() {
-  return buildDefaultSnapshot()
+export function createMeetingSnapshot(
+  input: CreateMeetingSnapshotInput = {},
+) {
+  return buildDefaultSnapshot(input)
 }
 
 export function createMeetingsStore(meetings: Snapshot[]): MeetingsStore {

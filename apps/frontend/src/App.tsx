@@ -4,6 +4,7 @@ import {
   Navigate,
   Route,
   Routes,
+  useLocation,
   useNavigate,
   useParams,
 } from 'react-router-dom'
@@ -29,6 +30,7 @@ import {
   fetchMeetingFromApi,
   fetchMeetingsFromApi,
   saveMeetingToApi,
+  type StarbucksCatalogMenu,
 } from './lib/api'
 import {
     type Attendee,
@@ -55,6 +57,7 @@ import {
   loadMeetingsStore,
   removeMeeting,
   saveMeetingsStore,
+  type CreateMeetingSnapshotInput,
   type MeetingsStore,
   upsertMeeting,
 } from './lib/meetings-store'
@@ -148,8 +151,8 @@ function AppRoutes() {
     }
   }, [])
 
-  function handleCreateMeeting() {
-    const snapshot = createMeetingSnapshot()
+  function handleCreateMeeting(input: CreateMeetingSnapshotInput) {
+    const snapshot = createMeetingSnapshot(input)
 
     setStore((currentStore) => upsertMeeting(currentStore, snapshot))
     if (apiSyncEnabled) {
@@ -219,6 +222,10 @@ type MeetingPageProps = {
   onToggleTheme: () => void
 }
 
+type MeetingRouteState = {
+  openStarbucksCategorySheet?: boolean
+}
+
 function MeetingPage({
   store,
   setStore,
@@ -226,9 +233,11 @@ function MeetingPage({
   onToggleTheme,
 }: MeetingPageProps) {
   const navigate = useNavigate()
+  const location = useLocation()
   const { shareCode = '', role = '' } = useParams()
   const normalizedCode = shareCode.toUpperCase()
   const normalizedRole = role === 'organizer' || role === 'join' ? role : null
+  const routeState = location.state as MeetingRouteState | null
   const snapshot = store[normalizedCode]
   const latestSnapshotRef = useRef(snapshot)
 
@@ -683,7 +692,7 @@ function MeetingPage({
     setFeedback('수동 메뉴를 추가했습니다.')
   }
 
-  function handleLoadPresetMenu() {
+  function handleLoadLatelierMenu() {
     patchSnapshot((currentSnapshot) => ({
       ...currentSnapshot,
       menuItems: mergeMenuItems(
@@ -695,7 +704,33 @@ function MeetingPage({
         cafeName: currentSnapshot.meeting.cafeName || "L'atelier",
       },
     }))
-    setFeedback('이미지 메뉴를 현재 모임에 추가했습니다.')
+    setFeedback("L'atelier 기본 메뉴를 현재 미팅에 추가했습니다.")
+  }
+
+  function handleLoadStarbucksMenu(
+    menus: StarbucksCatalogMenu[],
+    categoryNames: string[],
+  ) {
+    const importedMenus = menus.map((menu) => ({
+      id: createId('menu'),
+      name: menu.name,
+      price: menu.price,
+      availableTemperatures: menu.availableTemperatures,
+      nutritionInfo: menu.nutritionInfo,
+      source: 'manual' as const,
+    }))
+
+    patchSnapshot((currentSnapshot) => ({
+      ...currentSnapshot,
+      menuItems: mergeMenuItems(currentSnapshot.menuItems, importedMenus),
+      meeting: {
+        ...currentSnapshot.meeting,
+        cafeName: '스타벅스',
+      },
+    }))
+    setFeedback(
+      `스타벅스 ${categoryNames.join(', ')} 카테고리에서 ${importedMenus.length}개 메뉴를 불러왔습니다.`,
+    )
   }
 
   function handleRemoveMenu(menuItemId: string) {
@@ -1077,12 +1112,18 @@ function MeetingPage({
               <summary>메뉴 보기 및 편집</summary>
               <div className="admin-details-body">
                 <MenuPanel
+                  autoOpenStarbucksCategorySheet={
+                    normalizedRole === 'organizer' &&
+                    Boolean(routeState?.openStarbucksCategorySheet)
+                  }
+                  cafeName={meeting.cafeName}
                   menuItems={menuItems}
                   showPrices={showPrices}
                   onAddMenu={handleAddMenu}
                   onUpdateMenu={updateMenuField}
                   onRemoveMenu={handleRemoveMenu}
-                  onLoadPresetMenu={handleLoadPresetMenu}
+                  onLoadLatelierMenu={handleLoadLatelierMenu}
+                  onLoadStarbucksMenu={handleLoadStarbucksMenu}
                   onTogglePriceVisibility={() =>
                     setShowPrices((currentValue) => !currentValue)
                   }

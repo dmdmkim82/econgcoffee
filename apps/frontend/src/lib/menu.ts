@@ -140,5 +140,9 @@ export function formatPrice(price: number) {
 }
 
 export function formatVisiblePrice(price: number, showPrices: boolean) {
-  return showPrices ? formatPrice(price) : '금액 숨김'
+  if (!showPrices) {
+    return '금액 숨김'
+  }
+
+  return price > 0 ? formatPrice(price) : '가격 미정'
 }

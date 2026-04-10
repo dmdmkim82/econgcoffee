@@ -1,4 +1,8 @@
-import { type Snapshot } from './meeting'
+import {
+  type NutritionInfo,
+  type Snapshot,
+  type TemperatureOption,
+} from './meeting'
 
 type MeetingsResponse = {
   meetings: Snapshot[]
@@ -6,6 +10,19 @@ type MeetingsResponse = {
 
 type MeetingResponse = {
   meeting: Snapshot
+}
+
+export type StarbucksCatalogMenu = {
+  categoryName: string
+  name: string
+  price: number
+  availableTemperatures: TemperatureOption[]
+  nutritionInfo: NutritionInfo
+}
+
+type StarbucksCatalogResponse = {
+  menus: StarbucksCatalogMenu[]
+  fetchedAt: string
 }
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
@@ -62,4 +79,10 @@ export async function deleteMeetingFromApi(shareCode: string) {
   await request<void>(withApiBase(`/api/meetings/${shareCode.toUpperCase()}`), {
     method: 'DELETE',
   })
+}
+
+export async function fetchStarbucksDrinkCatalog() {
+  return request<StarbucksCatalogResponse>(
+    withApiBase('/api/catalogs/starbucks/drinks'),
+  )
 }
