@@ -155,7 +155,7 @@ export function MenuPanel({
       setSelectedMenuKeys(payload.menus.map(getStarbucksMenuKey))
       setIsStarbucksSheetOpen(true)
     } catch {
-      setStarbucksError('스타벅스 카테고리를 불러오지 못했습니다. 백엔드 연결을 확인해주세요.')
+      setStarbucksError('스타벅스 메뉴를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.')
     } finally {
       setIsLoadingStarbucks(false)
     }
