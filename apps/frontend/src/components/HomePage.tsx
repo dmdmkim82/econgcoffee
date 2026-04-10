@@ -1,19 +1,13 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  fetchStarbucksDrinkCatalog,
-  type StarbucksCatalogMenu,
-} from '../lib/api'
-import {
   CAFE_PRESETS,
-  STARBUCKS_CAFE_NAME,
   type CafePresetName,
   type CreateMenuSeed,
   type Snapshot,
 } from '../lib/meeting'
 import { BrandLogo } from './BrandLogo'
 import { CreateMeetingSheet } from './CreateMeetingSheet'
-import { StarbucksCategorySheet } from './StarbucksCategorySheet'
 
 type CreateMeetingPayload = {
   title: string
@@ -22,31 +16,12 @@ type CreateMeetingPayload = {
   menuSeeds?: CreateMenuSeed[]
 }
 
-type PendingStarbucksMeeting = Omit<CreateMeetingPayload, 'menuSeeds'>
-
-type MeetingRouteState = {
-  openStarbucksCategorySheet?: boolean
-}
-
 type HomePageProps = {
   meetings: Snapshot[]
   theme: 'light' | 'dark'
   onCreateMeeting: (payload: CreateMeetingPayload) => string
   onDeleteMeeting: (shareCode: string) => void
   onToggleTheme: () => void
-}
-
-function getStarbucksMenuKey(menu: StarbucksCatalogMenu) {
-  return `${menu.categoryName}::${menu.name}`
-}
-
-function toMenuSeeds(menus: StarbucksCatalogMenu[]): CreateMenuSeed[] {
-  return menus.map((menu) => ({
-    name: menu.name,
-    price: menu.price,
-    availableTemperatures: menu.availableTemperatures,
-    nutritionInfo: menu.nutritionInfo,
-  }))
 }
 
 function isClosed(snapshot: Snapshot) {
@@ -75,13 +50,6 @@ export function HomePage({
   const [isCreateSheetOpen, setIsCreateSheetOpen] = useState(false)
   const [draftMeetingTitle, setDraftMeetingTitle] = useState('')
   const [draftCafeName, setDraftCafeName] = useState<CafePresetName | ''>('')
-  const [isStarbucksSheetOpen, setIsStarbucksSheetOpen] = useState(false)
-  const [isLoadingStarbucks, setIsLoadingStarbucks] = useState(false)
-  const [starbucksMenus, setStarbucksMenus] = useState<StarbucksCatalogMenu[]>([])
-  const [selectedMenuKeys, setSelectedMenuKeys] = useState<string[]>([])
-  const [starbucksError, setStarbucksError] = useState('')
-  const [pendingStarbucksMeeting, setPendingStarbucksMeeting] =
-    useState<PendingStarbucksMeeting | null>(null)
   const canCreateMeeting = Boolean(draftMeetingTitle.trim() && draftCafeName)
 
   const summary = (() => {
@@ -103,112 +71,21 @@ export function HomePage({
     setDraftMeetingTitle('')
     setDraftCafeName('')
     setIsCreateSheetOpen(false)
-    setPendingStarbucksMeeting(null)
-    setIsStarbucksSheetOpen(false)
-    setStarbucksError('')
-    setSelectedMenuKeys([])
   }
 
-  function openMeeting(
-    shareCode: string,
-    role: 'organizer' | 'join',
-    state?: MeetingRouteState,
-  ) {
-    navigate(`/meeting/${shareCode}/${role}`, state ? { state } : undefined)
+  function openMeeting(shareCode: string, role: 'organizer' | 'join') {
+    navigate(`/meeting/${shareCode}/${role}`)
   }
 
-  function finalizeCreateMeeting(payload: CreateMeetingPayload) {
-    const finalCafeName = draftCafeName || payload.cafeName
-    const menuSeeds = payload.menuSeeds ?? []
+  function handleCreateMeeting(payload: { attendeeNames: string[] }) {
+    const finalCafeName = draftCafeName || CAFE_PRESETS[0]
     const shareCode = onCreateMeeting({
-      ...payload,
-      title: draftMeetingTitle.trim(),
-      cafeName: finalCafeName,
-      menuSeeds,
-    })
-
-    openMeeting(shareCode, 'organizer', {
-      openStarbucksCategorySheet:
-        finalCafeName === STARBUCKS_CAFE_NAME && menuSeeds.length === 0,
-    })
-
-    resetCreateDraft()
-  }
-
-  async function openStarbucksSelection() {
-    setIsStarbucksSheetOpen(true)
-
-    if (starbucksMenus.length > 0) {
-      if (selectedMenuKeys.length === 0) {
-        setSelectedMenuKeys(starbucksMenus.map(getStarbucksMenuKey))
-      }
-      return
-    }
-
-    setIsLoadingStarbucks(true)
-    setStarbucksError('')
-
-    try {
-      const payload = await fetchStarbucksDrinkCatalog()
-      setStarbucksMenus(payload.menus)
-      setSelectedMenuKeys(payload.menus.map(getStarbucksMenuKey))
-    } catch {
-      setStarbucksError(
-        '스타벅스 메뉴를 불러오지 못했습니다. 서버 연결을 확인한 뒤 다시 시도해주세요.',
-      )
-    } finally {
-      setIsLoadingStarbucks(false)
-    }
-  }
-
-  function handleCreateMeeting(payload: {
-    attendeeNames: string[]
-  }) {
-    const nextCafeName = draftCafeName || CAFE_PRESETS[0]
-
-    if (nextCafeName !== STARBUCKS_CAFE_NAME) {
-      finalizeCreateMeeting({
-        attendeeNames: payload.attendeeNames,
-        title: draftMeetingTitle.trim(),
-        cafeName: nextCafeName,
-      })
-      return
-    }
-
-    setPendingStarbucksMeeting({
       attendeeNames: payload.attendeeNames,
       title: draftMeetingTitle.trim(),
-      cafeName: nextCafeName,
+      cafeName: finalCafeName,
     })
-    setIsCreateSheetOpen(false)
-    void openStarbucksSelection()
-  }
-
-  function handleConfirmStarbucksMenus() {
-    if (!pendingStarbucksMeeting) {
-      return
-    }
-
-    const selectedMenus = starbucksMenus.filter((menu) =>
-      selectedMenuKeys.includes(getStarbucksMenuKey(menu)),
-    )
-
-    if (selectedMenus.length === 0) {
-      return
-    }
-
-    finalizeCreateMeeting({
-      ...pendingStarbucksMeeting,
-      menuSeeds: toMenuSeeds(selectedMenus),
-    })
-  }
-
-  function handleToggleMenu(menuKey: string) {
-    setSelectedMenuKeys((currentMenuKeys) =>
-      currentMenuKeys.includes(menuKey)
-        ? currentMenuKeys.filter((item) => item !== menuKey)
-        : [...currentMenuKeys, menuKey],
-    )
+    openMeeting(shareCode, 'organizer')
+    resetCreateDraft()
   }
 
   function handleOpenCreateSheet() {
@@ -239,27 +116,6 @@ export function HomePage({
         cafeName={draftCafeName}
         onClose={() => setIsCreateSheetOpen(false)}
         onSubmit={handleCreateMeeting}
-      />
-
-      <StarbucksCategorySheet
-        open={isStarbucksSheetOpen}
-        loading={isLoadingStarbucks}
-        error={starbucksError}
-        menus={starbucksMenus.map((menu) => ({
-          key: getStarbucksMenuKey(menu),
-          name: menu.name,
-          categoryName: menu.categoryName,
-          availableTemperatures: menu.availableTemperatures,
-        }))}
-        selectedMenuKeys={selectedMenuKeys}
-        onClose={() => {
-          setIsStarbucksSheetOpen(false)
-          setPendingStarbucksMeeting(null)
-        }}
-        onToggleMenu={handleToggleMenu}
-        onSelectAllMenus={() => setSelectedMenuKeys(starbucksMenus.map(getStarbucksMenuKey))}
-        onClearMenus={() => setSelectedMenuKeys([])}
-        onConfirm={handleConfirmStarbucksMenus}
       />
 
       <div className="compact-home">
@@ -328,9 +184,7 @@ export function HomePage({
               </div>
               {draftCafeName ? (
                 <div className="status-callout">
-                  {draftCafeName === STARBUCKS_CAFE_NAME
-                    ? '스타벅스는 참석자 입력 뒤 카테고리와 메뉴를 먼저 고른 다음 미팅이 만들어집니다.'
-                    : "L'atelier는 기본 메뉴가 포함된 상태로 바로 미팅이 열립니다."}
+                  카페를 선택했습니다. 참석자를 입력하면 바로 미팅이 만들어집니다.
                 </div>
               ) : (
                 <div className="status-callout">

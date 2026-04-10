@@ -4,7 +4,6 @@ import {
   Navigate,
   Route,
   Routes,
-  useLocation,
   useNavigate,
   useParams,
 } from 'react-router-dom'
@@ -225,9 +224,6 @@ type MeetingPageProps = {
   onToggleTheme: () => void
 }
 
-type MeetingRouteState = {
-  openStarbucksCategorySheet?: boolean
-}
 
 function MeetingPage({
   store,
@@ -236,11 +232,9 @@ function MeetingPage({
   onToggleTheme,
 }: MeetingPageProps) {
   const navigate = useNavigate()
-  const location = useLocation()
   const { shareCode = '', role = '' } = useParams()
   const normalizedCode = shareCode.toUpperCase()
   const normalizedRole = role === 'organizer' || role === 'join' ? role : null
-  const routeState = location.state as MeetingRouteState | null
   const snapshot = store[normalizedCode]
   const latestSnapshotRef = useRef(snapshot)
 
@@ -256,7 +250,6 @@ function MeetingPage({
   const [isSummarySheetOpen, setIsSummarySheetOpen] = useState(false)
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false)
   const [isMenuPanelOpen, setIsMenuPanelOpen] = useState(false)
-  const [starbucksSheetRequestKey, setStarbucksSheetRequestKey] = useState(0)
   const [shareTarget, setShareTarget] = useState<ShareTarget | null>(null)
   const [showPrices, setShowPrices] = useState(() => {
     const storedValue = window.localStorage.getItem(PRICE_VISIBILITY_STORAGE_KEY)
@@ -288,7 +281,6 @@ function MeetingPage({
     setIsSummarySheetOpen(false)
     setIsMoreSheetOpen(false)
     setIsMenuPanelOpen(false)
-    setStarbucksSheetRequestKey(0)
     setShareTarget(null)
     setCompletionToast('')
   }, [normalizedCode, normalizedRole])
@@ -296,26 +288,6 @@ function MeetingPage({
   useEffect(() => {
     latestSnapshotRef.current = snapshot
   }, [snapshot])
-
-  useEffect(() => {
-    if (
-      normalizedRole !== 'organizer' ||
-      !snapshot ||
-      (!routeState?.openStarbucksCategorySheet &&
-        !(
-          snapshot.meeting.cafeName === STARBUCKS_CAFE_NAME &&
-          snapshot.menuItems.length === 0
-        ))
-    ) {
-      return
-    }
-
-    setIsMenuPanelOpen(true)
-  }, [
-    normalizedRole,
-    routeState?.openStarbucksCategorySheet,
-    snapshot,
-  ])
 
   useEffect(() => {
     window.localStorage.setItem(
@@ -1097,23 +1069,19 @@ function MeetingPage({
               <div className="panel-head">
                 <div>
                   <span className="panel-kicker">스타벅스 메뉴 준비</span>
-                  <h2>주문을 받기 전에 스타벅스 메뉴를 먼저 골라주세요</h2>
+                  <h2>주문을 받기 전에 스타벅스 메뉴를 먼저 불러주세요</h2>
                 </div>
               </div>
               <p className="panel-note">
-                카테고리와 메뉴를 먼저 불러와야 참석자가 상단 주문 화면에서 바로 선택할 수
-                있습니다.
+                메뉴를 먼저 불러와야 참석자가 상단 주문 화면에서 바로 선택할 수 있습니다.
               </p>
               <div className="button-row">
                 <button
                   className="button"
                   type="button"
-                  onClick={() => {
-                    setIsMenuPanelOpen(true)
-                    setStarbucksSheetRequestKey((currentValue) => currentValue + 1)
-                  }}
+                  onClick={() => setIsMenuPanelOpen(true)}
                 >
-                  스타벅스 메뉴 선택
+                  메뉴 패널 열기
                 </button>
               </div>
             </section>
@@ -1184,13 +1152,8 @@ function MeetingPage({
               <summary>메뉴 보기 및 편집</summary>
               <div className="admin-details-body">
                 <MenuPanel
-                  autoOpenStarbucksCategorySheet={
-                    normalizedRole === 'organizer' &&
-                    Boolean(routeState?.openStarbucksCategorySheet)
-                  }
                   cafeName={meeting.cafeName}
                   menuItems={menuItems}
-                  openStarbucksSheetRequestKey={starbucksSheetRequestKey}
                   showPrices={showPrices}
                   onAddMenu={handleAddMenu}
                   onUpdateMenu={updateMenuField}
