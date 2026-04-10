@@ -1,7 +1,6 @@
 import {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   type FormEvent,
@@ -85,7 +84,6 @@ export function MenuPanel({
   const [isLoadingStarbucks, setIsLoadingStarbucks] = useState(false)
   const [isStarbucksSheetOpen, setIsStarbucksSheetOpen] = useState(false)
   const [starbucksMenus, setStarbucksMenus] = useState<StarbucksCatalogMenu[]>([])
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedMenuKeys, setSelectedMenuKeys] = useState<string[]>([])
   const [starbucksError, setStarbucksError] = useState('')
   const [availableTemperatures, setAvailableTemperatures] = useState<
@@ -94,27 +92,6 @@ export function MenuPanel({
   const hasAutoOpenedStarbucksSheet = useRef(false)
   const lastHandledOpenRequestKey = useRef(0)
   const isStarbucksMeeting = cafeName === STARBUCKS_CAFE_NAME
-
-  const starbucksCategories = useMemo(() => {
-    const counts = new Map<string, number>()
-
-    for (const menu of starbucksMenus) {
-      counts.set(menu.categoryName, (counts.get(menu.categoryName) ?? 0) + 1)
-    }
-
-    return [...counts.entries()]
-      .map(([categoryName, count]) => ({
-        name: categoryName,
-        count,
-      }))
-      .sort((left, right) => left.name.localeCompare(right.name, 'ko-KR'))
-  }, [starbucksMenus])
-
-  const filteredStarbucksMenus = useMemo(
-    () =>
-      starbucksMenus.filter((menu) => selectedCategories.includes(menu.categoryName)),
-    [selectedCategories, starbucksMenus],
-  )
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -147,11 +124,7 @@ export function MenuPanel({
 
     try {
       const payload = await fetchStarbucksDrinkCatalog()
-      const nextSelectedCategories = [
-        ...new Set(payload.menus.map((menu) => menu.categoryName)),
-      ].sort((left, right) => left.localeCompare(right, 'ko-KR'))
       setStarbucksMenus(payload.menus)
-      setSelectedCategories(nextSelectedCategories)
       setSelectedMenuKeys(payload.menus.map(getStarbucksMenuKey))
       setIsStarbucksSheetOpen(true)
     } catch {
@@ -160,30 +133,6 @@ export function MenuPanel({
       setIsLoadingStarbucks(false)
     }
   }, [starbucksMenus.length])
-
-  function handleToggleCategory(categoryName: string) {
-    const categoryMenuKeys = starbucksMenus
-      .filter((menu) => menu.categoryName === categoryName)
-      .map(getStarbucksMenuKey)
-
-    setSelectedCategories((currentCategories) => {
-      const nextCategories = currentCategories.includes(categoryName)
-        ? currentCategories.filter((item) => item !== categoryName)
-        : [...currentCategories, categoryName].sort((left, right) =>
-            left.localeCompare(right, 'ko-KR'),
-          )
-
-      setSelectedMenuKeys((currentMenuKeys) => {
-        if (currentCategories.includes(categoryName)) {
-          return currentMenuKeys.filter((menuKey) => !categoryMenuKeys.includes(menuKey))
-        }
-
-        return [...new Set([...currentMenuKeys, ...categoryMenuKeys])]
-      })
-
-      return nextCategories
-    })
-  }
 
   function handleToggleMenu(menuKey: string) {
     setSelectedMenuKeys((currentMenuKeys) =>
@@ -195,11 +144,11 @@ export function MenuPanel({
 
   function handleConfirmStarbucksCategories() {
     const filteredMenus = starbucksMenus.filter((menu) =>
-      selectedCategories.includes(menu.categoryName) &&
       selectedMenuKeys.includes(getStarbucksMenuKey(menu)),
     )
+    const categoryNames = [...new Set(filteredMenus.map((menu) => menu.categoryName))]
 
-    onLoadStarbucksMenu(filteredMenus, selectedCategories)
+    onLoadStarbucksMenu(filteredMenus, categoryNames)
     setIsStarbucksSheetOpen(false)
   }
 
@@ -239,44 +188,17 @@ export function MenuPanel({
         open={isStarbucksSheetOpen}
         loading={isLoadingStarbucks}
         error={starbucksError}
-        categories={starbucksCategories}
-        menus={filteredStarbucksMenus.map((menu) => ({
+        menus={starbucksMenus.map((menu) => ({
           key: getStarbucksMenuKey(menu),
           name: menu.name,
           categoryName: menu.categoryName,
           availableTemperatures: menu.availableTemperatures,
         }))}
-        selectedCategories={selectedCategories}
         selectedMenuKeys={selectedMenuKeys}
         onClose={() => setIsStarbucksSheetOpen(false)}
-        onToggleCategory={handleToggleCategory}
-        onSelectAll={() => {
-          setSelectedCategories(starbucksCategories.map((category) => category.name))
-          setSelectedMenuKeys(starbucksMenus.map(getStarbucksMenuKey))
-        }}
-        onClearAll={() => {
-          setSelectedCategories([])
-          setSelectedMenuKeys([])
-        }}
         onToggleMenu={handleToggleMenu}
-        onSelectAllMenus={() =>
-          setSelectedMenuKeys((currentMenuKeys) => [
-            ...new Set([
-              ...currentMenuKeys,
-              ...filteredStarbucksMenus.map(getStarbucksMenuKey),
-            ]),
-          ])
-        }
-        onClearMenus={() =>
-          setSelectedMenuKeys((currentMenuKeys) =>
-            currentMenuKeys.filter(
-              (menuKey) =>
-                !filteredStarbucksMenus
-                  .map(getStarbucksMenuKey)
-                  .includes(menuKey),
-            ),
-          )
-        }
+        onSelectAllMenus={() => setSelectedMenuKeys(starbucksMenus.map(getStarbucksMenuKey))}
+        onClearMenus={() => setSelectedMenuKeys([])}
         onConfirm={handleConfirmStarbucksCategories}
       />
 
