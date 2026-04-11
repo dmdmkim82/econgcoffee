@@ -47,7 +47,7 @@ function getAttendeeStatus(attendee: Attendee) {
 
   return {
     tone: 'neutral',
-    label: '메뉴 선택 전',
+    label: '선택 전',
   }
 }
 
@@ -109,14 +109,6 @@ export function QuickOrderPanel({
     }
   }, [attendees])
 
-  const heading =
-    variant === 'organizer'
-      ? '이름 입력 후 바로 주문 받기'
-      : '내 이름 선택 후 메뉴 고르기'
-  const description =
-    variant === 'organizer'
-      ? '참석자 이름을 입력하면 바로 메뉴를 선택해서 주문을 받을 수 있습니다.'
-      : '링크를 열면 내 이름을 누른 뒤 바로 주문할 수 있고, 이름이 없으면 새로 추가할 수 있습니다.'
   const countdownLabel = meetingClosed ? '주문 마감' : formatCountdown(meeting.deadline)
   const previewPrice =
     selectedMenu && activeAttendee
@@ -268,52 +260,27 @@ export function QuickOrderPanel({
             <span className="panel-kicker">
               {variant === 'organizer' ? '빠른 주문 입력' : '내 주문 입력'}
             </span>
-            <h2>{heading}</h2>
+            <h2>{isParticipantView ? '내 이름 선택 후 메뉴 고르기' : '이름 입력 후 바로 주문 받기'}</h2>
           </div>
           <span className={`status-pill ${meetingClosed ? 'danger' : 'live'}`}>
             {meetingClosed ? '주문 마감' : '주문 가능'}
           </span>
         </div>
 
-        <p className="panel-note">{description}</p>
-
-        <div className="participant-meta-grid quick-order-meta">
-          <article className="mini-stat">
-            <span>카페</span>
-            <strong>{meeting.cafeName || '미정'}</strong>
-          </article>
-          <article className="mini-stat">
-            <span>응답</span>
-            <strong>
-              {completionStats.completed}/{completionStats.total}
-            </strong>
-          </article>
-          <article className="mini-stat">
-            <span>마감</span>
-            <strong>{countdownLabel}</strong>
-          </article>
-        </div>
-
-        <div className="quick-order-composer">
-          {attendees.length > 0 ? (
-            <div className="quick-order-name-picker">
-              <div className="subhead">
-                <h3>{isParticipantView ? '참석자 이름 선택' : '기존 참석자 바로 선택'}</h3>
-                {isParticipantView ? (
-                  <button
-                    className="button ghost small"
-                    type="button"
-                    onClick={
-                      isAddingAttendee
-                        ? handleCancelAddingAttendee
-                        : handleStartAddingAttendee
-                    }
-                  >
-                    {isAddingAttendee ? '이름 선택으로 돌아가기' : '참석자 더 추가'}
-                  </button>
-                ) : null}
-              </div>
-
+        {/* PARTICIPANT: name chips at the very top — immediately visible */}
+        {isParticipantView && attendees.length > 0 ? (
+          <div className="quick-order-name-picker">
+            <div className="subhead">
+              <h3>내 이름 선택</h3>
+              <button
+                className="button ghost small"
+                type="button"
+                onClick={isAddingAttendee ? handleCancelAddingAttendee : handleStartAddingAttendee}
+              >
+                {isAddingAttendee ? '이름 선택으로' : '이름 없으면 추가'}
+              </button>
+            </div>
+            {!isAddingAttendee ? (
               <div className="quick-attendee-scroll" role="list" aria-label="기존 참석자">
                 {attendees.map((attendee) => {
                   const status = getAttendeeStatus(attendee)
@@ -333,37 +300,112 @@ export function QuickOrderPanel({
                   )
                 })}
               </div>
-            </div>
-          ) : null}
+            ) : (
+              <label className="field field-full">
+                <span>새 참석자 이름</span>
+                <input
+                  value={nameInput}
+                  onChange={(event) => handleNameChange(event.target.value)}
+                  placeholder="이름을 입력하면 새 참석자로 추가됩니다"
+                  // eslint-disable-next-line jsx-a11y/no-autofocus
+                  autoFocus
+                />
+              </label>
+            )}
+            {!activeAttendee && !isAddingAttendee ? (
+              <div className="status-callout">
+                내 이름을 눌러 주문을 시작하세요.
+              </div>
+            ) : null}
+            {nameInput.trim() && isAddingAttendee ? (
+              <div className="status-callout">이름 확인 완료. 아래에서 메뉴를 선택해주세요.</div>
+            ) : null}
+          </div>
+        ) : null}
 
-          {variant === 'organizer' || attendees.length === 0 || isAddingAttendee ? (
+        {/* PARTICIPANT: no attendees yet — show input at the top */}
+        {isParticipantView && attendees.length === 0 ? (
+          <>
             <label className="field field-full">
-              <span>{isParticipantView ? '새 참석자 이름' : '참석자 이름'}</span>
+              <span>내 이름</span>
               <input
                 value={nameInput}
                 onChange={(event) => handleNameChange(event.target.value)}
-                placeholder={
-                  isParticipantView
-                    ? '이름을 입력하면 새 참석자로 추가됩니다'
-                    : '이름만 입력하면 바로 메뉴를 고를 수 있습니다'
-                }
+                placeholder="이름을 입력하면 새 참석자로 추가됩니다"
               />
             </label>
-          ) : null}
+            {nameInput.trim() ? (
+              <div className="status-callout">이름 확인 완료. 아래에서 메뉴를 선택해주세요.</div>
+            ) : null}
+          </>
+        ) : null}
 
-          {isParticipantView && attendees.length > 0 && !activeAttendee && !isAddingAttendee ? (
-            <div className="status-callout">
-              내 이름을 눌러 주문을 시작하세요. 이름이 없으면 참석자 더 추가를 눌러 새로
-              등록할 수 있습니다.
-            </div>
-          ) : null}
+        {/* ORGANIZER: description + name input */}
+        {!isParticipantView ? (
+          <>
+            <p className="panel-note">
+              참석자 이름을 입력하면 바로 메뉴를 선택해서 주문을 받을 수 있습니다.
+            </p>
+            {attendees.length > 0 ? (
+              <div className="quick-order-name-picker">
+                <div className="subhead">
+                  <h3>기존 참석자 바로 선택</h3>
+                </div>
+                <div className="quick-attendee-scroll" role="list" aria-label="기존 참석자">
+                  {attendees.map((attendee) => {
+                    const status = getAttendeeStatus(attendee)
 
-          {nameInput.trim() && (variant === 'organizer' || attendees.length === 0 || isAddingAttendee) ? (
-            <div className="status-callout">
-              이름 확인 완료. 아래에서 메뉴를 선택해주세요.
-            </div>
-          ) : null}
+                    return (
+                      <button
+                        className={`quick-attendee-chip ${
+                          attendee.id === activeAttendeeId ? 'active' : ''
+                        }`}
+                        key={attendee.id}
+                        type="button"
+                        onClick={() => syncSelectedAttendee(attendee.id)}
+                      >
+                        {attendee.name}
+                        <span>{status.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ) : null}
+            <label className="field field-full">
+              <span>참석자 이름</span>
+              <input
+                value={nameInput}
+                onChange={(event) => handleNameChange(event.target.value)}
+                placeholder="이름만 입력하면 바로 메뉴를 고를 수 있습니다"
+              />
+            </label>
+            {nameInput.trim() ? (
+              <div className="status-callout">이름 확인 완료. 아래에서 메뉴를 선택해주세요.</div>
+            ) : null}
+          </>
+        ) : null}
 
+        {/* Meta stats */}
+        <div className="participant-meta-grid quick-order-meta">
+          <article className="mini-stat">
+            <span>카페</span>
+            <strong>{meeting.cafeName || '미정'}</strong>
+          </article>
+          <article className="mini-stat">
+            <span>응답</span>
+            <strong>
+              {completionStats.completed}/{completionStats.total}
+            </strong>
+          </article>
+          <article className="mini-stat">
+            <span>마감</span>
+            <strong>{countdownLabel}</strong>
+          </article>
+        </div>
+
+        {/* Order form */}
+        <div className="quick-order-composer">
           <div className="quick-order-fields">
             <label className="field field-full">
               <span>메뉴 선택</span>
