@@ -3,13 +3,8 @@ import {
   type FormEvent,
 } from 'react'
 import {
-  fetchStarbucksDrinkCatalog,
-  type StarbucksCatalogMenu,
-} from '../lib/api'
-import {
   type MenuItem,
   type NutritionInfo,
-  STARBUCKS_CAFE_NAME,
   type TemperatureOption,
 } from '../lib/meeting'
 import { formatVisiblePrice } from '../lib/menu'
@@ -31,10 +26,7 @@ type MenuPanelProps = {
   onRemoveMenu: (menuItemId: string) => void
   onLoadLatelierMenu: () => void
   onLoadPaulBassettMenu: () => void
-  onLoadStarbucksMenu: (
-    menus: StarbucksCatalogMenu[],
-    categoryNames: string[],
-  ) => void
+  onLoadStarbucksMenu: () => void
   onTogglePriceVisibility: () => void
 }
 
@@ -71,12 +63,9 @@ export function MenuPanel({
 }: MenuPanelProps) {
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
-  const [isLoadingStarbucks, setIsLoadingStarbucks] = useState(false)
   const [availableTemperatures, setAvailableTemperatures] = useState<
     TemperatureOption[]
   >(['HOT', 'ICE'])
-  const isStarbucksMeeting = cafeName === STARBUCKS_CAFE_NAME
-
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -95,22 +84,6 @@ export function MenuPanel({
     setName('')
     setPrice('')
     setAvailableTemperatures(['HOT', 'ICE'])
-  }
-
-  async function handleLoadStarbucksMenus() {
-    setIsLoadingStarbucks(true)
-
-    try {
-      const payload = await fetchStarbucksDrinkCatalog()
-      const categoryNames = [
-        ...new Set(payload.menus.map((menu: StarbucksCatalogMenu) => menu.categoryName)),
-      ]
-      onLoadStarbucksMenu(payload.menus, categoryNames)
-    } catch {
-      // 실패 시 사용자에게 알릴 방법 없음 — 버튼이 다시 활성화되므로 재시도 가능
-    } finally {
-      setIsLoadingStarbucks(false)
-    }
   }
 
   return (
@@ -141,10 +114,9 @@ export function MenuPanel({
         <button
           className="button secondary small"
           type="button"
-          disabled={isLoadingStarbucks}
-          onClick={() => { void handleLoadStarbucksMenus() }}
+          onClick={onLoadStarbucksMenu}
         >
-          {isLoadingStarbucks ? '스타벅스 불러오는 중' : '스타벅스 메뉴 불러오기'}
+          스타벅스 메뉴 불러오기
         </button>
         <button
           className="button ghost small"
@@ -161,26 +133,8 @@ export function MenuPanel({
       </p>
       {menuItems.length === 0 ? (
         <div className="empty-state">
-          {isStarbucksMeeting ? (
-            <>
-              <p>스타벅스 미팅은 메뉴를 먼저 불러와야 주문을 받을 수 있습니다.</p>
-              <div className="button-row">
-                <button
-                  className="button"
-                  type="button"
-                  disabled={isLoadingStarbucks}
-                  onClick={() => { void handleLoadStarbucksMenus() }}
-                >
-                  {isLoadingStarbucks ? '스타벅스 메뉴를 불러오는 중' : '스타벅스 메뉴 불러오기'}
-                </button>
-              </div>
-            </>
-          ) : (
-            <>
-              아직 등록된 메뉴가 없습니다. 아래 관리 섹션에서 이미지 메뉴를 올리거나
-              수동으로 추가해주세요.
-            </>
-          )}
+          아직 등록된 메뉴가 없습니다. 아래 관리 섹션에서 이미지 메뉴를 올리거나
+          수동으로 추가해주세요.
         </div>
       ) : (
         <div className="catalog-list menu-catalog-board">

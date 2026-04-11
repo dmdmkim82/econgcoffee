@@ -28,9 +28,7 @@ import {
   deleteMeetingFromApi,
   fetchMeetingFromApi,
   fetchMeetingsFromApi,
-  fetchStarbucksDrinkCatalog,
   saveMeetingToApi,
-  type StarbucksCatalogMenu,
 } from './lib/api'
 import {
   type Attendee,
@@ -42,6 +40,7 @@ import {
   type TemperatureOption,
   createLatelierMenuItems,
   createPaulBassettMenuItems,
+  createStarbucksMenuItems,
   PAUL_BASSETT_CAFE_NAME,
   createId,
   formatCountdown,
@@ -732,42 +731,17 @@ function MeetingPage({
       return
     }
 
-    let cancelled = false
-
-    void fetchStarbucksDrinkCatalog().then((payload) => {
-      if (cancelled) return
-      const categoryNames = [...new Set(payload.menus.map((m) => m.categoryName))]
-      handleLoadStarbucksMenu(payload.menus, categoryNames)
-    })
-
-    return () => { cancelled = true }
+    handleLoadStarbucksMenu()
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [normalizedRole, snapshot?.meeting.cafeName, snapshot?.menuItems.length])
 
-  function handleLoadStarbucksMenu(
-    menus: StarbucksCatalogMenu[],
-    categoryNames: string[],
-  ) {
-    const importedMenus = menus.map((menu) => ({
-      id: createId('menu'),
-      name: menu.name,
-      price: menu.price,
-      availableTemperatures: menu.availableTemperatures,
-      nutritionInfo: menu.nutritionInfo,
-      source: 'manual' as const,
-    }))
-
+  function handleLoadStarbucksMenu() {
+    const menuItems = createStarbucksMenuItems()
     patchSnapshot((currentSnapshot) => ({
       ...currentSnapshot,
-      menuItems: mergeMenuItems(currentSnapshot.menuItems, importedMenus),
-      meeting: {
-        ...currentSnapshot.meeting,
-        cafeName: '스타벅스',
-      },
+      menuItems: mergeMenuItems(currentSnapshot.menuItems, menuItems),
     }))
-    setFeedback(
-      `스타벅스 ${categoryNames.join(', ')} 카테고리에서 ${importedMenus.length}개 메뉴를 불러왔습니다.`,
-    )
+    setFeedback(`스타벅스 메뉴 ${menuItems.length}개를 불러왔습니다.`)
   }
 
   function handleRemoveMenu(menuItemId: string) {

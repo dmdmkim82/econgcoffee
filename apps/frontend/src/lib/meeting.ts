@@ -120,6 +120,45 @@ const LATELIER_MENU_PRESET: PresetMenuItem[] = [
   { name: '아보카도바나나스무디', price: 4300, availableTemperatures: ICE_ONLY },
 ]
 
+const STARBUCKS_MENU_PRESET: PresetMenuItem[] = [
+  // 에스프레소 / 커피
+  { name: '슈크림 라떼', price: 6700, availableTemperatures: HOT_AND_ICE },
+  { name: '슈 폼 라떼', price: 6700, availableTemperatures: HOT_AND_ICE },
+  { name: '스타벅스 에어로카노', price: 4900, availableTemperatures: ICE_ONLY },
+  { name: '시그니처 코르타도', price: 5800, availableTemperatures: HOT_AND_ICE },
+  { name: '밀크카라멜 라떼', price: 5800, availableTemperatures: HOT_AND_ICE },
+  { name: '플랫 화이트', price: 5800, availableTemperatures: HOT_AND_ICE },
+  { name: '카페 아메리카노', price: 4700, availableTemperatures: HOT_AND_ICE },
+  { name: '카페 라떼', price: 5200, availableTemperatures: HOT_AND_ICE },
+  { name: '바닐라 라떼', price: 5200, availableTemperatures: HOT_AND_ICE },
+  { name: '스타벅스 돌체 라떼', price: 6100, availableTemperatures: HOT_AND_ICE },
+  { name: '카페 모카', price: 5700, availableTemperatures: HOT_AND_ICE },
+  { name: '카푸치노', price: 5200, availableTemperatures: HOT_AND_ICE },
+  { name: '카라멜 마키아또', price: 6100, availableTemperatures: HOT_AND_ICE },
+  { name: '화이트 초콜릿 모카', price: 6100, availableTemperatures: HOT_AND_ICE },
+  { name: '커피 스타벅스 더블 샷', price: 5300, availableTemperatures: ICE_ONLY },
+  { name: '바닐라 스타벅스 더블 샷', price: 5300, availableTemperatures: ICE_ONLY },
+  { name: '헤이즐넛 스타벅스 더블 샷', price: 5300, availableTemperatures: ICE_ONLY },
+  { name: '에스프레소', price: 3900, availableTemperatures: HOT_AND_ICE },
+  { name: '에스프레소 마키아또', price: 3900, availableTemperatures: HOT_AND_ICE },
+  { name: '에스프레소 콘 파나', price: 4100, availableTemperatures: HOT_AND_ICE },
+  // 디카페인 커피
+  { name: '디카페인 슈 폼 라떼', price: 7000, availableTemperatures: HOT_AND_ICE },
+  { name: '디카페인 슈크림 라떼', price: 7000, availableTemperatures: HOT_AND_ICE },
+  { name: '1/2디카페인 슈 폼 라떼', price: 7000, availableTemperatures: HOT_AND_ICE },
+  { name: '1/2디카페인 슈크림 라떼', price: 7000, availableTemperatures: HOT_AND_ICE },
+  // 콜드 브루
+  { name: '바삭 피스타치오 바닐라 크림 콜드 브루', price: 7500, availableTemperatures: ICE_ONLY },
+  { name: '바닐라 크림 콜드 브루', price: 6000, availableTemperatures: ICE_ONLY },
+  { name: '돌체 콜드 브루', price: 6000, availableTemperatures: ICE_ONLY },
+  { name: '콜드 브루', price: 5100, availableTemperatures: ICE_ONLY },
+  // 프라푸치노 / 블렌디드
+  { name: '바삭 피스타치오 초콜릿 프라푸치노', price: 7700, availableTemperatures: ICE_ONLY },
+  { name: '체리블라썸 백도 크림 프라푸치노', price: 7700, availableTemperatures: ICE_ONLY },
+  { name: '자몽 허니 레몬 블렌디드', price: 6300, availableTemperatures: ICE_ONLY },
+  { name: '더블 에스프레소 칩 프라푸치노', price: 6500, availableTemperatures: ICE_ONLY },
+]
+
 const PAUL_BASSETT_MENU_PRESET: PresetMenuItem[] = [
   // 커피
   { name: '룽고', price: 5300, availableTemperatures: ICE_ONLY },
@@ -315,6 +354,10 @@ export function createPaulBassettMenuItems() {
   return PAUL_BASSETT_MENU_PRESET.map(createPresetMenuItem)
 }
 
+export function createStarbucksMenuItems() {
+  return STARBUCKS_MENU_PRESET.map(createPresetMenuItem)
+}
+
 function resolveCafePresetName(cafeName?: string): CafePresetName {
   if (cafeName === STARBUCKS_CAFE_NAME) {
     return STARBUCKS_CAFE_NAME
@@ -341,6 +384,10 @@ function createInitialMenuItems(
 
   if (cafeName === PAUL_BASSETT_CAFE_NAME) {
     return createPaulBassettMenuItems()
+  }
+
+  if (cafeName === STARBUCKS_CAFE_NAME) {
+    return createStarbucksMenuItems()
   }
 
   return []
