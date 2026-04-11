@@ -7,6 +7,7 @@ import {
   type Snapshot,
 } from '../lib/meeting'
 import { BrandLogo } from './BrandLogo'
+import { CafeLogoIcon } from './CafeLogoIcon'
 import { CreateMeetingSheet } from './CreateMeetingSheet'
 
 type CreateMeetingPayload = {
@@ -167,17 +168,18 @@ export function HomePage({
               </label>
               <div className="field field-full">
                 <span>카페 선택</span>
-                <div className="checkbox-group">
+                <div className="cafe-picker-grid">
                   {CAFE_PRESETS.map((presetCafeName) => (
                     <button
-                      className={`button ghost small ${
-                        draftCafeName === presetCafeName ? 'active-chip' : ''
+                      className={`cafe-picker-card ${
+                        draftCafeName === presetCafeName ? 'active' : ''
                       }`}
                       key={presetCafeName}
                       type="button"
                       onClick={() => setDraftCafeName(presetCafeName)}
                     >
-                      {presetCafeName}
+                      <CafeLogoIcon name={presetCafeName} size={44} />
+                      <span>{presetCafeName}</span>
                     </button>
                   ))}
                 </div>
