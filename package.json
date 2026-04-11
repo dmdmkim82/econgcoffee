@@ -15,7 +15,10 @@
     "start": "tsx apps/backend/src/index.ts"
   },
   "dependencies": {
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.3.2",
     "qrcode": "^1.5.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

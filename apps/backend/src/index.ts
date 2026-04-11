@@ -1,4 +1,5 @@
 import express from 'express'
+import { rateLimit } from 'express-rate-limit'
 import type { Snapshot } from '../../../shared/meeting'
 import {
   listMeetings,
@@ -11,6 +12,22 @@ import { fetchStarbucksDrinkCatalog } from './starbucks'
 
 const app = express()
 const port = Number(process.env.PORT || 8787)
+
+// Rate limiting: 일반 읽기 — IP당 1분에 120회
+const readLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: 120,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+})
+
+// Rate limiting: 쓰기(PUT/DELETE) — IP당 1분에 30회
+const writeLimiter = rateLimit({
+  windowMs: 60_000,
+  limit: 30,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+})
 const allowedOrigins = (process.env.CORS_ORIGIN ??
   'http://127.0.0.1:5173,http://localhost:5173,http://127.0.0.1:4173,http://localhost:4173').split(',')
 
@@ -53,7 +70,7 @@ app.get('/api/catalogs/starbucks/drinks', async (_request, response, next) => {
   }
 })
 
-app.get('/api/meetings', async (_request, response, next) => {
+app.get('/api/meetings', readLimiter, async (_request, response, next) => {
   try {
     const store = await readStore()
     response.json({ meetings: listMeetings(store) })
@@ -62,7 +79,7 @@ app.get('/api/meetings', async (_request, response, next) => {
   }
 })
 
-app.get('/api/meetings/:shareCode', async (request, response, next) => {
+app.get<{ shareCode: string }>('/api/meetings/:shareCode', readLimiter, async (request, response, next) => {
   try {
     const store = await readStore()
     const shareCode = request.params.shareCode.toUpperCase()
@@ -79,7 +96,7 @@ app.get('/api/meetings/:shareCode', async (request, response, next) => {
   }
 })
 
-app.put('/api/meetings/:shareCode', async (request, response, next) => {
+app.put<{ shareCode: string }>('/api/meetings/:shareCode', writeLimiter, async (request, response, next) => {
   try {
     const shareCode = request.params.shareCode.toUpperCase()
     const meeting = request.body?.meeting as Snapshot | undefined
@@ -104,7 +121,7 @@ app.put('/api/meetings/:shareCode', async (request, response, next) => {
   }
 })
 
-app.delete('/api/meetings/:shareCode', async (request, response, next) => {
+app.delete<{ shareCode: string }>('/api/meetings/:shareCode', writeLimiter, async (request, response, next) => {
   try {
     const shareCode = request.params.shareCode.toUpperCase()
     const store = await readStore()

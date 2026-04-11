@@ -496,7 +496,7 @@ export function buildDefaultSnapshot(
       organizer: '',
       deadline: formatDateTimeInput(deadline),
       notes: '',
-      shareCode: `EK-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
+      shareCode: `EK-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
       manuallyClosed: false,
     },
     menuItems: createInitialMenuItems(cafeName, menuSeeds),

@@ -3,12 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta
       name="description"
       content="에콩커피는 메뉴 OCR, 참석자 주문 입력, 최종 주문 요약까지 한 번에 처리하는 미팅 커피 취합 앱입니다."
     />
     <title>에콩커피 | 미팅 커피 취합</title>
+
+    <!-- PWA / App Store 설정 -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="에콩커피" />
+    <meta name="theme-color" content="#b86a39" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
   </head>
   <body>
     <div id="root"></div>
