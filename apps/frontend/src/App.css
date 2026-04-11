@@ -28,7 +28,7 @@
 .preview-card,
 .workspace-grid {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .compact-home-hero,
@@ -41,7 +41,7 @@
 .inline-form,
 .inline-form.stacked {
   display: grid;
-  gap: 6px;
+  gap: 4px;
 }
 
 .meeting-topbar,
@@ -58,8 +58,8 @@
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 10px;
+  gap: 6px;
+  padding: 8px;
   border-color: var(--border);
   background: var(--panel);
   box-shadow: var(--shadow-sm);
@@ -67,6 +67,12 @@
 
 .panel-wide {
   grid-column: auto;
+}
+
+.meeting-card {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
 }
 
 .home-panel {
@@ -83,8 +89,8 @@
   position: sticky;
   top: calc(6px + env(safe-area-inset-top, 0));
   z-index: 20;
-  padding: 7px 10px;
-  margin-bottom: 4px;
+  padding: 5px 8px;
+  margin-bottom: 2px;
   backdrop-filter: blur(14px);
 }
 
@@ -276,7 +282,7 @@
 .meeting-card-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
   align-items: center;
 }
 
@@ -360,7 +366,7 @@
 
 .mini-stat,
 .stat-card {
-  padding: 7px 9px;
+  padding: 5px 7px;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--surface);
@@ -522,7 +528,7 @@
 .pending-box h3,
 .summary-copy-box h3 {
   margin: 3px 0 0;
-  font-size: 0.88rem;
+  font-size: 0.84rem;
   line-height: 1.2;
 }
 
@@ -539,7 +545,7 @@
 .personal-summary span {
   margin: 0;
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   line-height: 1.35;
 }
 
@@ -615,8 +621,8 @@
 .ocr-textarea,
 .join-form input {
   width: 100%;
-  min-height: 36px;
-  padding: 8px 10px;
+  min-height: 32px;
+  padding: 6px 9px;
   border: 1px solid var(--input-border);
   border-radius: 12px;
   background: var(--input-bg);
@@ -652,10 +658,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
+  min-height: 34px;
   border: none;
   border-radius: 999px;
-  padding: 7px 11px;
+  padding: 5px 10px;
   background: linear-gradient(135deg, #b86a39, #d58a4a);
   color: #fffdf7;
   font: inherit;
@@ -695,8 +701,8 @@
 }
 
 .button.small {
-  min-height: 28px;
-  padding: 5px 9px;
+  min-height: 26px;
+  padding: 4px 8px;
   font-size: 0.73rem;
 }
 
@@ -732,12 +738,12 @@
 
 .summary-sheet {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   width: min(100%, 430px);
   margin: 0 auto;
   max-height: min(78vh, 680px);
   overflow: auto;
-  padding: 14px;
+  padding: 12px;
   border: 1px solid var(--border);
   border-radius: 18px;
   background: var(--panel);
@@ -746,12 +752,12 @@
 
 .share-sheet {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   width: min(100%, 430px);
   margin: 0 auto;
   max-height: min(78vh, 680px);
   overflow: auto;
-  padding: 14px;
+  padding: 12px;
   border: 1px solid var(--border);
   border-radius: 18px;
   background: var(--panel);
@@ -767,7 +773,7 @@
 
 .summary-sheet-list {
   display: grid;
-  gap: 8px;
+  gap: 5px;
 }
 
 .summary-sheet-row {
@@ -775,7 +781,7 @@
   justify-content: space-between;
   gap: 10px;
   align-items: flex-start;
-  padding: 9px 10px;
+  padding: 7px 8px;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--surface);
@@ -938,7 +944,7 @@
 .pending-box,
 .summary-copy-box,
 .summary-totals > div {
-  padding: 9px 10px;
+  padding: 7px 8px;
 }
 
 .menu-row {
@@ -950,8 +956,8 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
-  padding: 9px 10px;
+  gap: 4px;
+  padding: 7px 8px;
 }
 
 .order-grid {
@@ -989,6 +995,20 @@
   background: var(--selection-bg);
   color: var(--muted);
   font-size: 0.8rem;
+}
+
+.menu-catalog-board {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.menu-catalog-row {
+  grid-template-columns: 1fr;
+  gap: 2px;
+  padding: 5px 7px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
 }
 
 .catalog-row {
@@ -1157,13 +1177,16 @@
 }
 
 .menu-catalog-board {
-  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
 }
 
 .menu-catalog-row {
-  padding: 8px 10px;
+  grid-template-columns: 1fr;
+  gap: 2px;
+  padding: 5px 7px;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 8px;
   background: var(--surface);
 }
 
@@ -1205,12 +1228,12 @@
 .participant-order-stack,
 .quick-attendee-list {
   display: grid;
-  gap: 8px;
+  gap: 4px;
 }
 
 .attendance-row {
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 10px;
   background: var(--surface);
   overflow: hidden;
 }
@@ -1221,12 +1244,12 @@
 
 .attendance-summary {
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) auto;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
   grid-template-areas:
     'avatar main trigger'
     '. order order';
-  gap: 6px 10px;
-  padding: 9px 10px;
+  gap: 3px 8px;
+  padding: 6px 8px;
   cursor: pointer;
   list-style: none;
 }
@@ -1240,9 +1263,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
   background: var(--chip-bg);
   color: var(--accent-strong);
   font-weight: 800;
@@ -1256,30 +1279,30 @@
 }
 
 .attendance-main strong {
-  font-size: 0.88rem;
+  font-size: 0.84rem;
 }
 
 .attendance-main span {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
 }
 
 .attendance-order {
   grid-area: order;
   display: grid;
-  gap: 6px;
+  gap: 3px;
   min-width: 0;
 }
 
 .attendance-order strong {
-  font-size: 0.86rem;
+  font-size: 0.82rem;
   line-height: 1.35;
 }
 
 .attendance-badges {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
 }
 
 .accordion-trigger {
@@ -1291,15 +1314,15 @@
 }
 
 .attendance-editor {
-  padding: 0 12px 12px;
+  padding: 0 8px 8px;
 }
 
 .temperature-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 26px;
-  padding: 4px 8px;
+  min-height: 22px;
+  padding: 3px 6px;
   border-radius: 999px;
   font-size: 0.68rem;
   font-weight: 700;
@@ -1348,17 +1371,17 @@
 .quick-order-preview,
 .quick-order-fields {
   display: grid;
-  gap: 10px;
+  gap: 7px;
 }
 
 .quick-order-name-picker {
   display: grid;
-  gap: 8px;
+  gap: 5px;
 }
 
 .menu-info-actions {
   display: grid;
-  gap: 8px;
+  gap: 5px;
 }
 
 .menu-info-note {
@@ -1377,18 +1400,18 @@
 }
 
 .status-callout {
-  padding: 10px 12px;
+  padding: 6px 10px;
   border: 1px solid var(--callout-border);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--callout-bg);
   color: var(--accent-strong);
-  font-size: 0.82rem;
+  font-size: 0.77rem;
   line-height: 1.4;
 }
 
 .quick-attendee-scroll {
   display: flex;
-  gap: 8px;
+  gap: 5px;
   overflow-x: auto;
   padding-bottom: 2px;
   scrollbar-width: none;
@@ -1402,8 +1425,8 @@
   display: grid;
   gap: 2px;
   min-width: max-content;
-  min-height: 32px;
-  padding: 5px 10px;
+  min-height: 26px;
+  padding: 3px 8px;
   border: 1px solid var(--chip-border);
   border-radius: 999px;
   background: var(--chip-bg);
@@ -1470,26 +1493,26 @@
 }
 
 .more-sheet {
-  gap: 12px;
+  gap: 8px;
 }
 
 .more-sheet-group {
   display: grid;
-  gap: 10px;
+  gap: 7px;
 }
 
 .more-sheet-list {
   display: grid;
-  gap: 8px;
+  gap: 5px;
 }
 
 .more-sheet-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  padding: 10px 12px;
+  padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--surface);
@@ -1527,8 +1550,8 @@
 
 .more-sheet-note-card {
   display: grid;
-  gap: 10px;
-  padding: 14px;
+  gap: 8px;
+  padding: 12px;
   border: 1px solid var(--border);
   border-radius: 16px;
   background:
@@ -1756,11 +1779,15 @@
 }
 
 .meeting-card-actions,
-.recent-card .meeting-card-actions,
 .join-form.compact,
 .hero-steps {
   display: grid !important;
   grid-template-columns: 1fr !important;
+}
+
+.recent-card .meeting-card-actions {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 }
 
 .meeting-card-actions,
