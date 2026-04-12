@@ -251,7 +251,7 @@ function createDraftAttendee(name: string): Attendee {
   }
 }
 
-function formatDateTimeInput(date: Date) {
+export function formatDateTimeInput(date: Date) {
   const rounded = new Date(date)
   rounded.setMinutes(Math.ceil(rounded.getMinutes() / 10) * 10, 0, 0)
 

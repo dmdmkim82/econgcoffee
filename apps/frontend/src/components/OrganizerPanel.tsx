@@ -1,4 +1,4 @@
-import { CAFE_PRESETS, type MeetingSettings } from '../lib/meeting'
+import { CAFE_PRESETS, formatDateTimeInput, type MeetingSettings } from '../lib/meeting'
 
 type OrganizerPanelProps = {
   meeting: MeetingSettings
@@ -8,6 +8,10 @@ type OrganizerPanelProps = {
   onChange: (field: keyof MeetingSettings, value: string | boolean) => void
   onToggleManualClose: () => void
   onReset: () => void
+}
+
+function makeDeadline(minutesFromNow: number) {
+  return formatDateTimeInput(new Date(Date.now() + minutesFromNow * 60_000))
 }
 
 export function OrganizerPanel({
@@ -77,15 +81,32 @@ export function OrganizerPanel({
             placeholder="회의실 이름 또는 위치"
           />
         </label>
-        <label className="field field-full">
+        <div className="field field-full">
           <span>취합 마감 시간</span>
           <input
             type="datetime-local"
             value={meeting.deadline}
             onChange={(event) => onChange('deadline', event.target.value)}
           />
+          <div className="button-row inline-chip-row">
+            {([
+              { label: '10분 후', minutes: 10 },
+              { label: '30분 후', minutes: 30 },
+              { label: '1시간 후', minutes: 60 },
+              { label: '2시간 후', minutes: 120 },
+            ] as const).map(({ label, minutes }) => (
+              <button
+                className="button ghost small"
+                key={label}
+                type="button"
+                onClick={() => onChange('deadline', makeDeadline(minutes))}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <small>{deadlineLabel}</small>
-        </label>
+        </div>
         <label className="field field-full">
           <span>안내 메모</span>
           <textarea

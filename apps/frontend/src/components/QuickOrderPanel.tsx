@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { type ClipboardEvent, useMemo, useState } from 'react'
 import {
   formatCountdown,
   getMenuDisplayPrice,
@@ -66,6 +66,8 @@ export function QuickOrderPanel({
   const [nameInput, setNameInput] = useState('')
   const [nutritionMenuId, setNutritionMenuId] = useState('')
   const [isAddingAttendee, setIsAddingAttendee] = useState(false)
+  const [menuSearch, setMenuSearch] = useState('')
+  const [bulkAddedCount, setBulkAddedCount] = useState(0)
   const isParticipantView = variant === 'participant'
 
   const matchedAttendee = useMemo(() => {
@@ -97,6 +99,14 @@ export function QuickOrderPanel({
       (activeAttendee.skipped ||
         (selectedMenu && activeAttendee.temperature)),
   )
+
+  const filteredMenuItems = useMemo(() => {
+    const q = menuSearch.trim().replace(/\s/g, '').toLowerCase()
+    if (!q) return menuItems
+    return menuItems.filter((item) =>
+      item.name.replace(/\s/g, '').toLowerCase().includes(q),
+    )
+  }, [menuItems, menuSearch])
 
   const completionStats = useMemo(() => {
     const completed = attendees.filter(
@@ -246,6 +256,20 @@ export function QuickOrderPanel({
     setNutritionMenuId(menuItem.id)
   }
 
+  function handleOrganizerNamePaste(event: ClipboardEvent<HTMLInputElement>) {
+    const pasted = event.clipboardData.getData('text')
+    const lines = pasted.split(/[\n\r,，；;]/).map((n) => n.trim()).filter(Boolean)
+    if (lines.length > 1) {
+      event.preventDefault()
+      for (const name of lines) {
+        onAddAttendee(name, '')
+      }
+      setNameInput('')
+      setBulkAddedCount(lines.length)
+      setTimeout(() => setBulkAddedCount(0), 3000)
+    }
+  }
+
   return (
     <>
       <MenuNutritionSheet
@@ -377,10 +401,13 @@ export function QuickOrderPanel({
               <input
                 value={nameInput}
                 onChange={(event) => handleNameChange(event.target.value)}
-                placeholder="이름만 입력하면 바로 메뉴를 고를 수 있습니다"
+                onPaste={handleOrganizerNamePaste}
+                placeholder="이름 입력 또는 여러 명 붙여넣기"
               />
             </label>
-            {nameInput.trim() ? (
+            {bulkAddedCount > 0 ? (
+              <div className="status-callout">{bulkAddedCount}명을 한 번에 추가했습니다.</div>
+            ) : nameInput.trim() ? (
               <div className="status-callout">이름 확인 완료. 아래에서 메뉴를 선택해주세요.</div>
             ) : null}
           </>
@@ -407,12 +434,23 @@ export function QuickOrderPanel({
         {/* Order form */}
         <div className="quick-order-composer">
           <div className="quick-order-fields">
-            <label className="field field-full">
+            <div className="field field-full">
               <span>메뉴 선택</span>
+              {orderReady && menuItems.length > 0 ? (
+                <input
+                  value={menuSearch}
+                  onChange={(e) => setMenuSearch(e.target.value)}
+                  placeholder="메뉴 검색..."
+                  autoComplete="off"
+                />
+              ) : null}
               <select
                 value={activeAttendee?.menuItemId ?? ''}
                 disabled={meetingClosed || menuItems.length === 0 || !orderReady}
-                onChange={(event) => handleMenuSelect(event.target.value)}
+                onChange={(event) => {
+                  handleMenuSelect(event.target.value)
+                  setMenuSearch('')
+                }}
               >
                 <option value="">
                   {!orderReady
@@ -421,9 +459,11 @@ export function QuickOrderPanel({
                       : '먼저 이름을 입력해주세요'
                     : menuItems.length === 0
                       ? '등록된 메뉴가 없습니다'
-                      : '메뉴를 선택해주세요'}
+                      : filteredMenuItems.length === 0
+                        ? '검색 결과 없음'
+                        : '메뉴를 선택해주세요'}
                 </option>
-                {menuItems.map((item) => (
+                {filteredMenuItems.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.name}
                     {showPrices
@@ -432,7 +472,7 @@ export function QuickOrderPanel({
                   </option>
                 ))}
               </select>
-            </label>
+            </div>
 
             {selectedMenu ? (
               <div className="field field-full">
