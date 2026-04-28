@@ -1,9 +1,11 @@
+import { type DeadlineUrgency } from '../lib/meeting'
 import { formatVisiblePrice } from '../lib/menu'
 
 type HeroPanelProps = {
   meetingClosed: boolean
   shareCode: string
   countdown: string
+  countdownUrgency: DeadlineUrgency
   menuCount: number
   attendeeCount: number
   completionRate: number
@@ -13,10 +15,19 @@ type HeroPanelProps = {
   showPrices: boolean
 }
 
+const URGENCY_TONE: Record<DeadlineUrgency, string> = {
+  open: 'neutral',
+  soft: 'soft',
+  warn: 'warn',
+  danger: 'danger',
+  closed: 'danger',
+}
+
 export function HeroPanel({
   meetingClosed,
   shareCode,
   countdown,
+  countdownUrgency,
   menuCount,
   attendeeCount,
   completionRate,
@@ -43,7 +54,7 @@ export function HeroPanel({
             {meetingClosed ? '주문 마감' : '취합 진행 중'}
           </span>
           <span className="status-pill neutral">코드 {shareCode}</span>
-          <span className="status-pill neutral">{countdown}</span>
+          <span className={`status-pill ${URGENCY_TONE[countdownUrgency]}`}>{countdown}</span>
         </div>
       </div>
 

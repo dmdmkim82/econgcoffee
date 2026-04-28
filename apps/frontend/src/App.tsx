@@ -43,8 +43,10 @@ import {
   createStarbucksMenuItems,
   PAUL_BASSETT_CAFE_NAME,
   createId,
+  extendDeadline,
   formatCountdown,
   formatDeadlineLabel,
+  getDeadlineUrgency,
   getMenuDisplayPrice,
   inferTemperaturesFromMenuName,
   isCoffeeMenuName,
@@ -435,6 +437,9 @@ function MeetingPage({
   const deadlinePassed =
     Boolean(meeting.deadline) && new Date(meeting.deadline).getTime() <= Date.now()
   const meetingClosed = meeting.manuallyClosed || deadlinePassed
+  const deadlineUrgency = meetingClosed
+    ? 'closed'
+    : getDeadlineUrgency(meeting.deadline)
   const completedOrders = attendees.filter((attendee) =>
     attendee.skipped || menuLookup.has(attendee.menuItemId),
   ).length
@@ -1131,6 +1136,7 @@ function MeetingPage({
                   meetingClosed={meetingClosed}
                   shareCode={meeting.shareCode}
                   countdown={formatCountdown(meeting.deadline)}
+                  countdownUrgency={deadlineUrgency}
                   menuCount={menuItems.length}
                   attendeeCount={attendees.length}
                   completionRate={completionRate}
@@ -1180,12 +1186,26 @@ function MeetingPage({
                 <OrganizerPanel
                   meeting={meeting}
                   meetingClosed={meetingClosed}
-                  deadlinePassed={deadlinePassed}
                   deadlineLabel={formatDeadlineLabel(meeting.deadline)}
                   onChange={updateMeetingField}
-                  onToggleManualClose={() =>
-                    updateMeetingField('manuallyClosed', !meeting.manuallyClosed)
-                  }
+                  onToggleManualClose={() => {
+                    if (meetingClosed) {
+                      const nextDeadline =
+                        deadlinePassed && Boolean(meeting.deadline)
+                          ? extendDeadline(meeting.deadline, 30)
+                          : meeting.deadline
+                      patchSnapshot((currentSnapshot) => ({
+                        ...currentSnapshot,
+                        meeting: {
+                          ...currentSnapshot.meeting,
+                          manuallyClosed: false,
+                          deadline: nextDeadline,
+                        },
+                      }))
+                      return
+                    }
+                    updateMeetingField('manuallyClosed', true)
+                  }}
                   onReset={handleResetWorkspace}
                 />
               </div>

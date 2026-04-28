@@ -1,9 +1,11 @@
 import { type ClipboardEvent, useMemo, useState } from 'react'
 import {
   formatCountdown,
+  getDeadlineUrgency,
   getMenuDisplayPrice,
   isCoffeeMenuName,
   type Attendee,
+  type DeadlineUrgency,
   type MenuItem,
   type Snapshot,
 } from '../lib/meeting'
@@ -120,6 +122,9 @@ export function QuickOrderPanel({
   }, [attendees])
 
   const countdownLabel = meetingClosed ? '주문 마감' : formatCountdown(meeting.deadline)
+  const countdownUrgency: DeadlineUrgency = meetingClosed
+    ? 'closed'
+    : getDeadlineUrgency(meeting.deadline)
   const previewPrice =
     selectedMenu && activeAttendee
       ? getMenuDisplayPrice(selectedMenu, activeAttendee.decaf) *
@@ -425,7 +430,7 @@ export function QuickOrderPanel({
               {completionStats.completed}/{completionStats.total}
             </strong>
           </article>
-          <article className="mini-stat">
+          <article className={`mini-stat deadline-stat tone-${countdownUrgency}`}>
             <span>마감</span>
             <strong>{countdownLabel}</strong>
           </article>
