@@ -20,7 +20,16 @@ export type {
 }
 
 export const STORAGE_KEY = 'ekong-coffee-state-v1'
-export const LATELIER_CAFE_NAME = "L'atelier"
+export const LATELIER_CAFE_NAME = '라뜰리에(수송1층)'
+// 이전 라벨로 저장된 미팅은 자동으로 현재 라뜰리에 프리셋으로 매핑.
+const LATELIER_LEGACY_ALIASES = [
+  "L'atelier",
+  "L’atelier",
+  'L atelier',
+  '라뜸리에',
+  '라뜨리에',
+  '라뜰리에',
+]
 export const STARBUCKS_CAFE_NAME = '스타벅스'
 export const PAUL_BASSETT_CAFE_NAME = '폴 바셋'
 export const CAFE_PRESETS = [LATELIER_CAFE_NAME, STARBUCKS_CAFE_NAME, PAUL_BASSETT_CAFE_NAME] as const
@@ -370,6 +379,10 @@ function resolveCafePresetName(cafeName?: string): CafePresetName {
     return PAUL_BASSETT_CAFE_NAME
   }
 
+  if (cafeName && LATELIER_LEGACY_ALIASES.includes(cafeName)) {
+    return LATELIER_CAFE_NAME
+  }
+
   return LATELIER_CAFE_NAME
 }
 
@@ -381,7 +394,10 @@ function createInitialMenuItems(
     return menuSeeds.map(createMenuItemFromSeed)
   }
 
-  if (cafeName === LATELIER_CAFE_NAME) {
+  if (
+    cafeName === LATELIER_CAFE_NAME ||
+    LATELIER_LEGACY_ALIASES.includes(cafeName as string)
+  ) {
     return createLatelierMenuItems()
   }
 
