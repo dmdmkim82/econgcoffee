@@ -1,11 +1,8 @@
-import { type ClipboardEvent, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
-  formatCountdown,
-  getDeadlineUrgency,
   getMenuDisplayPrice,
   isCoffeeMenuName,
   type Attendee,
-  type DeadlineUrgency,
   type MenuItem,
   type Snapshot,
 } from '../lib/meeting'
@@ -69,7 +66,6 @@ export function QuickOrderPanel({
   const [nutritionMenuId, setNutritionMenuId] = useState('')
   const [isAddingAttendee, setIsAddingAttendee] = useState(false)
   const [menuSearch, setMenuSearch] = useState('')
-  const [bulkAddedCount, setBulkAddedCount] = useState(0)
   const isParticipantView = variant === 'participant'
 
   const matchedAttendee = useMemo(() => {
@@ -121,10 +117,6 @@ export function QuickOrderPanel({
     }
   }, [attendees])
 
-  const countdownLabel = meetingClosed ? '주문 마감' : formatCountdown(meeting.deadline)
-  const countdownUrgency: DeadlineUrgency = meetingClosed
-    ? 'closed'
-    : getDeadlineUrgency(meeting.deadline)
   const previewPrice =
     selectedMenu && activeAttendee
       ? getMenuDisplayPrice(selectedMenu, activeAttendee.decaf) *
@@ -261,20 +253,6 @@ export function QuickOrderPanel({
     setNutritionMenuId(menuItem.id)
   }
 
-  function handleOrganizerNamePaste(event: ClipboardEvent<HTMLInputElement>) {
-    const pasted = event.clipboardData.getData('text')
-    const lines = pasted.split(/[\n\r,，；;]/).map((n) => n.trim()).filter(Boolean)
-    if (lines.length > 1) {
-      event.preventDefault()
-      for (const name of lines) {
-        onAddAttendee(name, '')
-      }
-      setNameInput('')
-      setBulkAddedCount(lines.length)
-      setTimeout(() => setBulkAddedCount(0), 3000)
-    }
-  }
-
   return (
     <>
       <MenuNutritionSheet
@@ -369,57 +347,45 @@ export function QuickOrderPanel({
           </>
         ) : null}
 
-        {/* ORGANIZER: description + name input */}
+        {/* ORGANIZER: attendee chips first — pick name then menu */}
         {!isParticipantView ? (
-          <>
-            <p className="panel-note">
-              참석자 이름을 입력하면 바로 메뉴를 선택해서 주문을 받을 수 있습니다.
-            </p>
-            {attendees.length > 0 ? (
-              <div className="quick-order-name-picker">
-                <div className="subhead">
-                  <h3>기존 참석자 바로 선택</h3>
-                </div>
-                <div className="quick-attendee-scroll" role="list" aria-label="기존 참석자">
-                  {attendees.map((attendee) => {
-                    const status = getAttendeeStatus(attendee)
-
-                    return (
-                      <button
-                        className={`quick-attendee-chip ${
-                          attendee.id === activeAttendeeId ? 'active' : ''
-                        }`}
-                        key={attendee.id}
-                        type="button"
-                        onClick={() => syncSelectedAttendee(attendee.id)}
-                      >
-                        {attendee.name}
-                        <span>{status.label}</span>
-                      </button>
-                    )
-                  })}
-                </div>
+          attendees.length > 0 ? (
+            <div className="quick-order-name-picker">
+              <div className="subhead">
+                <h3>참석자 현황</h3>
+                <span className="subhead-meta">
+                  이름을 누르면 바로 메뉴를 선택할 수 있어요.
+                </span>
               </div>
-            ) : null}
-            <label className="field field-full">
-              <span>참석자 이름</span>
-              <input
-                value={nameInput}
-                onChange={(event) => handleNameChange(event.target.value)}
-                onPaste={handleOrganizerNamePaste}
-                placeholder="이름 입력 또는 여러 명 붙여넣기"
-              />
-            </label>
-            {bulkAddedCount > 0 ? (
-              <div className="status-callout">{bulkAddedCount}명을 한 번에 추가했습니다.</div>
-            ) : nameInput.trim() ? (
-              <div className="status-callout">이름 확인 완료. 아래에서 메뉴를 선택해주세요.</div>
-            ) : null}
-          </>
+              <div className="quick-attendee-scroll" role="list" aria-label="참석자 현황">
+                {attendees.map((attendee) => {
+                  const status = getAttendeeStatus(attendee)
+
+                  return (
+                    <button
+                      className={`quick-attendee-chip ${
+                        attendee.id === activeAttendeeId ? 'active' : ''
+                      }`}
+                      key={attendee.id}
+                      type="button"
+                      onClick={() => syncSelectedAttendee(attendee.id)}
+                    >
+                      {attendee.name}
+                      <span>{status.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="empty-state compact">
+              참석자가 아직 없어요. 아래 "참석자 수동 관리" 또는 새 미팅 만들기에서 이름을 추가해 주세요.
+            </div>
+          )
         ) : null}
 
         {/* Meta stats */}
-        <div className="participant-meta-grid quick-order-meta">
+        <div className="participant-meta-grid quick-order-meta two-col">
           <article className="mini-stat">
             <span>카페</span>
             <strong>{meeting.cafeName || '미정'}</strong>
@@ -429,10 +395,6 @@ export function QuickOrderPanel({
             <strong>
               {completionStats.completed}/{completionStats.total}
             </strong>
-          </article>
-          <article className={`mini-stat deadline-stat tone-${countdownUrgency}`}>
-            <span>마감</span>
-            <strong>{countdownLabel}</strong>
           </article>
         </div>
 

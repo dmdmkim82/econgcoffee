@@ -1447,6 +1447,16 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.quick-order-meta.two-col {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.subhead-meta {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
 .quick-order-composer,
 .quick-order-preview,
 .quick-order-fields {
