@@ -45,11 +45,12 @@ export function ShareLinkSheet({
     let ignore = false
 
     void toDataURL(link, {
-      margin: 1,
-      width: 220,
+      errorCorrectionLevel: 'H',
+      margin: 4,
+      width: 256,
       color: {
-        dark: '#2b1d13',
-        light: '#fffaf5',
+        dark: '#000000',
+        light: '#ffffff',
       },
     }).then((nextUrl: string) => {
       if (!ignore) {
@@ -109,7 +110,9 @@ export function ShareLinkSheet({
             <span>휴대폰 카메라로 바로 열 수 있습니다.</span>
           </div>
           {qrDataUrl ? (
-            <img alt={`${title} QR 코드`} className="share-qr-image" src={qrDataUrl} />
+            <div className="share-qr-frame">
+              <img alt={`${title} QR 코드`} className="share-qr-image" src={qrDataUrl} />
+            </div>
           ) : (
             <div className="empty-state compact">QR 코드를 준비하고 있습니다.</div>
           )}
