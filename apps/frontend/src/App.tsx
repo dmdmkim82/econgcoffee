@@ -916,10 +916,10 @@ function MeetingPage({
       ),
       meeting: {
         ...currentSnapshot.meeting,
-        cafeName: currentSnapshot.meeting.cafeName || "L'atelier",
+        cafeName: currentSnapshot.meeting.cafeName || '라뜰리에',
       },
     }))
-    setFeedback("L'atelier 기본 메뉴를 현재 미팅에 추가했습니다.")
+    setFeedback('라뜰리에 기본 메뉴를 현재 미팅에 추가했습니다.')
   }
 
   function handleLoadPaulBassettMenu() {

@@ -51,7 +51,7 @@ export function OrganizerPanel({
           <input
             value={meeting.cafeName}
             onChange={(event) => onChange('cafeName', event.target.value)}
-            placeholder="예: 카페 아뜰리에"
+            placeholder="예: 라뜰리에 / 스타벅스"
           />
           <div className="button-row inline-chip-row">
             {CAFE_PRESETS.map((cafeName) => (
