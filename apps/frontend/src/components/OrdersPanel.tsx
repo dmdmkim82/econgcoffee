@@ -1,3 +1,4 @@
+import { pastelFromName } from '../lib/avatar'
 import {
   getMenuDisplayPrice,
   isCoffeeMenuName,
@@ -119,7 +120,11 @@ export function OrdersPanel({
             return (
               <details className="attendance-row" key={attendee.id}>
                 <summary className="attendance-summary">
-                  <div className="attendee-avatar" aria-hidden="true">
+                  <div
+                    className="attendee-avatar"
+                    aria-hidden="true"
+                    style={{ background: pastelFromName(attendee.name) }}
+                  >
                     {attendee.name.slice(0, 1) || '?'}
                   </div>
                   <div className="attendance-main">
