@@ -248,6 +248,7 @@ function createDraftAttendee(name: string): Attendee {
     decaf: false,
     size: '',
     note: '',
+    orderCompleted: false,
   }
 }
 
@@ -474,6 +475,7 @@ function normalizeAttendee(
     decaf: Boolean(attendee.decaf) && Boolean(menuItem && isCoffeeMenuName(menuItem.name)),
     size: '',
     note: pickText(attendee.note),
+    orderCompleted: Boolean(attendee.orderCompleted),
   }
 }
 

@@ -22,7 +22,7 @@ type QuickOrderPanelProps = {
     value: string | number | boolean,
   ) => void
   onSkipAttendee: (attendeeId: string, skipped: boolean) => void
-  onCompleteOrder: (attendeeName: string) => void
+  onCompleteOrder: (attendeeId: string, attendeeName: string) => void
 }
 
 function normalizeName(value: string) {
@@ -37,10 +37,17 @@ function getAttendeeStatus(attendee: Attendee) {
     }
   }
 
-  if (attendee.menuItemId) {
+  if (attendee.orderCompleted) {
     return {
       tone: 'live',
-      label: '선택 완료',
+      label: '주문 완료',
+    }
+  }
+
+  if (attendee.menuItemId) {
+    return {
+      tone: 'soft',
+      label: '선택 중',
     }
   }
 
@@ -108,7 +115,7 @@ export function QuickOrderPanel({
 
   const completionStats = useMemo(() => {
     const completed = attendees.filter(
-      (attendee) => attendee.skipped || attendee.menuItemId,
+      (attendee) => attendee.skipped || attendee.orderCompleted,
     ).length
 
     return {
@@ -119,8 +126,7 @@ export function QuickOrderPanel({
 
   const previewPrice =
     selectedMenu && activeAttendee
-      ? getMenuDisplayPrice(selectedMenu, activeAttendee.decaf) *
-        activeAttendee.quantity
+      ? getMenuDisplayPrice(selectedMenu, activeAttendee.decaf)
       : 0
 
   function syncSelectedAttendee(attendeeId: string) {
@@ -191,16 +197,6 @@ export function QuickOrderPanel({
     onUpdateAttendee(attendeeId, 'menuItemId', menuItemId)
   }
 
-  function handleQuantityChange(nextQuantity: number) {
-    const attendeeId = ensureActiveAttendeeId()
-
-    if (!attendeeId) {
-      return
-    }
-
-    onUpdateAttendee(attendeeId, 'quantity', Math.min(9, Math.max(1, nextQuantity)))
-  }
-
   function handleTemperatureChange(nextTemperature: string) {
     const attendeeId = ensureActiveAttendeeId()
 
@@ -246,7 +242,7 @@ export function QuickOrderPanel({
       return
     }
 
-    onCompleteOrder(activeAttendee.name)
+    onCompleteOrder(activeAttendee.id, activeAttendee.name)
   }
 
   function openNutritionSheet(menuItem: MenuItem) {
@@ -464,21 +460,7 @@ export function QuickOrderPanel({
               </div>
             ) : null}
 
-            <label className="field">
-              <span>수량</span>
-              <input
-                type="number"
-                min={1}
-                max={9}
-                value={activeAttendee?.quantity ?? 1}
-                disabled={meetingClosed || !orderReady}
-                onChange={(event) =>
-                  handleQuantityChange(Number(event.target.value || 1))
-                }
-              />
-            </label>
-
-            <div className="field">
+            <div className="field field-full">
               <span>온도</span>
               {selectedMenu ? (
                 <TemperatureSelector
@@ -569,7 +551,6 @@ export function QuickOrderPanel({
                 {activeAttendee.decaf && canUseDecaf ? ' · 디카페인' : ''}
               </strong>
               <span>
-                {activeAttendee.quantity}잔 ·{' '}
                 {activeAttendee.temperature || '온도 선택 전'} ·{' '}
                 {formatVisiblePrice(previewPrice, showPrices)}
               </span>
