@@ -7,7 +7,6 @@ import {
   type Snapshot,
   type Team,
 } from '../lib/meeting'
-import { BrandLogo } from './BrandLogo'
 import { CafeLogoIcon } from './CafeLogoIcon'
 import { CreateMeetingSheet } from './CreateMeetingSheet'
 
@@ -133,11 +132,17 @@ export function HomePage({
         <section className="compact-home-hero">
           <article className="panel compact-home-copy home-brand-panel">
             <span className="eyebrow">SK에코플랜트 미팅 커피 취합</span>
-            <BrandLogo size="hero" />
+            <h1 className="home-brand-panel-greeting">에콩커피<br />오늘은 뭐 마실까요?</h1>
             <p className="hero-description">
-              취합자가 카페를 먼저 정하고, 참석자는 자기 이름을 눌러 바로 메뉴를 고를
-              수 있습니다.
+              취합자가 카페를 정하고, 참석자는 자기 이름을 눌러 바로 메뉴를 고를 수 있어요.
             </p>
+            <div style={{ marginTop: 14 }}>
+              <span className="live-pill">
+                {summary.activeMeetings > 0
+                  ? `LIVE · 진행 중 ${summary.activeMeetings}건`
+                  : '오늘의 새 모임 만들기'}
+              </span>
+            </div>
             <div className="compact-metric-grid">
               <article className="mini-stat">
                 <span>전체 모임</span>

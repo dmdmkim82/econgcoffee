@@ -6,6 +6,7 @@ import {
   type MenuItem,
   type Snapshot,
 } from '../lib/meeting'
+import { pastelFromName } from '../lib/avatar'
 import { formatVisiblePrice } from '../lib/menu'
 import { MenuNutritionSheet } from './MenuNutritionSheet'
 import { TemperatureSelector } from './TemperatureSelector'
@@ -325,7 +326,11 @@ export function QuickOrderPanel({
                       type="button"
                       onClick={() => syncSelectedAttendee(attendee.id)}
                     >
-                      <span aria-hidden="true" className="chip-avatar">
+                      <span
+                        aria-hidden="true"
+                        className="chip-avatar"
+                        style={{ background: pastelFromName(attendee.name) }}
+                      >
                         {attendee.name.slice(0, 1) || '?'}
                       </span>
                       <span className="chip-name">{attendee.name}</span>
@@ -397,7 +402,11 @@ export function QuickOrderPanel({
                       type="button"
                       onClick={() => syncSelectedAttendee(attendee.id)}
                     >
-                      <span aria-hidden="true" className="chip-avatar">
+                      <span
+                        aria-hidden="true"
+                        className="chip-avatar"
+                        style={{ background: pastelFromName(attendee.name) }}
+                      >
                         {attendee.name.slice(0, 1) || '?'}
                       </span>
                       <span className="chip-name">{attendee.name}</span>
