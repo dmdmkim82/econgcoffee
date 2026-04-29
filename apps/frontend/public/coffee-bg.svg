@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1100" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <!-- Steam wisps rising above the portafilter -->
+  <g stroke-dasharray="4 7">
+    <path d="M 320 180 C 305 150 345 130 330 95 C 315 60 350 38 340 8" />
+    <path d="M 400 180 C 385 150 425 130 410 95 C 395 60 430 38 420 8" />
+    <path d="M 480 180 C 465 150 505 130 490 95 C 475 60 510 38 500 8" />
+  </g>
+
+  <!-- Portafilter body (the cup-shaped filter holder) -->
+  <rect x="340" y="200" width="120" height="50" rx="6" />
+  <!-- Portafilter handle extending right -->
+  <rect x="460" y="218" width="160" height="14" rx="6" />
+  <line x1="538" y1="232" x2="610" y2="232" />
+
+  <!-- Twin spouts at the bottom of the portafilter -->
+  <path d="M 380 250 L 372 290 L 360 310 Q 358 322 372 326 L 376 348" />
+  <path d="M 420 250 L 428 290 L 440 310 Q 442 322 428 326 L 424 348" />
+
+  <!-- Coffee streams / drips between spout and cup -->
+  <ellipse cx="372" cy="372" rx="5" ry="12" fill="currentColor" fill-opacity="0.5" />
+  <ellipse cx="428" cy="380" rx="5" ry="12" fill="currentColor" fill-opacity="0.5" />
+  <ellipse cx="382" cy="430" rx="4" ry="10" fill="currentColor" fill-opacity="0.4" />
+  <ellipse cx="418" cy="455" rx="4" ry="10" fill="currentColor" fill-opacity="0.4" />
+  <ellipse cx="392" cy="500" rx="3" ry="8" fill="currentColor" fill-opacity="0.3" />
+  <ellipse cx="408" cy="515" rx="3" ry="8" fill="currentColor" fill-opacity="0.3" />
+
+  <!-- Coffee cup (front silhouette) -->
+  <path d="M 282 555 Q 282 740 360 778 L 440 778 Q 518 740 518 555 Z" stroke-width="4" />
+  <!-- Cup rim ellipse -->
+  <ellipse cx="400" cy="555" rx="118" ry="22" />
+  <!-- Coffee surface inside cup (subtle dashes) -->
+  <ellipse cx="400" cy="572" rx="108" ry="16" stroke-width="2" stroke-dasharray="3 6" />
+  <!-- Cup handle (right side) -->
+  <path d="M 518 595 Q 600 605 600 660 Q 600 720 518 728" />
+
+  <!-- Saucer line below the cup -->
+  <ellipse cx="400" cy="800" rx="190" ry="22" />
+  <line x1="220" y1="804" x2="580" y2="804" />
+</svg>

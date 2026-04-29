@@ -55,8 +55,8 @@ export function OrdersPanel({
   ).length
 
   return (
-    <section className="panel panel-wide">
-      <div className="panel-head">
+    <details className="panel panel-wide collapsible-panel" open>
+      <summary className="panel-head">
         <div>
           <span className="panel-kicker">참석자 현황</span>
           <h2>이름별 주문 상태와 수정</h2>
@@ -64,7 +64,8 @@ export function OrdersPanel({
         <span className="status-pill neutral">
           {completedCount}/{attendees.length || 0}명 응답
         </span>
-      </div>
+        <span aria-hidden="true" className="collapse-chevron">▾</span>
+      </summary>
 
       <p className="panel-note">
         본인 이름을 누르면 메뉴를 바로 선택할 수 있어요. 아래 빠른 주문 입력에서 받은 주문도 자동으로 반영됩니다.
@@ -259,6 +260,6 @@ export function OrdersPanel({
           })}
         </div>
       )}
-    </section>
+    </details>
   )
 }

@@ -261,8 +261,11 @@ export function QuickOrderPanel({
         onClose={() => setNutritionMenuId('')}
       />
 
-      <section className="panel panel-wide participant-entry-panel quick-order-panel">
-        <div className="panel-head">
+      <details
+        className="panel panel-wide participant-entry-panel quick-order-panel collapsible-panel"
+        open
+      >
+        <summary className="panel-head">
           <div>
             <span className="panel-kicker">
               {variant === 'organizer' ? '빠른 주문 입력' : '내 주문 입력'}
@@ -272,7 +275,8 @@ export function QuickOrderPanel({
           <span className={`status-pill ${meetingClosed ? 'danger' : 'live'}`}>
             {meetingClosed ? '주문 마감' : '주문 가능'}
           </span>
-        </div>
+          <span aria-hidden="true" className="collapse-chevron">▾</span>
+        </summary>
 
         {/* PARTICIPANT: name chips at the very top — immediately visible */}
         {isParticipantView && attendees.length > 0 ? (
@@ -610,7 +614,7 @@ export function QuickOrderPanel({
             </div>
           </div>
         </details>
-      </section>
+      </details>
     </>
   )
 }
