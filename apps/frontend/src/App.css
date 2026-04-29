@@ -533,6 +533,40 @@
   align-items: flex-start;
 }
 
+.collapsible-panel {
+  display: block;
+}
+
+.collapsible-panel > summary.panel-head {
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  align-items: center;
+}
+
+.collapsible-panel > summary.panel-head::-webkit-details-marker {
+  display: none;
+}
+
+.collapsible-panel > summary.panel-head:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 4px;
+  border-radius: 6px;
+}
+
+.collapse-chevron {
+  flex: 0 0 auto;
+  font-size: 0.95rem;
+  line-height: 1;
+  color: var(--muted);
+  transition: transform 0.2s ease;
+  margin-left: 2px;
+}
+
+.collapsible-panel[open] > summary > .collapse-chevron {
+  transform: rotate(-180deg);
+}
+
 .panel-head h2,
 .preview-card h3,
 .order-card h3,

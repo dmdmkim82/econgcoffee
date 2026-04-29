@@ -27,16 +27,25 @@ export function SummaryPanel({
   onCopy,
 }: SummaryPanelProps) {
   return (
-    <section className="panel">
-      <div className="panel-head">
+    <details className="panel collapsible-panel" open>
+      <summary className="panel-head">
         <div>
           <span className="panel-kicker">주문 요약</span>
           <h2>최종 주문 집계</h2>
         </div>
-        <button className="button secondary small" type="button" onClick={onCopy}>
+        <button
+          className="button secondary small"
+          type="button"
+          onClick={(event) => {
+            event.preventDefault()
+            event.stopPropagation()
+            void onCopy()
+          }}
+        >
           요약 복사
         </button>
-      </div>
+        <span aria-hidden="true" className="collapse-chevron">▾</span>
+      </summary>
 
       {groupedOrders.length === 0 ? (
         <div className="empty-state compact">
@@ -91,6 +100,6 @@ export function SummaryPanel({
         </div>
         <textarea readOnly rows={12} value={summaryText} />
       </div>
-    </section>
+    </details>
   )
 }

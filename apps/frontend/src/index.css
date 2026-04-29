@@ -141,6 +141,51 @@ body::before {
     linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
 }
 
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-color: rgba(107, 66, 37, 0.5);
+  -webkit-mask-image: url('/coffee-bg.svg');
+  mask-image: url('/coffee-bg.svg');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center 92%;
+  mask-position: center 92%;
+  -webkit-mask-size: min(78vh, 720px) auto;
+  mask-size: min(78vh, 720px) auto;
+  opacity: 0.18;
+  animation: coffee-extract-shimmer 9s ease-in-out infinite alternate;
+}
+
+:root[data-theme='dark'] body::after {
+  background-color: rgba(242, 194, 140, 0.6);
+  opacity: 0.16;
+}
+
+@keyframes coffee-extract-shimmer {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.06;
+  }
+  50% {
+    transform: translateY(-6px) scale(1.012);
+    opacity: 0.085;
+  }
+  100% {
+    transform: translateY(4px) scale(0.996);
+    opacity: 0.05;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after {
+    animation: none;
+  }
+}
+
 button,
 input,
 textarea,
