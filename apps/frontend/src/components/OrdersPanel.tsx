@@ -18,6 +18,7 @@ type OrdersPanelProps = {
     value: string | number | boolean,
   ) => void
   onSkipAttendee: (attendeeId: string, skipped: boolean) => void
+  onCompleteOrder: (attendeeId: string, attendeeName: string) => void
 }
 
 function getAttendeeRank(attendee: Attendee) {
@@ -25,7 +26,7 @@ function getAttendeeRank(attendee: Attendee) {
     return 2
   }
 
-  if (attendee.menuItemId) {
+  if (attendee.orderCompleted) {
     return 1
   }
 
@@ -39,6 +40,7 @@ export function OrdersPanel({
   showPrices,
   onUpdateAttendee,
   onSkipAttendee,
+  onCompleteOrder,
 }: OrdersPanelProps) {
   const sortedAttendees = [...attendees].sort((left, right) => {
     const rankDiff = getAttendeeRank(left) - getAttendeeRank(right)
@@ -86,14 +88,19 @@ export function OrdersPanel({
             const temperatureLabel = attendee.temperature || '온도 선택 전'
             const statusTone = attendee.skipped
               ? 'skip'
-              : attendee.menuItemId
+              : attendee.orderCompleted
                 ? 'live'
                 : 'neutral'
             const statusLabel = attendee.skipped
               ? '안마심'
-              : attendee.menuItemId
+              : attendee.orderCompleted
                 ? '주문 완료'
                 : '대기'
+            const canConfirmOrder =
+              !meetingClosed &&
+              !attendee.skipped &&
+              Boolean(selectedMenu) &&
+              Boolean(attendee.temperature)
             const detailLine = attendee.skipped
               ? '이번 주문에서 제외된 참석자입니다.'
               : selectedMenu
@@ -173,25 +180,7 @@ export function OrdersPanel({
                       </select>
                     </label>
 
-                    <label className="field">
-                      <span>수량</span>
-                      <input
-                        type="number"
-                        min={1}
-                        max={9}
-                        value={attendee.quantity}
-                        disabled={fieldsDisabled}
-                        onChange={(event) =>
-                          onUpdateAttendee(
-                            attendee.id,
-                            'quantity',
-                            Math.min(9, Math.max(1, Number(event.target.value || 1))),
-                          )
-                        }
-                      />
-                    </label>
-
-                    <div className="field">
+                    <div className="field field-full">
                       <span>온도</span>
                       {selectedMenu ? (
                         <TemperatureSelector
@@ -244,6 +233,20 @@ export function OrdersPanel({
                   </div>
 
                   <div className="button-row order-card-actions">
+                    <button
+                      className="button small"
+                      type="button"
+                      disabled={!canConfirmOrder}
+                      onClick={(event) => {
+                        const detailsElement = event.currentTarget.closest('details')
+                        if (detailsElement instanceof HTMLDetailsElement) {
+                          detailsElement.open = false
+                        }
+                        onCompleteOrder(attendee.id, attendee.name)
+                      }}
+                    >
+                      주문완료
+                    </button>
                     <button
                       aria-pressed={attendee.skipped}
                       className="button ghost small"

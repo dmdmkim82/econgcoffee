@@ -471,11 +471,11 @@ function MeetingPage({
     ? 'closed'
     : getDeadlineUrgency(meeting.deadline)
   const completedOrders = attendees.filter((attendee) =>
-    attendee.skipped || menuLookup.has(attendee.menuItemId),
+    attendee.skipped || attendee.orderCompleted,
   ).length
   const skippedAttendees = attendees.filter((attendee) => attendee.skipped)
   const pendingAttendees = attendees.filter(
-    (attendee) => !attendee.skipped && !menuLookup.has(attendee.menuItemId),
+    (attendee) => !attendee.skipped && !attendee.orderCompleted,
   )
   const completionRate =
     attendees.length > 0 ? Math.round((completedOrders / attendees.length) * 100) : 0
@@ -494,7 +494,7 @@ function MeetingPage({
     >((groups, attendee) => {
       const menuItem = menuLookup.get(attendee.menuItemId)
 
-      if (!menuItem) {
+      if (!menuItem || !attendee.orderCompleted) {
         return groups
       }
 
@@ -809,6 +809,7 @@ function MeetingPage({
           decaf: false,
           size: '',
           note: '',
+          orderCompleted: false,
         },
       ],
     }))
@@ -1035,8 +1036,16 @@ function MeetingPage({
     setFeedback('모임 데이터를 초기화했습니다.')
   }
 
-  function handleCompleteOrder(attendeeName: string) {
-    setCompletionToast(`${attendeeName}님 주문 완료!`)
+  function handleCompleteOrder(attendeeId: string, attendeeName: string) {
+    patchSnapshot((currentSnapshot) => ({
+      ...currentSnapshot,
+      attendees: currentSnapshot.attendees.map((attendee) =>
+        attendee.id === attendeeId
+          ? { ...attendee, orderCompleted: true }
+          : attendee,
+      ),
+    }))
+    setCompletionToast(`${attendeeName}님이 메뉴를 선택했어요`)
   }
 
   return (
@@ -1125,6 +1134,7 @@ function MeetingPage({
             showPrices={showPrices}
             onUpdateAttendee={updateAttendeeField}
             onSkipAttendee={handleSkipAttendee}
+            onCompleteOrder={handleCompleteOrder}
           />
           <QuickOrderPanel
             snapshot={snapshot}

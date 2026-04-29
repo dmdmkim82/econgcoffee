@@ -45,6 +45,7 @@ export type Attendee = {
   decaf: boolean
   size: '' | 'Regular' | 'Large'
   note: string
+  orderCompleted: boolean
 }
 
 export type Snapshot = {
