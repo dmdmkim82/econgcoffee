@@ -102,7 +102,7 @@ export function MenuPanel({
           type="button"
           onClick={onLoadLatelierMenu}
         >
-          라뜰리에 메뉴 불러오기
+          라뜰리에(수송1층) 메뉴 불러오기
         </button>
         <button
           className="button secondary small"
