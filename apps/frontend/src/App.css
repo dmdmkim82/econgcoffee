@@ -3,8 +3,9 @@
   margin: 0 auto;
   padding:
     calc(6px + env(safe-area-inset-top, 0))
-    0
+    14px
     calc(10px + env(safe-area-inset-bottom, 0));
+  position: relative;
 }
 
 .compact-home,
@@ -1826,6 +1827,28 @@
 
 .quick-order-panel {
   margin-top: 6px;
+  padding: 12px 14px;
+  gap: 6px;
+}
+
+.quick-order-panel > summary.panel-head {
+  align-items: center;
+}
+
+.quick-order-panel .panel-kicker {
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+}
+
+.quick-order-panel .panel-head h2 {
+  font-size: 0.95rem;
+  margin-top: 2px;
+}
+
+.quick-order-panel .panel-note {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
 }
 
 .meeting-utility-bar {
@@ -1973,7 +1996,7 @@
   flex-wrap: wrap;
   gap: 6px 5px;
   padding-bottom: 2px;
-  max-height: 30vh;
+  max-height: 38vh;
   overflow-y: auto;
 }
 
@@ -2533,9 +2556,39 @@
 
 /* Portrait-first override: keep the app in an iPhone-like vertical layout */
 .shell {
-  width: min(calc(100% - 18px), 430px) !important;
-  padding-top: calc(10px + env(safe-area-inset-top, 0));
-  padding-bottom: calc(18px + env(safe-area-inset-bottom, 0));
+  width: min(calc(100% - 14px), 430px) !important;
+  padding:
+    calc(14px + env(safe-area-inset-top, 0))
+    14px
+    calc(20px + env(safe-area-inset-bottom, 0));
+  border-radius: 28px;
+  border: 1.5px solid rgba(43, 29, 20, 0.16);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent 40%),
+    linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 24px 60px -28px rgba(43, 29, 20, 0.32),
+    0 8px 20px -16px rgba(43, 29, 20, 0.18);
+  margin: 12px auto 24px;
+}
+
+:root[data-theme='dark'] .shell {
+  border-color: rgba(245, 233, 215, 0.12);
+  background:
+    linear-gradient(180deg, rgba(245, 233, 215, 0.04), transparent 40%),
+    linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 24px 60px -28px rgba(0, 0, 0, 0.6),
+    0 8px 20px -16px rgba(0, 0, 0, 0.4);
+}
+
+/* Wider viewports: bump shell width and add edge breathing room */
+@media (min-width: 520px) {
+  .shell {
+    margin: 24px auto 32px;
+  }
 }
 
 .compact-home-hero,
