@@ -4,6 +4,7 @@ import type {
   MenuItem,
   NutritionInfo,
   Snapshot,
+  Team,
   TemperatureOption,
 } from '../../../../shared/meeting'
 import { findNutritionInfo } from './nutrition'
@@ -14,6 +15,7 @@ export type {
   MeetingSettings,
   NutritionInfo,
   Snapshot,
+  Team,
   TemperatureOption,
 }
 

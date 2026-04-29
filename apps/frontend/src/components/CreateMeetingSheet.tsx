@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import {
   type CafePresetName,
+  type Team,
 } from '../lib/meeting'
 
 type CreateMeetingSheetProps = {
   open: boolean
   title: string
   cafeName: CafePresetName | ''
+  teams: Team[]
   onClose: () => void
   onSubmit: (payload: {
     attendeeNames: string[]
@@ -37,52 +39,29 @@ function parseAttendeeNames(rawValue: string) {
   return attendeeNames
 }
 
-const ATTENDEE_PRESETS = [
-  {
-    label: '연료전지영업팀',
-    description: '자주 쓰는 팀 인원 16명 자동 입력',
-    names: [
-      '정용훈',
-      '송용원',
-      '이충봉',
-      '김가혁',
-      '김기선',
-      '김동민',
-      '김산',
-      '김영선',
-      '김창섭',
-      '박민범',
-      '송상현',
-      '심현진',
-      '이설하',
-      '이용훈',
-      '주환범',
-      '최성원',
-    ],
-  },
-  {
-    label: '분산발전영업팀',
-    description: '자주 쓰는 팀 인원 11명 자동 입력',
-    names: [
-      '탁종호',
-      '고정범',
-      '김현회',
-      '손정주',
-      '양석준',
-      '윤준영',
-      '이건호',
-      '이동원',
-      '이상은',
-      '최두연',
-      '조광희',
-    ],
-  },
-] as const
+type AttendeePreset = {
+  id: string
+  label: string
+  description: string
+  names: string[]
+}
+
+function teamsToPresets(teams: Team[]): AttendeePreset[] {
+  return teams
+    .filter((team) => team.members.length > 0)
+    .map((team) => ({
+      id: team.id,
+      label: team.name,
+      description: `${team.name} 인원 ${team.members.length}명 자동 입력`,
+      names: team.members,
+    }))
+}
 
 export function CreateMeetingSheet({
   open,
   title,
   cafeName,
+  teams,
   onClose,
   onSubmit,
 }: CreateMeetingSheetProps) {
@@ -96,6 +75,7 @@ export function CreateMeetingSheet({
     () => parseAttendeeNames(attendeeInput),
     [attendeeInput],
   )
+  const presets = useMemo(() => teamsToPresets(teams), [teams])
 
   useEffect(() => {
     return () => {
@@ -133,7 +113,7 @@ export function CreateMeetingSheet({
     }
   }
 
-  function handlePresetClick(preset: (typeof ATTENDEE_PRESETS)[number]) {
+  function handlePresetClick(preset: AttendeePreset) {
     const beforeCount = parseAttendeeNames(attendeeInput).length
     const merged = parseAttendeeNames(
       [...parseAttendeeNames(attendeeInput), ...preset.names].join('\n'),
@@ -215,18 +195,24 @@ export function CreateMeetingSheet({
             <div className="field-head-row">
               <span>초기 참석자 이름</span>
               <div className="team-preset-row">
-                {ATTENDEE_PRESETS.map((preset) => (
-                  <button
-                    className="team-preset-button"
-                    key={preset.label}
-                    type="button"
-                    title={preset.description}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onClick={() => handlePresetClick(preset)}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
+                {presets.length === 0 ? (
+                  <span className="team-preset-empty">
+                    팀 관리에서 팀을 만들면 여기에 칩으로 보입니다.
+                  </span>
+                ) : (
+                  presets.map((preset) => (
+                    <button
+                      className="team-preset-button"
+                      key={preset.id}
+                      type="button"
+                      title={preset.description}
+                      onMouseDown={(event) => event.preventDefault()}
+                      onClick={() => handlePresetClick(preset)}
+                    >
+                      {preset.label}
+                    </button>
+                  ))
+                )}
               </div>
             </div>
             <textarea

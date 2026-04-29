@@ -56,3 +56,11 @@ export type Snapshot = {
   createdAt: string
   updatedAt: string
 }
+
+export type Team = {
+  id: string
+  name: string
+  members: string[]
+  createdAt: string
+  updatedAt: string
+}
