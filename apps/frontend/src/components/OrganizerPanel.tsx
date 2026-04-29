@@ -1,9 +1,13 @@
-import { CAFE_PRESETS, formatDateTimeInput, type MeetingSettings } from '../lib/meeting'
+import {
+  CAFE_PRESETS,
+  extendDeadline,
+  formatDateTimeInput,
+  type MeetingSettings,
+} from '../lib/meeting'
 
 type OrganizerPanelProps = {
   meeting: MeetingSettings
   meetingClosed: boolean
-  deadlinePassed: boolean
   deadlineLabel: string
   onChange: (field: keyof MeetingSettings, value: string | boolean) => void
   onToggleManualClose: () => void
@@ -17,7 +21,6 @@ function makeDeadline(minutesFromNow: number) {
 export function OrganizerPanel({
   meeting,
   meetingClosed,
-  deadlinePassed,
   deadlineLabel,
   onChange,
   onToggleManualClose,
@@ -90,13 +93,15 @@ export function OrganizerPanel({
           />
           <div className="button-row inline-chip-row">
             {([
-              { label: '10분 후', minutes: 10 },
               { label: '30분 후', minutes: 30 },
               { label: '1시간 후', minutes: 60 },
               { label: '2시간 후', minutes: 120 },
+              { label: '4시간 후', minutes: 240 },
             ] as const).map(({ label, minutes }) => (
               <button
-                className="button ghost small"
+                className={`button ghost small ${
+                  meeting.deadline === makeDeadline(minutes) ? 'active-chip' : ''
+                }`}
                 key={label}
                 type="button"
                 onClick={() => onChange('deadline', makeDeadline(minutes))}
@@ -104,8 +109,24 @@ export function OrganizerPanel({
                 {label}
               </button>
             ))}
+            <button
+              className="button ghost small"
+              type="button"
+              onClick={() => onChange('deadline', extendDeadline(meeting.deadline, 30))}
+            >
+              +30분 연장
+            </button>
+            <button
+              className={`button ghost small ${
+                meeting.deadline === '' ? 'active-chip' : ''
+              }`}
+              type="button"
+              onClick={() => onChange('deadline', '')}
+            >
+              마감없음
+            </button>
           </div>
-          <small>{deadlineLabel}</small>
+          <small>{meeting.deadline ? deadlineLabel : '마감 시간 없이 계속 주문을 받습니다.'}</small>
         </div>
         <label className="field field-full">
           <span>안내 메모</span>
@@ -121,10 +142,9 @@ export function OrganizerPanel({
         <button
           className="button"
           type="button"
-          disabled={deadlinePassed}
           onClick={onToggleManualClose}
         >
-          {meeting.manuallyClosed ? '취합 다시 열기' : '지금 마감'}
+          {meetingClosed ? '취합 다시 열기' : '지금 마감'}
         </button>
         <button className="button secondary" type="button" onClick={onReset}>
           새 모임처럼 초기화

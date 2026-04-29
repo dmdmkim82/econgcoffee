@@ -481,7 +481,7 @@ export function buildDefaultSnapshot(
   options: BuildDefaultSnapshotOptions = {},
 ): Snapshot {
   const deadline = new Date()
-  deadline.setHours(deadline.getHours() + 1)
+  deadline.setHours(deadline.getHours() + 3)
   const now = new Date().toISOString()
   const attendeeNames = normalizeInitialAttendeeNames(options.attendeeNames ?? [])
   const title = options.title?.trim() || 'SK에코플랜트 미팅 커피'
@@ -614,6 +614,53 @@ export function formatDeadlineLabel(deadline: string) {
     hour: 'numeric',
     minute: '2-digit',
   }).format(date)
+}
+
+export type DeadlineUrgency = 'open' | 'soft' | 'warn' | 'danger' | 'closed'
+
+export function getDeadlineUrgency(deadline: string): DeadlineUrgency {
+  if (!deadline) {
+    return 'open'
+  }
+
+  const diff = new Date(deadline).getTime() - Date.now()
+
+  if (Number.isNaN(diff)) {
+    return 'open'
+  }
+
+  if (diff <= 0) {
+    return 'closed'
+  }
+
+  if (diff <= 2 * 60_000) {
+    return 'danger'
+  }
+
+  if (diff <= 10 * 60_000) {
+    return 'warn'
+  }
+
+  if (diff <= 60 * 60_000) {
+    return 'soft'
+  }
+
+  return 'open'
+}
+
+export function extendDeadline(deadline: string, addedMinutes: number): string {
+  const base = (() => {
+    if (!deadline) {
+      return Date.now()
+    }
+    const parsed = new Date(deadline).getTime()
+    if (Number.isNaN(parsed) || parsed <= Date.now()) {
+      return Date.now()
+    }
+    return parsed
+  })()
+
+  return formatDateTimeInput(new Date(base + addedMinutes * 60_000))
 }
 
 export function formatCountdown(deadline: string) {

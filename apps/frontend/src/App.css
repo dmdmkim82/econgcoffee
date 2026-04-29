@@ -395,6 +395,31 @@
   background: var(--surface-accent);
 }
 
+.deadline-stat strong {
+  font-variant-numeric: tabular-nums;
+  word-break: keep-all;
+}
+
+.deadline-stat.tone-warn {
+  border-color: rgba(207, 132, 26, 0.45);
+  background: rgba(207, 132, 26, 0.1);
+}
+
+.deadline-stat.tone-warn strong {
+  color: #8a4d05;
+}
+
+.deadline-stat.tone-danger,
+.deadline-stat.tone-closed {
+  border-color: rgba(177, 68, 44, 0.45);
+  background: rgba(177, 68, 44, 0.1);
+}
+
+.deadline-stat.tone-danger strong,
+.deadline-stat.tone-closed strong {
+  color: #a13624;
+}
+
 .feedback-banner {
   margin: 8px 0 0;
   padding: 8px 10px;
@@ -570,6 +595,11 @@
 .status-pill.danger {
   background: rgba(177, 68, 44, 0.12);
   color: #a13624;
+}
+
+.status-pill.warn {
+  background: rgba(207, 132, 26, 0.16);
+  color: #8a4d05;
 }
 
 .field-grid {
@@ -1383,22 +1413,21 @@
 
 .quick-attendee-scroll {
   display: flex;
-  gap: 5px;
-  overflow-x: auto;
+  flex-wrap: wrap;
+  gap: 6px 5px;
   padding-bottom: 2px;
-  scrollbar-width: none;
-}
-
-.quick-attendee-scroll::-webkit-scrollbar {
-  display: none;
+  max-height: 30vh;
+  overflow-y: auto;
 }
 
 .quick-attendee-chip {
-  display: grid;
-  gap: 2px;
-  min-width: max-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 auto;
   min-height: 26px;
-  padding: 3px 8px;
+  max-width: 100%;
+  padding: 3px 10px;
   border: 1px solid var(--chip-border);
   border-radius: 999px;
   background: var(--chip-bg);
@@ -1408,9 +1437,12 @@
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .quick-attendee-chip span {
+  flex: 0 0 auto;
   font-size: 0.68rem;
   color: var(--muted);
 }
@@ -1730,8 +1762,24 @@
   .person-chip,
   .summary-row {
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
+    gap: 6px 10px;
+  }
+
+  .person-chip > div,
+  .summary-row > div {
+    min-width: 0;
+  }
+
+  .person-chip > div:first-child,
+  .summary-row > div:first-child {
+    flex: 1 1 auto;
+  }
+
+  .person-chip .person-actions {
+    flex: 0 0 auto;
   }
 
   .summary-metrics {
