@@ -23,6 +23,7 @@ import { ParticipantWorkspace } from './components/ParticipantWorkspace'
 import { QuickOrderPanel } from './components/QuickOrderPanel'
 import { ShareLinkSheet } from './components/ShareLinkSheet'
 import { SummaryPanel } from './components/SummaryPanel'
+import { TeamsPanel } from './components/TeamsPanel'
 import {
   apiSyncEnabled,
   deleteMeetingFromApi,
@@ -37,6 +38,7 @@ import {
   type NutritionInfo,
   type Snapshot,
   STARBUCKS_CAFE_NAME,
+  type Team,
   type TemperatureOption,
   createLatelierMenuItems,
   createPaulBassettMenuItems,
@@ -54,6 +56,15 @@ import {
   normalizeSnapshot,
   resolveTemperatureSelection,
 } from './lib/meeting'
+import {
+  buildSeedTeams,
+  createTeamId,
+  deleteTeamFromApi,
+  fetchTeamsFromApi,
+  loadTeamsFromStorage,
+  saveTeamToApi,
+  saveTeamsToStorage,
+} from './lib/teams'
 import {
   createMeetingSnapshot,
   createMeetingsStore,
@@ -131,6 +142,7 @@ function App() {
 function AppRoutes() {
   const [store, setStore] = useState<MeetingsStore>(() => loadMeetingsStore())
   const [theme, setTheme] = useState<ThemeMode>(() => getStoredTheme())
+  const [teams, setTeams] = useState<Team[]>(() => loadTeamsFromStorage())
   const initialStoreRef = useRef(store)
 
   useEffect(() => {
@@ -138,9 +150,138 @@ function AppRoutes() {
   }, [store])
 
   useEffect(() => {
+    saveTeamsToStorage(teams)
+  }, [teams])
+
+  useEffect(() => {
     window.localStorage.setItem(THEME_STORAGE_KEY, theme)
     document.documentElement.dataset.theme = theme
   }, [theme])
+
+  useEffect(() => {
+    let ignore = false
+
+    async function hydrateTeams() {
+      try {
+        const remote = await fetchTeamsFromApi()
+        if (ignore) return
+
+        if (remote.length > 0) {
+          setTeams(remote)
+          return
+        }
+
+        // 첫 사용: 로컬에 캐시된 팀이 있으면 그걸 서버로 올리고,
+        // 없으면 기본 시드 팀(연료전지영업팀, 분산발전영업팀)을 서버로 올림.
+        const cached = loadTeamsFromStorage()
+        const seed = cached.length > 0 ? cached : buildSeedTeams()
+        await Promise.all(seed.map((team) => saveTeamToApi(team).catch(() => team)))
+        if (!ignore) {
+          setTeams(seed)
+        }
+      } catch {
+        // 서버 연결 실패 시 로컬 캐시만 유지.
+      }
+    }
+
+    void hydrateTeams()
+    return () => {
+      ignore = true
+    }
+  }, [])
+
+  function handleCreateTeamGlobal(name: string) {
+    const trimmed = name.trim()
+    if (!trimmed) return
+
+    const now = new Date().toISOString()
+    const team: Team = {
+      id: createTeamId(),
+      name: trimmed,
+      members: [],
+      createdAt: now,
+      updatedAt: now,
+    }
+    setTeams((current) => [...current, team])
+    void saveTeamToApi(team).catch(() => undefined)
+  }
+
+  function handleRenameTeamGlobal(teamId: string, name: string) {
+    const trimmed = name.trim()
+    if (!trimmed) return
+
+    setTeams((current) =>
+      current.map((team) =>
+        team.id === teamId
+          ? { ...team, name: trimmed, updatedAt: new Date().toISOString() }
+          : team,
+      ),
+    )
+
+    const target = teams.find((team) => team.id === teamId)
+    if (target) {
+      void saveTeamToApi({
+        ...target,
+        name: trimmed,
+        updatedAt: new Date().toISOString(),
+      }).catch(() => undefined)
+    }
+  }
+
+  function handleDeleteTeamGlobal(teamId: string) {
+    setTeams((current) => current.filter((team) => team.id !== teamId))
+    void deleteTeamFromApi(teamId).catch(() => undefined)
+  }
+
+  function handleAddTeamMemberGlobal(teamId: string, memberName: string) {
+    const trimmed = memberName.trim().replace(/\s+/g, ' ')
+    if (!trimmed) return
+
+    let updated: Team | null = null
+    setTeams((current) =>
+      current.map((team) => {
+        if (team.id !== teamId) return team
+        const dedupeKey = trimmed.normalize('NFKC').toLocaleLowerCase('ko-KR')
+        if (
+          team.members.some(
+            (member) =>
+              member.normalize('NFKC').toLocaleLowerCase('ko-KR') === dedupeKey,
+          )
+        ) {
+          return team
+        }
+        const next: Team = {
+          ...team,
+          members: [...team.members, trimmed],
+          updatedAt: new Date().toISOString(),
+        }
+        updated = next
+        return next
+      }),
+    )
+    if (updated) {
+      void saveTeamToApi(updated).catch(() => undefined)
+    }
+  }
+
+  function handleRemoveTeamMemberGlobal(teamId: string, memberName: string) {
+    let updated: Team | null = null
+    setTeams((current) =>
+      current.map((team) => {
+        if (team.id !== teamId) return team
+        const next: Team = {
+          ...team,
+          members: team.members.filter((member) => member !== memberName),
+          updatedAt: new Date().toISOString(),
+        }
+        updated = next
+        return next
+      }),
+    )
+    if (updated) {
+      void saveTeamToApi(updated).catch(() => undefined)
+    }
+  }
 
   useEffect(() => {
     let ignore = false
@@ -217,6 +358,7 @@ function AppRoutes() {
         element={
           <HomePage
             meetings={listMeetings(store)}
+            teams={teams}
             theme={theme}
             onCreateMeeting={handleCreateMeeting}
             onDeleteMeeting={handleDeleteMeeting}
@@ -235,6 +377,12 @@ function AppRoutes() {
             store={store}
             setStore={setStore}
             theme={theme}
+            teams={teams}
+            onCreateTeam={handleCreateTeamGlobal}
+            onRenameTeam={handleRenameTeamGlobal}
+            onDeleteTeam={handleDeleteTeamGlobal}
+            onAddTeamMember={handleAddTeamMemberGlobal}
+            onRemoveTeamMember={handleRemoveTeamMemberGlobal}
             onToggleTheme={() =>
               setTheme((currentTheme) =>
                 currentTheme === 'dark' ? 'light' : 'dark',
@@ -252,6 +400,12 @@ type MeetingPageProps = {
   store: MeetingsStore
   setStore: React.Dispatch<React.SetStateAction<MeetingsStore>>
   theme: ThemeMode
+  teams: Team[]
+  onCreateTeam: (name: string) => void
+  onRenameTeam: (teamId: string, name: string) => void
+  onDeleteTeam: (teamId: string) => void
+  onAddTeamMember: (teamId: string, name: string) => void
+  onRemoveTeamMember: (teamId: string, memberName: string) => void
   onToggleTheme: () => void
 }
 
@@ -260,6 +414,12 @@ function MeetingPage({
   store,
   setStore,
   theme,
+  teams,
+  onCreateTeam,
+  onRenameTeam,
+  onDeleteTeam,
+  onAddTeamMember,
+  onRemoveTeamMember,
   onToggleTheme,
 }: MeetingPageProps) {
   const navigate = useNavigate()
@@ -1207,6 +1367,48 @@ function MeetingPage({
                   onTogglePriceVisibility={() =>
                     setShowPrices((currentValue) => !currentValue)
                   }
+                />
+              </div>
+            </details>
+            <details className="admin-details">
+              <summary>팀 관리</summary>
+              <div className="admin-details-body">
+                <TeamsPanel
+                  teams={teams}
+                  onCreateTeam={onCreateTeam}
+                  onRenameTeam={onRenameTeam}
+                  onDeleteTeam={onDeleteTeam}
+                  onAddMember={onAddTeamMember}
+                  onRemoveMember={onRemoveTeamMember}
+                  onApplyTeamToMeeting={(teamId) => {
+                    const team = teams.find((entry) => entry.id === teamId)
+                    if (!team) return
+                    const existingKeys = new Set(
+                      attendees.map((attendee) =>
+                        attendee.name
+                          .normalize('NFKC')
+                          .toLocaleLowerCase('ko-KR')
+                          .trim(),
+                      ),
+                    )
+                    const toAdd = team.members.filter((memberName) => {
+                      const key = memberName
+                        .normalize('NFKC')
+                        .toLocaleLowerCase('ko-KR')
+                        .trim()
+                      if (existingKeys.has(key)) return false
+                      existingKeys.add(key)
+                      return true
+                    })
+                    for (const memberName of toAdd) {
+                      handleAddAttendee(memberName, '')
+                    }
+                    setFeedback(
+                      toAdd.length > 0
+                        ? `"${team.name}" 팀에서 ${toAdd.length}명을 추가했어요.`
+                        : `"${team.name}" 팀의 멤버는 이미 모두 참석자에 있습니다.`,
+                    )
+                  }}
                 />
               </div>
             </details>

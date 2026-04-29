@@ -5,6 +5,7 @@ import {
   type CafePresetName,
   type CreateMenuSeed,
   type Snapshot,
+  type Team,
 } from '../lib/meeting'
 import { BrandLogo } from './BrandLogo'
 import { CafeLogoIcon } from './CafeLogoIcon'
@@ -19,6 +20,7 @@ type CreateMeetingPayload = {
 
 type HomePageProps = {
   meetings: Snapshot[]
+  teams: Team[]
   theme: 'light' | 'dark'
   onCreateMeeting: (payload: CreateMeetingPayload) => string
   onDeleteMeeting: (shareCode: string) => void
@@ -41,6 +43,7 @@ function countCompleted(snapshot: Snapshot) {
 
 export function HomePage({
   meetings,
+  teams,
   theme,
   onCreateMeeting,
   onDeleteMeeting,
@@ -115,6 +118,7 @@ export function HomePage({
         open={isCreateSheetOpen}
         title={draftMeetingTitle}
         cafeName={draftCafeName}
+        teams={teams}
         onClose={() => setIsCreateSheetOpen(false)}
         onSubmit={handleCreateMeeting}
       />
