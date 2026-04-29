@@ -51,15 +51,23 @@
 .notice-box,
 .home-side-card {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 18px;
   background: var(--panel);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 6px 18px rgba(74, 51, 34, 0.06);
+}
+
+:root[data-theme='dark'] .panel,
+:root[data-theme='dark'] .meeting-card,
+:root[data-theme='dark'] .notice-box,
+:root[data-theme='dark'] .home-side-card {
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 6px 18px rgba(0, 0, 0, 0.28);
 }
 
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 8px;
+  gap: 8px;
+  padding: 14px;
   border-color: var(--border);
   background: var(--panel);
 }
@@ -257,6 +265,39 @@
 .home-brand-panel {
   align-items: center;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+  padding: 22px 18px 18px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 219, 178, 0.55), transparent 55%),
+    radial-gradient(circle at 0% 100%, rgba(196, 124, 51, 0.18), transparent 60%),
+    radial-gradient(circle at 100% 100%, rgba(245, 184, 106, 0.18), transparent 50%),
+    var(--panel);
+}
+
+:root[data-theme='dark'] .home-brand-panel {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(83, 53, 27, 0.55), transparent 55%),
+    radial-gradient(circle at 0% 100%, rgba(196, 124, 51, 0.18), transparent 60%),
+    radial-gradient(circle at 100% 100%, rgba(245, 184, 106, 0.12), transparent 50%),
+    var(--panel);
+}
+
+.home-brand-panel::after {
+  content: '';
+  position: absolute;
+  inset: -10% -10% 50% 60%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle, rgba(43, 29, 19, 0.13) 0 12%, transparent 14%) 0 0 / 28px 28px,
+    radial-gradient(circle, rgba(43, 29, 19, 0.10) 0 12%, transparent 14%) 14px 14px / 28px 28px;
+  mask-image: radial-gradient(circle at 70% 30%, #000 0%, transparent 75%);
+  -webkit-mask-image: radial-gradient(circle at 70% 30%, #000 0%, transparent 75%);
+  opacity: 0.6;
+}
+
+.home-brand-panel > * {
+  position: relative;
 }
 
 .home-brand-panel .eyebrow {
@@ -722,16 +763,26 @@
 .ocr-textarea,
 .join-form input {
   width: 100%;
-  min-height: 32px;
-  padding: 6px 9px;
+  min-height: 40px;
+  padding: 9px 14px;
   border: 1px solid var(--input-border);
-  border-radius: 8px;
+  border-radius: 14px;
   background: var(--input-bg);
   color: var(--ink);
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   box-sizing: border-box;
-  transition: border-color 0.15s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field input:focus,
+.field textarea:focus,
+.field select:focus,
+.inline-form input:focus,
+.summary-copy-box textarea:focus,
+.ocr-textarea:focus,
+.join-form input:focus {
+  box-shadow: 0 0 0 3px rgba(196, 124, 51, 0.18);
 }
 
 .field textarea,
@@ -1785,15 +1836,15 @@
   align-items: center;
   gap: 6px;
   flex: 0 1 auto;
-  min-height: 26px;
+  min-height: 32px;
   max-width: 100%;
-  padding: 3px 10px;
+  padding: 3px 14px 3px 4px;
   border: 1px solid var(--chip-border);
   border-radius: 999px;
   background: var(--chip-bg);
   color: var(--ink-soft);
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -1811,10 +1862,44 @@
   box-shadow: 0 5px 12px rgba(74, 51, 34, 0.12);
 }
 
-.quick-attendee-chip span {
+.quick-attendee-chip .chip-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(140deg, #f4d8b1, #c47c33);
+  color: #2b1d13;
+  font-size: 0.78rem;
+  font-weight: 800;
   flex: 0 0 auto;
-  font-size: 0.68rem;
+}
+
+.quick-attendee-chip.completed .chip-avatar {
+  background: linear-gradient(140deg, #fff5e6, #f4d8b1);
+}
+
+.quick-attendee-chip .chip-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quick-attendee-chip .chip-status {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  font-weight: 600;
   color: var(--muted);
+}
+
+.quick-attendee-chip.completed .chip-status {
+  color: rgba(255, 245, 230, 0.78);
+}
+
+:root[data-theme='dark'] .quick-attendee-chip.completed .chip-status {
+  color: rgba(43, 29, 19, 0.7);
 }
 
 .quick-attendee-chip.active {
@@ -2143,14 +2228,15 @@
 .empty-state {
   display: grid;
   place-items: center;
-  min-height: 48px;
-  padding: 10px;
+  min-height: 64px;
+  padding: 14px;
   text-align: center;
   border: 1px dashed var(--selection-border);
-  border-radius: 8px;
+  border-radius: 14px;
   background: var(--empty-bg);
   color: var(--muted);
   font-size: 0.82rem;
+  line-height: 1.5;
 }
 
 .empty-state.compact {
