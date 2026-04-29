@@ -27,7 +27,10 @@ type StarbucksCatalogResponse = {
 }
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
-export const apiSyncEnabled = import.meta.env.DEV || API_BASE_URL.length > 0
+// Production builds also call `/api/*` on the same origin (Vercel Functions).
+// The frontend already falls back to localStorage when calls fail (e.g. when
+// the Upstash Redis integration has not been added yet).
+export const apiSyncEnabled = true
 
 function withApiBase(path: string) {
   return `${API_BASE_URL}${path}`
