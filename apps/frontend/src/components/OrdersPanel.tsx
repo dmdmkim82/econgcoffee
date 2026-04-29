@@ -57,7 +57,7 @@ export function OrdersPanel({
   ).length
 
   return (
-    <details className="panel panel-wide collapsible-panel" open>
+    <details className="panel panel-wide collapsible-panel">
       <summary className="panel-head">
         <div>
           <span className="panel-kicker">참석자 현황</span>
@@ -70,7 +70,7 @@ export function OrdersPanel({
       </summary>
 
       <p className="panel-note">
-        본인 이름을 누르면 메뉴를 바로 선택할 수 있어요. 아래 빠른 주문 입력에서 받은 주문도 자동으로 반영됩니다.
+        헤더를 눌러 펼치면 이름별로 메뉴를 직접 골라 주문할 수 있어요. 위 빠른 주문 입력에서 받은 주문도 자동으로 반영됩니다.
       </p>
 
       {attendees.length === 0 ? (

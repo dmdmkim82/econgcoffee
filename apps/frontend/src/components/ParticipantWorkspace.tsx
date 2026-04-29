@@ -31,21 +31,21 @@ export function ParticipantWorkspace({
 
   return (
     <div className="participant-layout">
-      <OrdersPanel
-        attendees={attendees}
-        menuItems={menuItems}
-        meetingClosed={meetingClosed}
-        showPrices={showPrices}
-        onUpdateAttendee={onUpdateAttendee}
-        onSkipAttendee={onSkipAttendee}
-        onCompleteOrder={onCompleteOrder}
-      />
       <QuickOrderPanel
         snapshot={snapshot}
         meetingClosed={meetingClosed}
         showPrices={showPrices}
         variant="participant"
         onAddAttendee={onAddAttendee}
+        onUpdateAttendee={onUpdateAttendee}
+        onSkipAttendee={onSkipAttendee}
+        onCompleteOrder={onCompleteOrder}
+      />
+      <OrdersPanel
+        attendees={attendees}
+        menuItems={menuItems}
+        meetingClosed={meetingClosed}
+        showPrices={showPrices}
         onUpdateAttendee={onUpdateAttendee}
         onSkipAttendee={onSkipAttendee}
         onCompleteOrder={onCompleteOrder}
