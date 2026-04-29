@@ -325,8 +325,11 @@ export function QuickOrderPanel({
                       type="button"
                       onClick={() => syncSelectedAttendee(attendee.id)}
                     >
-                      {attendee.name}
-                      <span>{status.label}</span>
+                      <span aria-hidden="true" className="chip-avatar">
+                        {attendee.name.slice(0, 1) || '?'}
+                      </span>
+                      <span className="chip-name">{attendee.name}</span>
+                      <span className="chip-status">{status.label}</span>
                     </button>
                   )
                 })}
@@ -394,8 +397,11 @@ export function QuickOrderPanel({
                       type="button"
                       onClick={() => syncSelectedAttendee(attendee.id)}
                     >
-                      {attendee.name}
-                      <span>{status.label}</span>
+                      <span aria-hidden="true" className="chip-avatar">
+                        {attendee.name.slice(0, 1) || '?'}
+                      </span>
+                      <span className="chip-name">{attendee.name}</span>
+                      <span className="chip-status">{status.label}</span>
                     </button>
                   )
                 })}
