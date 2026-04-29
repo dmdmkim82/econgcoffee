@@ -114,7 +114,11 @@ export function CreateMeetingSheet({
   }
 
   return (
-    <div className="summary-sheet-overlay" role="presentation" onClick={handleClose}>
+    <div
+      className="summary-sheet-overlay create-sheet-overlay"
+      role="presentation"
+      onClick={handleClose}
+    >
       <section
         aria-label="새 미팅 만들기"
         aria-modal="true"
@@ -154,38 +158,40 @@ export function CreateMeetingSheet({
           </div>
 
           <label className="field field-full">
-            <span>초기 참석자 이름</span>
+            <div className="field-head-row">
+              <span>초기 참석자 이름</span>
+              <div className="team-preset-row">
+                {ATTENDEE_PRESETS.map((preset) => (
+                  <button
+                    className="team-preset-button"
+                    key={preset.label}
+                    type="button"
+                    title={preset.description}
+                    onClick={() => {
+                      setAttendeeInput((current) => {
+                        const merged = [
+                          ...parseAttendeeNames(current),
+                          ...preset.names,
+                        ]
+                        return parseAttendeeNames(merged.join('\n')).join('\n')
+                      })
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
             <textarea
               autoFocus
               value={attendeeInput}
               onChange={(event) => setAttendeeInput(event.target.value)}
               placeholder={'한 줄에 한 명씩 입력하세요\n예: 김대리\n이주임\n박과장'}
             />
-            <div className="button-row inline-chip-row">
-              {ATTENDEE_PRESETS.map((preset) => (
-                <button
-                  className="button ghost small"
-                  key={preset.label}
-                  type="button"
-                  title={preset.description}
-                  onClick={() => {
-                    setAttendeeInput((current) => {
-                      const merged = [
-                        ...parseAttendeeNames(current),
-                        ...preset.names,
-                      ]
-                      return parseAttendeeNames(merged.join('\n')).join('\n')
-                    })
-                  }}
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
           </label>
 
           <div className="status-callout">
-            참석자 이름은 줄바꿈이나 쉼표로 구분할 수 있습니다. 자주 쓰는 팀은 위 버튼으로 한 번에 추가할 수 있어요.
+            참석자 이름은 줄바꿈이나 쉼표로 구분할 수 있습니다. 자주 쓰는 팀은 우측 버튼으로 한 번에 추가할 수 있어요.
           </div>
 
           <div className="button-row">
