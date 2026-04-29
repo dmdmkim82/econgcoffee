@@ -1088,6 +1088,14 @@ function MeetingPage({
               </div>
             </section>
           ) : null}
+          <OrdersPanel
+            attendees={attendees}
+            menuItems={menuItems}
+            meetingClosed={meetingClosed}
+            showPrices={showPrices}
+            onUpdateAttendee={updateAttendeeField}
+            onSkipAttendee={handleSkipAttendee}
+          />
           <QuickOrderPanel
             snapshot={snapshot}
             meetingClosed={meetingClosed}
@@ -1106,14 +1114,6 @@ function MeetingPage({
             onOpenMore={() => setIsMoreSheetOpen(true)}
           />
           <main className="workspace-grid">
-            <OrdersPanel
-              attendees={attendees}
-              menuItems={menuItems}
-              meetingClosed={meetingClosed}
-              showPrices={showPrices}
-              onUpdateAttendee={updateAttendeeField}
-              onSkipAttendee={handleSkipAttendee}
-            />
             <SummaryPanel
               groupedOrders={groupedOrders.map((group) => ({
                 label: group.label,

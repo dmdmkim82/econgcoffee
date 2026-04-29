@@ -1,4 +1,5 @@
 import { type Attendee, type Snapshot } from '../lib/meeting'
+import { OrdersPanel } from './OrdersPanel'
 import { QuickOrderPanel } from './QuickOrderPanel'
 
 type ParticipantWorkspaceProps = {
@@ -26,10 +27,18 @@ export function ParticipantWorkspace({
   onUpdateAttendee,
   onSkipAttendee,
 }: ParticipantWorkspaceProps) {
-  const { meeting } = snapshot
+  const { meeting, attendees, menuItems } = snapshot
 
   return (
     <div className="participant-layout">
+      <OrdersPanel
+        attendees={attendees}
+        menuItems={menuItems}
+        meetingClosed={meetingClosed}
+        showPrices={showPrices}
+        onUpdateAttendee={onUpdateAttendee}
+        onSkipAttendee={onSkipAttendee}
+      />
       <QuickOrderPanel
         snapshot={snapshot}
         meetingClosed={meetingClosed}
