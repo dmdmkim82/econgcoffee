@@ -67,12 +67,12 @@ export function OrdersPanel({
       </div>
 
       <p className="panel-note">
-        위 빠른 주문 입력에서 받은 주문이 바로 반영됩니다. 필요한 경우에만 펼쳐서 수정하세요.
+        본인 이름을 누르면 메뉴를 바로 선택할 수 있어요. 아래 빠른 주문 입력에서 받은 주문도 자동으로 반영됩니다.
       </p>
 
       {attendees.length === 0 ? (
         <div className="empty-state">
-          아직 참석자가 없습니다. 상단에서 이름을 입력해 첫 주문을 받아주세요.
+          아직 참석자가 없습니다. 아래 새 미팅 만들기 또는 참석자 수동 관리에서 이름을 추가해 주세요.
         </div>
       ) : (
         <div className="attendance-board">
