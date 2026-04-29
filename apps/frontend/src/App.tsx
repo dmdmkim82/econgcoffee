@@ -91,6 +91,35 @@ type ShareTarget = {
   link: string
 }
 
+function playCompletionDing() {
+  try {
+    const Ctor =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext
+    if (!Ctor) {
+      return
+    }
+    const ctx = new Ctor()
+    const now = ctx.currentTime
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(880, now)
+    osc.frequency.exponentialRampToValueAtTime(1320, now + 0.07)
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.exponentialRampToValueAtTime(0.18, now + 0.02)
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.42)
+    osc.connect(gain).connect(ctx.destination)
+    osc.start(now)
+    osc.stop(now + 0.45)
+    window.setTimeout(() => {
+      void ctx.close().catch(() => undefined)
+    }, 600)
+  } catch {
+    // Audio not supported or autoplay blocked — silently ignore.
+  }
+}
+
 function App() {
   return (
     <BrowserRouter>
@@ -275,6 +304,7 @@ function MeetingPage({
       return undefined
     }
 
+    playCompletionDing()
     const timer = window.setTimeout(() => setCompletionToast(''), 1650)
     return () => window.clearTimeout(timer)
   }, [completionToast])
@@ -1058,7 +1088,7 @@ function MeetingPage({
             <div className="completion-toast-check" aria-hidden="true">
               <span />
             </div>
-            <strong>주문 완료!</strong>
+            <strong>선택완료!</strong>
             <p>{completionToast}</p>
           </div>
         </div>
