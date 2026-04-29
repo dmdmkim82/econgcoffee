@@ -1127,21 +1127,21 @@ function MeetingPage({
               </div>
             </section>
           ) : null}
-          <OrdersPanel
-            attendees={attendees}
-            menuItems={menuItems}
-            meetingClosed={meetingClosed}
-            showPrices={showPrices}
-            onUpdateAttendee={updateAttendeeField}
-            onSkipAttendee={handleSkipAttendee}
-            onCompleteOrder={handleCompleteOrder}
-          />
           <QuickOrderPanel
             snapshot={snapshot}
             meetingClosed={meetingClosed}
             showPrices={showPrices}
             variant="organizer"
             onAddAttendee={handleAddAttendee}
+            onUpdateAttendee={updateAttendeeField}
+            onSkipAttendee={handleSkipAttendee}
+            onCompleteOrder={handleCompleteOrder}
+          />
+          <OrdersPanel
+            attendees={attendees}
+            menuItems={menuItems}
+            meetingClosed={meetingClosed}
+            showPrices={showPrices}
             onUpdateAttendee={updateAttendeeField}
             onSkipAttendee={handleSkipAttendee}
             onCompleteOrder={handleCompleteOrder}
