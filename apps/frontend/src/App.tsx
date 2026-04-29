@@ -74,7 +74,7 @@ type ThemeMode = 'light' | 'dark'
 
 function getStoredTheme(): ThemeMode {
   const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
-  return storedTheme === 'light' ? 'light' : 'dark'
+  return storedTheme === 'dark' ? 'dark' : 'light'
 }
 
 type OcrState = {

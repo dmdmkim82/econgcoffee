@@ -37,6 +37,31 @@ function parseAttendeeNames(rawValue: string) {
   return attendeeNames
 }
 
+const ATTENDEE_PRESETS = [
+  {
+    label: '연료전지영업팀',
+    description: '자주 쓰는 팀 인원 16명 자동 입력',
+    names: [
+      '정용훈',
+      '송용원',
+      '이충봉',
+      '김가혁',
+      '김기선',
+      '김동민',
+      '김산',
+      '김영선',
+      '김창섭',
+      '박민범',
+      '송상현',
+      '심현진',
+      '이설하',
+      '이용훈',
+      '주환범',
+      '최성원',
+    ],
+  },
+] as const
+
 export function CreateMeetingSheet({
   open,
   title,
@@ -136,10 +161,31 @@ export function CreateMeetingSheet({
               onChange={(event) => setAttendeeInput(event.target.value)}
               placeholder={'한 줄에 한 명씩 입력하세요\n예: 김대리\n이주임\n박과장'}
             />
+            <div className="button-row inline-chip-row">
+              {ATTENDEE_PRESETS.map((preset) => (
+                <button
+                  className="button ghost small"
+                  key={preset.label}
+                  type="button"
+                  title={preset.description}
+                  onClick={() => {
+                    setAttendeeInput((current) => {
+                      const merged = [
+                        ...parseAttendeeNames(current),
+                        ...preset.names,
+                      ]
+                      return parseAttendeeNames(merged.join('\n')).join('\n')
+                    })
+                  }}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
           </label>
 
           <div className="status-callout">
-            참석자 이름은 줄바꿈이나 쉼표로 구분할 수 있습니다.
+            참석자 이름은 줄바꿈이나 쉼표로 구분할 수 있습니다. 자주 쓰는 팀은 위 버튼으로 한 번에 추가할 수 있어요.
           </div>
 
           <div className="button-row">
