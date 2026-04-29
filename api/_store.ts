@@ -1,5 +1,5 @@
 import { Redis } from '@upstash/redis'
-import type { Snapshot } from '../shared/meeting'
+import type { Snapshot } from '../shared/meeting.js'
 
 export type MeetingsStore = Record<string, Snapshot>
 

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { isRedisConfigured, listMeetings, readStore } from '../_store'
+import { isRedisConfigured, listMeetings, readStore } from '../_store.js'
 
 export default async function handler(
   request: VercelRequest,

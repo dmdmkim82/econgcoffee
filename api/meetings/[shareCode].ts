@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import type { Snapshot } from '../../shared/meeting'
+import type { Snapshot } from '../../shared/meeting.js'
 import {
   deleteMeeting,
   isRedisConfigured,
   readMeeting,
   writeMeeting,
-} from '../_store'
+} from '../_store.js'
 
 function pickShareCode(request: VercelRequest): string | null {
   const { shareCode } = request.query
