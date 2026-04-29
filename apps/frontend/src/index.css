@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
 @font-face {
   font-family: 'Pretendard Variable';
   src: url('./assets/fonts/PretendardVariable.woff2') format('woff2-variations');
@@ -7,51 +9,54 @@
 }
 
 :root {
-  --bg-top: #efe1d0;
-  --bg-bottom: #f7f1e7;
-  --panel: rgba(255, 252, 247, 0.94);
-  --surface: rgba(255, 255, 255, 0.88);
-  --surface-soft: rgba(250, 246, 238, 0.88);
-  --surface-muted: rgba(248, 243, 235, 0.92);
+  --bg-top: #f5efe6;
+  --bg-bottom: #ede4d5;
+  --panel: #fbf7f0;
+  --surface: #fbf7f0;
+  --surface-soft: #ede4d5;
+  --surface-muted: #ede4d5;
   --surface-accent: linear-gradient(
     180deg,
-    rgba(250, 214, 182, 0.78),
-    rgba(255, 249, 243, 0.96)
+    rgba(180, 125, 82, 0.18),
+    rgba(251, 247, 240, 0.96)
   );
-  --ink: #22160e;
-  --ink-soft: #463427;
-  --muted: #6d5b4d;
-  --border: rgba(86, 62, 44, 0.14);
-  --input-bg: rgba(255, 255, 255, 0.86);
-  --input-border: rgba(92, 67, 44, 0.16);
-  --chip-bg: rgba(255, 255, 255, 0.88);
-  --chip-border: rgba(92, 67, 44, 0.12);
-  --chip-active-bg: rgba(196, 124, 51, 0.14);
-  --chip-active-border: rgba(196, 124, 51, 0.24);
-  --empty-bg: rgba(252, 247, 238, 0.78);
-  --selection-bg: rgba(252, 247, 238, 0.72);
-  --selection-border: rgba(92, 67, 44, 0.16);
-  --callout-bg: rgba(255, 246, 234, 0.92);
-  --callout-border: rgba(196, 124, 51, 0.18);
-  --feedback-bg: rgba(222, 244, 227, 0.85);
-  --feedback-border: rgba(60, 112, 72, 0.22);
-  --feedback-ink: #215a34;
-  --overlay: rgba(23, 17, 12, 0.38);
-  --accent-strong: #965222;
-  --shadow-sm: 0 18px 40px rgba(74, 51, 34, 0.08);
-  --shadow-lg: 0 28px 70px rgba(74, 51, 34, 0.12);
+  --ink: #2b1d14;
+  --ink-soft: #4a3527;
+  --muted: #7a6a5a;
+  --ink-faint: #b6a795;
+  --border: rgba(43, 29, 20, 0.08);
+  --input-bg: #fbf7f0;
+  --input-border: rgba(43, 29, 20, 0.1);
+  --chip-bg: #fbf7f0;
+  --chip-border: rgba(43, 29, 20, 0.08);
+  --chip-active-bg: rgba(180, 125, 82, 0.14);
+  --chip-active-border: rgba(180, 125, 82, 0.32);
+  --empty-bg: #fbf7f0;
+  --selection-bg: #fbf7f0;
+  --selection-border: rgba(43, 29, 20, 0.1);
+  --callout-bg: rgba(180, 125, 82, 0.08);
+  --callout-border: rgba(180, 125, 82, 0.22);
+  --feedback-bg: rgba(123, 211, 137, 0.18);
+  --feedback-border: rgba(60, 112, 72, 0.32);
+  --feedback-ink: #1d6d3e;
+  --overlay: rgba(43, 29, 20, 0.4);
+  --accent-strong: #b47d52;
+  --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.6) inset, 0 6px 18px rgba(43, 29, 20, 0.06);
+  --shadow-lg: 0 10px 28px rgba(43, 29, 20, 0.12);
   --display-font:
-    'Pretendard Variable', 'Aptos Display', 'Segoe UI', 'Malgun Gothic',
-    sans-serif;
+    'Playfair Display', 'Pretendard Variable', 'Aptos Display', 'Segoe UI',
+    'Malgun Gothic', sans-serif;
   --body-font:
     'Pretendard Variable', 'Aptos', 'Segoe UI', 'Malgun Gothic', sans-serif;
+  --mono-font:
+    'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   font-family: var(--body-font);
   line-height: 1.5;
   font-weight: 400;
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, rgba(255, 235, 213, 0.96), transparent 28%),
-    radial-gradient(circle at top right, rgba(223, 199, 162, 0.52), transparent 24%),
+    radial-gradient(circle at top left, rgba(180, 125, 82, 0.18), transparent 32%),
+    radial-gradient(circle at top right, rgba(245, 184, 106, 0.18), transparent 28%),
     linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -60,39 +65,40 @@
 }
 
 :root[data-theme='dark'] {
-  --bg-top: #090b10;
-  --bg-bottom: #14171d;
-  --panel: rgba(24, 27, 34, 0.94);
-  --surface: rgba(15, 18, 24, 0.88);
-  --surface-soft: rgba(29, 32, 39, 0.9);
-  --surface-muted: rgba(34, 38, 46, 0.94);
+  --bg-top: #1f1611;
+  --bg-bottom: #14100c;
+  --panel: #2a1f18;
+  --surface: #2a1f18;
+  --surface-soft: #382b22;
+  --surface-muted: #382b22;
   --surface-accent: linear-gradient(
     180deg,
-    rgba(88, 60, 36, 0.72),
-    rgba(34, 38, 46, 0.96)
+    rgba(212, 165, 116, 0.32),
+    rgba(56, 43, 34, 0.96)
   );
-  --ink: #f7efe8;
+  --ink: #f5e9d7;
   --ink-soft: #e3d7cb;
-  --muted: #a19992;
-  --border: rgba(255, 255, 255, 0.08);
-  --input-bg: rgba(12, 14, 18, 0.92);
-  --input-border: rgba(255, 255, 255, 0.1);
-  --chip-bg: rgba(255, 255, 255, 0.05);
-  --chip-border: rgba(255, 255, 255, 0.08);
-  --chip-active-bg: rgba(242, 194, 140, 0.16);
-  --chip-active-border: rgba(242, 194, 140, 0.22);
-  --empty-bg: rgba(255, 255, 255, 0.03);
-  --selection-bg: rgba(255, 255, 255, 0.04);
-  --selection-border: rgba(255, 255, 255, 0.08);
-  --callout-bg: rgba(242, 194, 140, 0.08);
-  --callout-border: rgba(242, 194, 140, 0.18);
-  --feedback-bg: rgba(28, 70, 44, 0.3);
-  --feedback-border: rgba(74, 170, 112, 0.22);
+  --muted: #b5a38d;
+  --ink-faint: #7a6a57;
+  --border: rgba(245, 233, 215, 0.08);
+  --input-bg: #1f1611;
+  --input-border: rgba(245, 233, 215, 0.1);
+  --chip-bg: rgba(245, 233, 215, 0.06);
+  --chip-border: rgba(245, 233, 215, 0.1);
+  --chip-active-bg: rgba(212, 165, 116, 0.18);
+  --chip-active-border: rgba(212, 165, 116, 0.36);
+  --empty-bg: rgba(245, 233, 215, 0.04);
+  --selection-bg: rgba(245, 233, 215, 0.06);
+  --selection-border: rgba(245, 233, 215, 0.1);
+  --callout-bg: rgba(212, 165, 116, 0.1);
+  --callout-border: rgba(212, 165, 116, 0.22);
+  --feedback-bg: rgba(123, 211, 137, 0.16);
+  --feedback-border: rgba(123, 211, 137, 0.3);
   --feedback-ink: #c8efd4;
-  --overlay: rgba(3, 4, 8, 0.74);
-  --accent-strong: #f2c28c;
-  --shadow-sm: 0 18px 40px rgba(0, 0, 0, 0.32);
-  --shadow-lg: 0 28px 70px rgba(0, 0, 0, 0.42);
+  --overlay: rgba(0, 0, 0, 0.78);
+  --accent-strong: #d4a574;
+  --shadow-sm: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 6px 18px rgba(0, 0, 0, 0.36);
+  --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.48);
   color-scheme: dark;
 }
 
