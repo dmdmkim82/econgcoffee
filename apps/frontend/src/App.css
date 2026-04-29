@@ -1489,6 +1489,13 @@
   line-height: 1.4;
 }
 
+.status-callout.success-callout {
+  border-color: rgba(38, 124, 73, 0.35);
+  background: rgba(38, 124, 73, 0.1);
+  color: #216d43;
+  font-weight: 600;
+}
+
 .quick-attendee-scroll {
   display: flex;
   flex-wrap: wrap;

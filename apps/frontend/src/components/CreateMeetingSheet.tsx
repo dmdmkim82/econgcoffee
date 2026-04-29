@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import {
   type CafePresetName,
 } from '../lib/meeting'
@@ -60,6 +60,23 @@ const ATTENDEE_PRESETS = [
       '최성원',
     ],
   },
+  {
+    label: '분산발전영업팀',
+    description: '자주 쓰는 팀 인원 11명 자동 입력',
+    names: [
+      '탁종호',
+      '고정범',
+      '김현회',
+      '손정주',
+      '양석준',
+      '윤준영',
+      '이건호',
+      '이동원',
+      '이상은',
+      '최두연',
+      '조광희',
+    ],
+  },
 ] as const
 
 export function CreateMeetingSheet({
@@ -70,10 +87,23 @@ export function CreateMeetingSheet({
   onSubmit,
 }: CreateMeetingSheetProps) {
   const [attendeeInput, setAttendeeInput] = useState('')
+  const [presetFeedback, setPresetFeedback] = useState<{
+    label: string
+    addedCount: number
+  } | null>(null)
+  const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const attendeeNames = useMemo(
     () => parseAttendeeNames(attendeeInput),
     [attendeeInput],
   )
+
+  useEffect(() => {
+    return () => {
+      if (feedbackTimeoutRef.current) {
+        clearTimeout(feedbackTimeoutRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (!open) {
@@ -96,6 +126,30 @@ export function CreateMeetingSheet({
 
   function resetForm() {
     setAttendeeInput('')
+    setPresetFeedback(null)
+    if (feedbackTimeoutRef.current) {
+      clearTimeout(feedbackTimeoutRef.current)
+      feedbackTimeoutRef.current = null
+    }
+  }
+
+  function handlePresetClick(preset: (typeof ATTENDEE_PRESETS)[number]) {
+    const beforeCount = parseAttendeeNames(attendeeInput).length
+    const merged = parseAttendeeNames(
+      [...parseAttendeeNames(attendeeInput), ...preset.names].join('\n'),
+    )
+    const addedCount = merged.length - beforeCount
+
+    setAttendeeInput(merged.join('\n'))
+    setPresetFeedback({ label: preset.label, addedCount })
+
+    if (feedbackTimeoutRef.current) {
+      clearTimeout(feedbackTimeoutRef.current)
+    }
+    feedbackTimeoutRef.current = setTimeout(() => {
+      setPresetFeedback(null)
+      feedbackTimeoutRef.current = null
+    }, 4000)
   }
 
   function handleClose() {
@@ -167,15 +221,8 @@ export function CreateMeetingSheet({
                     key={preset.label}
                     type="button"
                     title={preset.description}
-                    onClick={() => {
-                      setAttendeeInput((current) => {
-                        const merged = [
-                          ...parseAttendeeNames(current),
-                          ...preset.names,
-                        ]
-                        return parseAttendeeNames(merged.join('\n')).join('\n')
-                      })
-                    }}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => handlePresetClick(preset)}
                   >
                     {preset.label}
                   </button>
@@ -190,9 +237,17 @@ export function CreateMeetingSheet({
             />
           </label>
 
-          <div className="status-callout">
-            참석자 이름은 줄바꿈이나 쉼표로 구분할 수 있습니다. 자주 쓰는 팀은 우측 버튼으로 한 번에 추가할 수 있어요.
-          </div>
+          {presetFeedback ? (
+            <div className="status-callout success-callout" role="status">
+              {presetFeedback.label} {presetFeedback.addedCount}명을 추가했어요.
+              {' '}추가로 더 입력하거나, 다 됐으면 아래 "새 미팅 만들기" 를 눌러주세요.
+            </div>
+          ) : (
+            <div className="status-callout">
+              참석자 이름은 줄바꿈이나 쉼표로 구분할 수 있습니다. 자주 쓰는 팀은
+              우측 버튼으로 한 번에 추가할 수 있어요.
+            </div>
+          )}
 
           <div className="button-row">
             <button className="button" type="submit">
