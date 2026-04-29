@@ -34,6 +34,7 @@ function getAttendeeStatus(attendee: Attendee) {
     return {
       tone: 'skip',
       label: '미주문',
+      chipClass: 'skipped',
     }
   }
 
@@ -41,6 +42,7 @@ function getAttendeeStatus(attendee: Attendee) {
     return {
       tone: 'live',
       label: '주문 완료',
+      chipClass: 'completed',
     }
   }
 
@@ -48,13 +50,30 @@ function getAttendeeStatus(attendee: Attendee) {
     return {
       tone: 'soft',
       label: '선택 중',
+      chipClass: 'in-progress',
     }
   }
 
   return {
     tone: 'neutral',
     label: '선택 전',
+    chipClass: 'pending',
   }
+}
+
+function getAttendeeOrderRank(attendee: Attendee) {
+  if (attendee.skipped) return 3
+  if (attendee.orderCompleted) return 2
+  if (attendee.menuItemId) return 1
+  return 0
+}
+
+function sortAttendeesByStatus<T extends Attendee>(attendees: T[]) {
+  return [...attendees].sort((left, right) => {
+    const diff = getAttendeeOrderRank(left) - getAttendeeOrderRank(right)
+    if (diff !== 0) return diff
+    return left.name.localeCompare(right.name, 'ko-KR')
+  })
 }
 
 export function QuickOrderPanel({
@@ -112,6 +131,11 @@ export function QuickOrderPanel({
       item.name.replace(/\s/g, '').toLowerCase().includes(q),
     )
   }, [menuItems, menuSearch])
+
+  const sortedAttendees = useMemo(
+    () => sortAttendeesByStatus(attendees),
+    [attendees],
+  )
 
   const completionStats = useMemo(() => {
     const completed = attendees.filter(
@@ -289,12 +313,12 @@ export function QuickOrderPanel({
             </div>
             {!isAddingAttendee ? (
               <div className="quick-attendee-scroll" role="list" aria-label="기존 참석자">
-                {attendees.map((attendee) => {
+                {sortedAttendees.map((attendee) => {
                   const status = getAttendeeStatus(attendee)
 
                   return (
                     <button
-                      className={`quick-attendee-chip ${
+                      className={`quick-attendee-chip ${status.chipClass} ${
                         attendee.id === activeAttendeeId ? 'active' : ''
                       }`}
                       key={attendee.id}
@@ -358,12 +382,12 @@ export function QuickOrderPanel({
                 </span>
               </div>
               <div className="quick-attendee-scroll" role="list" aria-label="참석자 현황">
-                {attendees.map((attendee) => {
+                {sortedAttendees.map((attendee) => {
                   const status = getAttendeeStatus(attendee)
 
                   return (
                     <button
-                      className={`quick-attendee-chip ${
+                      className={`quick-attendee-chip ${status.chipClass} ${
                         attendee.id === activeAttendeeId ? 'active' : ''
                       }`}
                       key={attendee.id}
