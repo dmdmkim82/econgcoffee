@@ -480,8 +480,6 @@ function normalizeAttendee(
 export function buildDefaultSnapshot(
   options: BuildDefaultSnapshotOptions = {},
 ): Snapshot {
-  const deadline = new Date()
-  deadline.setHours(deadline.getHours() + 3)
   const now = new Date().toISOString()
   const attendeeNames = normalizeInitialAttendeeNames(options.attendeeNames ?? [])
   const title = options.title?.trim() || 'SK에코플랜트 미팅 커피'
@@ -494,7 +492,7 @@ export function buildDefaultSnapshot(
       cafeName,
       place: '',
       organizer: '',
-      deadline: formatDateTimeInput(deadline),
+      deadline: '',
       notes: '',
       shareCode: `EK-${Math.random().toString(36).slice(2, 8).toUpperCase()}`,
       manuallyClosed: false,
