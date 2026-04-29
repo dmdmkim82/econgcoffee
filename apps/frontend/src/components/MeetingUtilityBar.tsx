@@ -15,11 +15,17 @@ export function MeetingUtilityBar({
 }: MeetingUtilityBarProps) {
   return (
     <section className="meeting-utility-bar" aria-label="보조 기능">
+      <button
+        className="share-emphasis-button"
+        type="button"
+        onClick={onOpenShare}
+        aria-label={`${shareLabel} 공유`}
+      >
+        <span aria-hidden="true" className="share-emphasis-icon">🔗</span>
+        {shareLabel} 공유하기
+      </button>
       <button className="button secondary micro" type="button" onClick={onOpenSummary}>
         주문요약{summaryCount > 0 ? ` ${summaryCount}` : ''}
-      </button>
-      <button className="button secondary micro" type="button" onClick={onOpenShare}>
-        {shareLabel}
       </button>
       <button className="button ghost micro" type="button" onClick={onOpenMore}>
         더보기
