@@ -14,6 +14,7 @@
 .catalog-list,
 .participant-layout,
 .participant-side-column,
+.aged-meetings,
 .recent-card-list,
 .menu-list,
 .person-list,
@@ -2408,6 +2409,74 @@
   color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.5;
+}
+
+.aged-meetings {
+  margin-top: 12px;
+  border-top: 1px dashed var(--border);
+  padding-top: 12px;
+  gap: 8px;
+}
+
+.aged-meetings > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 0;
+  font-family: var(--mono-font);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.aged-meetings > summary::-webkit-details-marker {
+  display: none;
+}
+
+.aged-meetings > summary::after {
+  content: '▾';
+  font-family: inherit;
+  font-size: 0.78rem;
+  transition: transform 0.2s ease;
+}
+
+.aged-meetings[open] > summary::after {
+  transform: rotate(-180deg);
+}
+
+.aged-meetings-hint {
+  flex: 1;
+  text-align: right;
+  color: var(--ink-faint);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.aged-meetings-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 8px 0 12px;
+}
+
+.aged-meetings-note {
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.recent-card.aged {
+  opacity: 0.84;
+}
+
+.recent-card.aged:hover {
+  opacity: 1;
 }
 
 .empty-state.compact {

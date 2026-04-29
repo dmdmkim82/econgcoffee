@@ -7,6 +7,11 @@ export type TeamsStore = Record<string, Team>
 const MEETINGS_HASH = 'ekong:meetings'
 const TEAMS_HASH = 'ekong:teams'
 
+// 미팅을 만든 시점부터 이 일수가 지나면 다음 readStore 호출 시
+// Upstash 에서 자동으로 hdel (lazy expiry).
+const MEETING_PURGE_AFTER_DAYS = 30
+const PURGE_AFTER_MS = MEETING_PURGE_AFTER_DAYS * 24 * 60 * 60 * 1000
+
 let cachedRedis: Redis | null = null
 
 function resolveRedisCredentials() {
@@ -55,22 +60,48 @@ function normalizeSnapshot(snapshot: Snapshot): Snapshot {
   }
 }
 
+function isExpired(snapshot: Snapshot, now: number): boolean {
+  const updatedAt = new Date(snapshot.updatedAt).getTime()
+  if (Number.isNaN(updatedAt)) return false
+  return now - updatedAt > PURGE_AFTER_MS
+}
+
 export async function readStore(): Promise<MeetingsStore> {
   const raw = await getRedis().hgetall<Record<string, Snapshot>>(MEETINGS_HASH)
   if (!raw) return {}
 
-  return Object.fromEntries(
-    Object.entries(raw).map(([code, snapshot]) => [
-      code.toUpperCase(),
-      normalizeSnapshot(snapshot),
-    ]),
-  )
+  const now = Date.now()
+  const fresh: MeetingsStore = {}
+  const expiredCodes: string[] = []
+
+  for (const [code, snapshot] of Object.entries(raw)) {
+    const upperCode = code.toUpperCase()
+    if (!snapshot || typeof snapshot !== 'object') continue
+    if (isExpired(snapshot, now)) {
+      expiredCodes.push(upperCode)
+      continue
+    }
+    fresh[upperCode] = normalizeSnapshot(snapshot)
+  }
+
+  if (expiredCodes.length > 0) {
+    void getRedis()
+      .hdel(MEETINGS_HASH, ...expiredCodes)
+      .catch(() => undefined)
+  }
+
+  return fresh
 }
 
 export async function readMeeting(shareCode: string): Promise<Snapshot | null> {
   const code = shareCode.toUpperCase()
   const snapshot = await getRedis().hget<Snapshot>(MEETINGS_HASH, code)
-  return snapshot ? normalizeSnapshot(snapshot) : null
+  if (!snapshot) return null
+  if (isExpired(snapshot, Date.now())) {
+    void getRedis().hdel(MEETINGS_HASH, code).catch(() => undefined)
+    return null
+  }
+  return normalizeSnapshot(snapshot)
 }
 
 export async function writeMeeting(snapshot: Snapshot): Promise<Snapshot> {

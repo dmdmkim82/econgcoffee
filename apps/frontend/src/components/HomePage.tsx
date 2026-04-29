@@ -23,8 +23,12 @@ type HomePageProps = {
   theme: 'light' | 'dark'
   onCreateMeeting: (payload: CreateMeetingPayload) => string
   onDeleteMeeting: (shareCode: string) => void
+  onDeleteOldMeetings: (shareCodes: string[]) => Promise<number> | number
   onToggleTheme: () => void
 }
+
+const FRESH_DAYS = 7
+const FRESH_AFTER_MS = FRESH_DAYS * 24 * 60 * 60 * 1000
 
 function isClosed(snapshot: Snapshot) {
   return (
@@ -34,9 +38,15 @@ function isClosed(snapshot: Snapshot) {
   )
 }
 
+function isAged(snapshot: Snapshot, now: number) {
+  const updated = new Date(snapshot.updatedAt).getTime()
+  if (Number.isNaN(updated)) return false
+  return now - updated > FRESH_AFTER_MS
+}
+
 function countCompleted(snapshot: Snapshot) {
   return snapshot.attendees.filter(
-    (attendee) => attendee.skipped || attendee.menuItemId,
+    (attendee) => attendee.skipped || attendee.orderCompleted,
   ).length
 }
 
@@ -46,6 +56,7 @@ export function HomePage({
   theme,
   onCreateMeeting,
   onDeleteMeeting,
+  onDeleteOldMeetings,
   onToggleTheme,
 }: HomePageProps) {
   const navigate = useNavigate()
@@ -53,7 +64,30 @@ export function HomePage({
   const [isCreateSheetOpen, setIsCreateSheetOpen] = useState(false)
   const [draftMeetingTitle, setDraftMeetingTitle] = useState('')
   const [draftCafeName, setDraftCafeName] = useState<CafePresetName | ''>('')
+  const [showAged, setShowAged] = useState(false)
+  const [purgingOld, setPurgingOld] = useState(false)
   const canCreateMeeting = Boolean(draftMeetingTitle.trim() && draftCafeName)
+
+  const now = Date.now()
+  const freshMeetings = meetings.filter((snapshot) => !isAged(snapshot, now))
+  const agedMeetings = meetings.filter((snapshot) => isAged(snapshot, now))
+
+  async function handleDeleteOldMeetings() {
+    if (agedMeetings.length === 0 || purgingOld) return
+    if (
+      !window.confirm(
+        `${FRESH_DAYS}일 이전의 과거 모임 ${agedMeetings.length}건을 모두 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`,
+      )
+    ) {
+      return
+    }
+    setPurgingOld(true)
+    try {
+      await onDeleteOldMeetings(agedMeetings.map((m) => m.meeting.shareCode))
+    } finally {
+      setPurgingOld(false)
+    }
+  }
 
   const summary = (() => {
     return meetings.reduce(
@@ -235,16 +269,18 @@ export function HomePage({
               <span className="panel-kicker">최근 모임</span>
               <h2>다시 이어서 보기</h2>
             </div>
-            <span className="status-pill neutral">{meetings.length}개 저장됨</span>
+            <span className="status-pill neutral">{freshMeetings.length}개</span>
           </div>
 
-          {meetings.length === 0 ? (
+          {freshMeetings.length === 0 ? (
             <div className="empty-state compact">
-              아직 저장된 미팅이 없습니다. 첫 미팅을 만들어 커피 주문을 시작해보세요.
+              {meetings.length === 0
+                ? '아직 저장된 미팅이 없습니다. 첫 미팅을 만들어 커피 주문을 시작해보세요.'
+                : `최근 ${FRESH_DAYS}일 안에 진행한 미팅이 없습니다. 새 미팅을 만들어보세요.`}
             </div>
           ) : (
             <div className="recent-card-list">
-              {meetings.map((snapshot) => {
+              {freshMeetings.map((snapshot) => {
                 const closed = isClosed(snapshot)
                 const completed = countCompleted(snapshot)
 
@@ -303,6 +339,92 @@ export function HomePage({
               })}
             </div>
           )}
+
+          {agedMeetings.length > 0 ? (
+            <details
+              className="aged-meetings"
+              open={showAged}
+              onToggle={(event) =>
+                setShowAged((event.currentTarget as HTMLDetailsElement).open)
+              }
+            >
+              <summary>
+                <span>
+                  {FRESH_DAYS}일 이전 과거 모임 {agedMeetings.length}건
+                </span>
+                <span className="aged-meetings-hint">
+                  열어서 살펴보거나 일괄 정리할 수 있어요
+                </span>
+              </summary>
+              <div className="aged-meetings-actions">
+                <button
+                  className="button ghost small"
+                  type="button"
+                  disabled={purgingOld}
+                  onClick={handleDeleteOldMeetings}
+                >
+                  {purgingOld ? '삭제 중…' : `과거 모임 ${agedMeetings.length}건 모두 삭제`}
+                </button>
+                <span className="aged-meetings-note">
+                  서버 저장 후 30일이 지나면 자동으로 정리됩니다.
+                </span>
+              </div>
+              <div className="recent-card-list">
+                {agedMeetings.map((snapshot) => {
+                  const closed = isClosed(snapshot)
+                  const completed = countCompleted(snapshot)
+                  const updatedAt = new Date(snapshot.updatedAt)
+                  const updatedLabel = Number.isNaN(updatedAt.getTime())
+                    ? ''
+                    : new Intl.DateTimeFormat('ko-KR', {
+                        month: 'long',
+                        day: 'numeric',
+                      }).format(updatedAt)
+
+                  return (
+                    <article
+                      className="meeting-card recent-card aged"
+                      key={snapshot.meeting.shareCode}
+                    >
+                      <div className="meeting-card-copy">
+                        <div className="button-row">
+                          <span className={`status-pill ${closed ? 'skip' : 'neutral'}`}>
+                            {updatedLabel || '과거'}
+                          </span>
+                          <span className="status-pill neutral">
+                            코드 {snapshot.meeting.shareCode}
+                          </span>
+                        </div>
+                        <strong>{snapshot.meeting.title || '에콩커피 모임'}</strong>
+                        <span>
+                          {snapshot.meeting.cafeName || '카페 미정'} ·{' '}
+                          {completed}/{snapshot.attendees.length}명 응답
+                        </span>
+                      </div>
+                      <div className="meeting-card-actions">
+                        <button
+                          className="button secondary small"
+                          type="button"
+                          onClick={() =>
+                            openMeeting(snapshot.meeting.shareCode, 'organizer')
+                          }
+                        >
+                          다시 보기
+                        </button>
+                        <button
+                          className="button ghost small"
+                          type="button"
+                          onClick={() => onDeleteMeeting(snapshot.meeting.shareCode)}
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            </details>
+          ) : null}
         </section>
       </div>
     </div>

@@ -351,6 +351,26 @@ function AppRoutes() {
     }
   }
 
+  async function handleDeleteOldMeetings(shareCodes: string[]): Promise<number> {
+    if (shareCodes.length === 0) return 0
+
+    setStore((currentStore) =>
+      shareCodes.reduce(
+        (accumulator, shareCode) => removeMeeting(accumulator, shareCode),
+        currentStore,
+      ),
+    )
+
+    if (apiSyncEnabled) {
+      await Promise.all(
+        shareCodes.map((shareCode) =>
+          deleteMeetingFromApi(shareCode).catch(() => undefined),
+        ),
+      )
+    }
+    return shareCodes.length
+  }
+
   return (
     <Routes>
       <Route
@@ -362,6 +382,7 @@ function AppRoutes() {
             theme={theme}
             onCreateMeeting={handleCreateMeeting}
             onDeleteMeeting={handleDeleteMeeting}
+            onDeleteOldMeetings={handleDeleteOldMeetings}
             onToggleTheme={() =>
               setTheme((currentTheme) =>
                 currentTheme === 'dark' ? 'light' : 'dark',
