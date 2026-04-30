@@ -7,6 +7,7 @@ import {
   type Snapshot,
   type Team,
 } from '../lib/meeting'
+import { HeroCrema } from './AmbientLayer'
 import { CafeLogoIcon } from './CafeLogoIcon'
 import { CreateMeetingSheet } from './CreateMeetingSheet'
 
@@ -165,6 +166,7 @@ export function HomePage({
 
         <section className="compact-home-hero">
           <article className="panel compact-home-copy home-brand-panel">
+            <HeroCrema />
             <span className="eyebrow">SK에코플랜트 미팅 커피 취합</span>
             <h1 className="home-brand-panel-greeting">에콩커피<br />오늘은 뭐 마실까요?</h1>
             <p className="hero-description">
