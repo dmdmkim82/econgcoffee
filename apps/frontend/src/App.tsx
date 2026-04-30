@@ -8,6 +8,7 @@ import {
   useParams,
 } from 'react-router-dom'
 import './App.css'
+import { AmbientLayer } from './components/AmbientLayer'
 import { AttendeesPanel } from './components/AttendeesPanel'
 import { HeroPanel } from './components/HeroPanel'
 import { HomePage } from './components/HomePage'
@@ -372,7 +373,9 @@ function AppRoutes() {
   }
 
   return (
-    <Routes>
+    <>
+      <AmbientLayer />
+      <Routes>
       <Route
         path="/"
         element={
@@ -414,6 +417,7 @@ function AppRoutes() {
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   )
 }
 
