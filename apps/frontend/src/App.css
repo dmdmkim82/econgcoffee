@@ -659,12 +659,70 @@
 
 .home-brand-panel-greeting {
   font-family: var(--display-font);
-  font-size: clamp(1.6rem, 6vw, 1.9rem);
+  font-size: clamp(1.3rem, 5vw, 1.55rem);
   font-weight: 600;
-  line-height: 1.15;
+  line-height: 1.2;
   letter-spacing: -0.02em;
   margin: 12px 0 6px;
-  color: inherit;
+  display: inline-block;
+  color: var(--bg-top);
+  background: linear-gradient(
+    100deg,
+    #fff5e6 0%,
+    #f4d8b1 18%,
+    #d4a574 36%,
+    #b47d52 52%,
+    #f4d8b1 70%,
+    #fff5e6 88%,
+    #d4a574 100%
+  );
+  background-size: 280% 100%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: greeting-allure 9s ease-in-out infinite;
+}
+
+:root[data-theme='dark'] .home-brand-panel-greeting {
+  background: linear-gradient(
+    100deg,
+    #f5e9d7 0%,
+    #d4a574 22%,
+    #c87f3a 44%,
+    #f5e9d7 68%,
+    #d4a574 100%
+  );
+  background-size: 280% 100%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes greeting-allure {
+  0% {
+    background-position: 0% 50%;
+    letter-spacing: -0.022em;
+    transform: translateY(0);
+  }
+  50% {
+    background-position: 100% 50%;
+    letter-spacing: -0.015em;
+    transform: translateY(-1px);
+  }
+  100% {
+    background-position: 0% 50%;
+    letter-spacing: -0.022em;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-brand-panel-greeting {
+    animation: none;
+    background-position: 0% 50%;
+  }
 }
 
 .home-brand-panel-greeting + .hero-description {
