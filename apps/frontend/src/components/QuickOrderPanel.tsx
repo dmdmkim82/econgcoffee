@@ -346,7 +346,6 @@ export function QuickOrderPanel({
                   value={nameInput}
                   onChange={(event) => handleNameChange(event.target.value)}
                   placeholder="이름을 입력하면 새 참석자로 추가됩니다"
-                  // eslint-disable-next-line jsx-a11y/no-autofocus
                   autoFocus
                 />
               </label>

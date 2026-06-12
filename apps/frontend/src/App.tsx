@@ -570,7 +570,7 @@ function MeetingPage({
 
     let ignore = false
 
-    const intervalId = window.setInterval(() => {
+    function syncFromServer() {
       void fetchMeetingFromApi(normalizedCode)
         .then((remoteSnapshot) => {
           if (ignore) {
@@ -597,13 +597,46 @@ function MeetingPage({
         .catch(() => {
           // Polling failures should not interrupt local editing.
         })
+    }
+
+    const intervalId = window.setInterval(() => {
+      // 백그라운드 탭에서는 폴링하지 않음 (Upstash 무료 한도 절약).
+      if (document.hidden) {
+        return
+      }
+      syncFromServer()
     }, 5000)
+
+    function handleVisibilityChange() {
+      if (!document.hidden) {
+        syncFromServer()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
       ignore = true
       window.clearInterval(intervalId)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [normalizedCode, snapshot, setStore])
+
+  // 스타벅스 프리셋 미팅이 메뉴 없이 만들어졌을 때 1회 자동 채움.
+  // 아래 early return 보다 먼저 와야 hook 순서가 렌더마다 동일하게 유지된다.
+  useEffect(() => {
+    if (
+      normalizedRole !== 'organizer' ||
+      !snapshot ||
+      snapshot.meeting.cafeName !== STARBUCKS_CAFE_NAME ||
+      snapshot.menuItems.length > 0
+    ) {
+      return
+    }
+
+    handleLoadStarbucksMenu()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [normalizedRole, snapshot?.meeting.cafeName, snapshot?.menuItems.length])
 
   if (!normalizedRole) {
     return <Navigate to="/" replace />
@@ -940,20 +973,6 @@ function MeetingPage({
     }))
     setFeedback('폴 바셋 메뉴를 현재 미팅에 추가했습니다.')
   }
-
-  useEffect(() => {
-    if (
-      normalizedRole !== 'organizer' ||
-      !snapshot ||
-      snapshot.meeting.cafeName !== STARBUCKS_CAFE_NAME ||
-      snapshot.menuItems.length > 0
-    ) {
-      return
-    }
-
-    handleLoadStarbucksMenu()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [normalizedRole, snapshot?.meeting.cafeName, snapshot?.menuItems.length])
 
   function handleLoadStarbucksMenu() {
     const menuItems = createStarbucksMenuItems()

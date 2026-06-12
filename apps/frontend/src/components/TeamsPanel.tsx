@@ -43,21 +43,21 @@ export function TeamsPanel({
     setMemberDrafts((prev) => ({ ...prev, [teamId]: '' }))
   }
 
+  function clearRenameDraft(teamId: string) {
+    setRenameDrafts((prev) => {
+      const rest = { ...prev }
+      delete rest[teamId]
+      return rest
+    })
+  }
+
   function handleRenameSubmit(team: Team, event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const next = (renameDrafts[team.id] ?? team.name).trim()
-    if (!next || next === team.name) {
-      setRenameDrafts((prev) => {
-        const { [team.id]: _, ...rest } = prev
-        return rest
-      })
-      return
+    if (next && next !== team.name) {
+      onRenameTeam(team.id, next)
     }
-    onRenameTeam(team.id, next)
-    setRenameDrafts((prev) => {
-      const { [team.id]: _, ...rest } = prev
-      return rest
-    })
+    clearRenameDraft(team.id)
   }
 
   return (
@@ -103,7 +103,6 @@ export function TeamsPanel({
                       onSubmit={(event) => handleRenameSubmit(team, event)}
                     >
                       <input
-                        // eslint-disable-next-line jsx-a11y/no-autofocus
                         autoFocus
                         value={renameDrafts[team.id] ?? ''}
                         onChange={(event) =>

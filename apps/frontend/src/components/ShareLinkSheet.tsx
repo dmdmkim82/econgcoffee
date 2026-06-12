@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { toDataURL } from 'qrcode'
 
 type ShareLinkSheetProps = {
   open: boolean
@@ -44,19 +43,27 @@ export function ShareLinkSheet({
 
     let ignore = false
 
-    void toDataURL(link, {
-      errorCorrectionLevel: 'H',
-      margin: 4,
-      width: 256,
-      color: {
-        dark: '#000000',
-        light: '#ffffff',
-      },
-    }).then((nextUrl: string) => {
-      if (!ignore) {
-        setQrDataUrl(nextUrl)
-      }
-    })
+    // 시트가 처음 열릴 때만 qrcode 청크를 내려받는다 (메인 번들 분리).
+    void import('qrcode')
+      .then(({ toDataURL }) =>
+        toDataURL(link, {
+          errorCorrectionLevel: 'H',
+          margin: 4,
+          width: 256,
+          color: {
+            dark: '#000000',
+            light: '#ffffff',
+          },
+        }),
+      )
+      .then((nextUrl: string) => {
+        if (!ignore) {
+          setQrDataUrl(nextUrl)
+        }
+      })
+      .catch(() => {
+        // QR 생성 실패 시 링크 복사 버튼은 그대로 사용 가능.
+      })
 
     return () => {
       ignore = true
