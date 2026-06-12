@@ -1,12 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap');
-
-@font-face {
-  font-family: 'Pretendard Variable';
-  src: url('./assets/fonts/PretendardVariable.woff2') format('woff2-variations');
-  font-style: normal;
-  font-display: swap;
-  font-weight: 45 920;
-}
+/* Pretendard Variable 은 main.tsx 에서 dynamic-subset CSS 로 로드.
+   Playfair Display / JetBrains Mono 는 index.html <link> 에서 로드. */
 
 :root {
   --bg-top: #f5efe6;

@@ -283,6 +283,24 @@
   }
 }
 
+/* 좁은 화면(폰)에서는 큰 blur 레이어를 줄여 GPU/배터리 부담 완화.
+   shell 이 화면을 거의 다 덮어 배경이 가장자리 몇 px 만 보이므로
+   체감 차이 없이 blur 합성 비용만 줄어든다. */
+@media (max-width: 520px) {
+  .ambient-steam {
+    display: none;
+  }
+
+  .ambient-blob-c,
+  .ambient-blob-d {
+    display: none;
+  }
+
+  .ambient-blob {
+    filter: blur(40px);
+  }
+}
+
 .compact-home,
 .compact-home-hero,
 .meeting-card-list,
