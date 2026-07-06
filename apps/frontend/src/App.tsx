@@ -24,8 +24,6 @@ import { ParticipantWorkspace } from './components/ParticipantWorkspace'
 import { QuickOrderPanel } from './components/QuickOrderPanel'
 import { ShareLinkSheet } from './components/ShareLinkSheet'
 import { SummaryPanel } from './components/SummaryPanel'
-import { AdminGate } from './components/AdminGate'
-import { TeamsPanel } from './components/TeamsPanel'
 import {
   apiSyncEnabled,
   deleteMeetingFromApi,
@@ -387,6 +385,11 @@ function AppRoutes() {
             onCreateMeeting={handleCreateMeeting}
             onDeleteMeeting={handleDeleteMeeting}
             onDeleteOldMeetings={handleDeleteOldMeetings}
+            onCreateTeam={handleCreateTeamGlobal}
+            onRenameTeam={handleRenameTeamGlobal}
+            onDeleteTeam={handleDeleteTeamGlobal}
+            onAddTeamMember={handleAddTeamMemberGlobal}
+            onRemoveTeamMember={handleRemoveTeamMemberGlobal}
             onToggleTheme={() =>
               setTheme((currentTheme) =>
                 currentTheme === 'dark' ? 'light' : 'dark',
@@ -402,12 +405,6 @@ function AppRoutes() {
             store={store}
             setStore={setStore}
             theme={theme}
-            teams={teams}
-            onCreateTeam={handleCreateTeamGlobal}
-            onRenameTeam={handleRenameTeamGlobal}
-            onDeleteTeam={handleDeleteTeamGlobal}
-            onAddTeamMember={handleAddTeamMemberGlobal}
-            onRemoveTeamMember={handleRemoveTeamMemberGlobal}
             onToggleTheme={() =>
               setTheme((currentTheme) =>
                 currentTheme === 'dark' ? 'light' : 'dark',
@@ -426,12 +423,6 @@ type MeetingPageProps = {
   store: MeetingsStore
   setStore: React.Dispatch<React.SetStateAction<MeetingsStore>>
   theme: ThemeMode
-  teams: Team[]
-  onCreateTeam: (name: string) => void
-  onRenameTeam: (teamId: string, name: string) => void
-  onDeleteTeam: (teamId: string) => void
-  onAddTeamMember: (teamId: string, name: string) => void
-  onRemoveTeamMember: (teamId: string, memberName: string) => void
   onToggleTheme: () => void
 }
 
@@ -440,12 +431,6 @@ function MeetingPage({
   store,
   setStore,
   theme,
-  teams,
-  onCreateTeam,
-  onRenameTeam,
-  onDeleteTeam,
-  onAddTeamMember,
-  onRemoveTeamMember,
   onToggleTheme,
 }: MeetingPageProps) {
   const navigate = useNavigate()
@@ -1471,50 +1456,6 @@ function MeetingPage({
                   }
                   onApplyRawText={applyRawTextToMenu}
                 />
-              </div>
-            </details>
-            <details className="admin-details admin-mode-details">
-              <summary>관리자 모드 🔒</summary>
-              <div className="admin-details-body">
-                <AdminGate>
-                  <TeamsPanel
-                    teams={teams}
-                    onCreateTeam={onCreateTeam}
-                    onRenameTeam={onRenameTeam}
-                    onDeleteTeam={onDeleteTeam}
-                    onAddMember={onAddTeamMember}
-                    onRemoveMember={onRemoveTeamMember}
-                    onApplyTeamToMeeting={(teamId) => {
-                      const team = teams.find((entry) => entry.id === teamId)
-                      if (!team) return
-                      const existingKeys = new Set(
-                        attendees.map((attendee) =>
-                          attendee.name
-                            .normalize('NFKC')
-                            .toLocaleLowerCase('ko-KR')
-                            .trim(),
-                        ),
-                      )
-                      const toAdd = team.members.filter((memberName) => {
-                        const key = memberName
-                          .normalize('NFKC')
-                          .toLocaleLowerCase('ko-KR')
-                          .trim()
-                        if (existingKeys.has(key)) return false
-                        existingKeys.add(key)
-                        return true
-                      })
-                      for (const memberName of toAdd) {
-                        handleAddAttendee(memberName, '')
-                      }
-                      setFeedback(
-                        toAdd.length > 0
-                          ? `"${team.name}" 팀에서 ${toAdd.length}명을 추가했어요.`
-                          : `"${team.name}" 팀의 멤버는 이미 모두 참석자에 있습니다.`,
-                      )
-                    }}
-                  />
-                </AdminGate>
               </div>
             </details>
           </main>

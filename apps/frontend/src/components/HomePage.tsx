@@ -7,9 +7,11 @@ import {
   type Snapshot,
   type Team,
 } from '../lib/meeting'
+import { AdminGate } from './AdminGate'
 import { HeroCrema } from './AmbientLayer'
 import { CafeLogoIcon } from './CafeLogoIcon'
 import { CreateMeetingSheet } from './CreateMeetingSheet'
+import { TeamsPanel } from './TeamsPanel'
 
 type CreateMeetingPayload = {
   title: string
@@ -25,6 +27,11 @@ type HomePageProps = {
   onCreateMeeting: (payload: CreateMeetingPayload) => string
   onDeleteMeeting: (shareCode: string) => void
   onDeleteOldMeetings: (shareCodes: string[]) => Promise<number> | number
+  onCreateTeam: (name: string) => void
+  onRenameTeam: (teamId: string, name: string) => void
+  onDeleteTeam: (teamId: string) => void
+  onAddTeamMember: (teamId: string, name: string) => void
+  onRemoveTeamMember: (teamId: string, memberName: string) => void
   onToggleTheme: () => void
 }
 
@@ -58,6 +65,11 @@ export function HomePage({
   onCreateMeeting,
   onDeleteMeeting,
   onDeleteOldMeetings,
+  onCreateTeam,
+  onRenameTeam,
+  onDeleteTeam,
+  onAddTeamMember,
+  onRemoveTeamMember,
   onToggleTheme,
 }: HomePageProps) {
   const navigate = useNavigate()
@@ -264,6 +276,22 @@ export function HomePage({
             </div>
           </aside>
         </section>
+
+        <details className="admin-details admin-mode-details">
+          <summary>관리자 모드 🔒 — 팀 관리</summary>
+          <div className="admin-details-body">
+            <AdminGate>
+              <TeamsPanel
+                teams={teams}
+                onCreateTeam={onCreateTeam}
+                onRenameTeam={onRenameTeam}
+                onDeleteTeam={onDeleteTeam}
+                onAddMember={onAddTeamMember}
+                onRemoveMember={onRemoveTeamMember}
+              />
+            </AdminGate>
+          </div>
+        </details>
 
         <section className="panel home-panel">
           <div className="panel-head">
